@@ -39,8 +39,9 @@
     count.textContent = (index + 1) + " / " + group.length;
   }
   function open(btn) {
+    if (btn.__orig) btn = btn.__orig;
     var wrap = btn.closest(".file-photos");
-    group = Array.prototype.slice.call(wrap.querySelectorAll(".file-photo-zoom"));
+    group = Array.prototype.slice.call(wrap.querySelectorAll(".file-photo-zoom:not([data-clone])"));
     lastFocus = btn;
     lb.classList.toggle("lb-single", group.length < 2);
     show(group.indexOf(btn));
@@ -305,74 +306,47 @@ window.pfSetupTestiClamp();
   }
 })();
 
-/* ---- 7. Case study photos: horizontal carousel, swipe + arrows + calm autoplay ---- */
+/* ---- 7. Continuous flowing tickers: case photos, videos, reels, testimonials ---- */
 (function () {
   var reduceMotion = false;
   try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
-  document.querySelectorAll(".file-photos").forEach(function (scroller) {
-    var slides = Array.prototype.slice.call(scroller.querySelectorAll(".file-photo-zoom"));
-    if (slides.length < 2) return;
-    var wrap = document.createElement("div");
-    wrap.className = "pf-carousel";
-    scroller.parentNode.insertBefore(wrap, scroller);
-    wrap.appendChild(scroller);
-    var count = document.createElement("span");
-    count.className = "pf-car-count";
-    wrap.appendChild(count);
+  var SPEED = 42; /* px per second */
 
-    function current() {
-      var r = scroller.getBoundingClientRect();
-      var mid = (r.left + r.right) / 2;
-      var best = 0, bd = Infinity;
-      slides.forEach(function (s, i) {
-        var sr = s.getBoundingClientRect();
-        var d = Math.abs((sr.left + sr.right) / 2 - mid);
-        if (d < bd) { bd = d; best = i; }
-      });
-      return best;
-    }
-    function go(i) {
-      var n = slides.length;
-      slides[((i % n) + n) % n].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    }
+  function ticker(scroller, hoverTarget) {
+    var cards = Array.prototype.slice.call(scroller.children);
+    if (cards.length < 2) return;
+    scroller.classList.add("pf-strip");
+    /* seamless loop: one duplicated set after the originals */
+    cards.forEach(function (c) {
+      var k = c.cloneNode(true);
+      k.setAttribute("data-clone", "1");
+      k.setAttribute("aria-hidden", "true");
+      k.__orig = c;
+      k.querySelectorAll("button,a").forEach(function (x) { x.setAttribute("tabindex", "-1"); });
+      scroller.appendChild(k);
+    });
+    var first = cards[0], clone0 = scroller.children[cards.length];
+    function loopLen() { return clone0.offsetLeft - first.offsetLeft; }
 
-    var raf = null;
-    function sync() {
-      var c = current();
-      count.textContent = (c + 1) + " / " + slides.length;
-      slides.forEach(function (s, i) { s.classList.toggle("pf-car-active", i === c); });
-    }
-    scroller.addEventListener("scroll", function () {
-      if (raf) return;
-      raf = requestAnimationFrame(function () { raf = null; sync(); });
-    }, { passive: true });
-    sync();
-
-    /* pause autoplay while the visitor interacts, resume after a calm delay */
-    var paused = false, hovered = false, idleTimer = null, visible = false;
+    var pos = 0, last = 0, paused = false, hovered = false, visible = false, idleTimer = null;
     function interact() {
       paused = true;
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(function () { paused = false; }, 7000);
+      idleTimer = setTimeout(function () { paused = false; }, 4000);
     }
     ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
       scroller.addEventListener(ev, interact, { passive: true });
     });
-    wrap.addEventListener("mouseenter", function () { hovered = true; });
-    wrap.addEventListener("mouseleave", function () { hovered = false; });
+    hoverTarget.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") hovered = true; });
+    hoverTarget.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") hovered = false; });
     if ("IntersectionObserver" in window) {
-      var io2 = new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { threshold: 0.4 });
-      io2.observe(wrap);
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { threshold: 0.25 }).observe(hoverTarget);
+    } else { visible = true; }
+    function videoPlaying() {
+      var vs = scroller.querySelectorAll("video");
+      for (var i = 0; i < vs.length; i++) if (!vs[i].paused && !vs[i].ended) return true;
+      return false;
     }
-
-    if (!reduceMotion) {
-      setInterval(function () {
-        if (paused || hovered || !visible || document.hidden) return;
-        if (document.body.classList.contains("lb-lock")) return;
-        go(current() + 1);
-      }, 3200);
-    }
-
     /* keep a swipe from opening the lightbox */
     var sx = null, moved = false;
     scroller.addEventListener("pointerdown", function (e) { sx = e.clientX; moved = false; }, { passive: true });
@@ -381,71 +355,38 @@ window.pfSetupTestiClamp();
     scroller.addEventListener("click", function (e) {
       if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
     }, true);
+
+    function frame(t) {
+      var dt = last ? Math.min(0.1, (t - last) / 1000) : 0;
+      last = t;
+      var L = loopLen();
+      var running = !reduceMotion && L > 0 && visible && !paused && !hovered && !document.hidden &&
+        !document.body.classList.contains("lb-lock") && !videoPlaying();
+      if (running) {
+        pos += SPEED * dt;
+        if (pos >= L) pos -= L;
+        scroller.scrollLeft = pos;
+      } else {
+        pos = scroller.scrollLeft;
+      }
+      if (L > 0) {
+        /* swiping past either end wraps into the duplicate set */
+        if (scroller.scrollLeft >= L) { scroller.scrollLeft -= L; pos = scroller.scrollLeft; }
+        else if (scroller.scrollLeft <= 0 && !running && pos <= 0) { scroller.scrollLeft = L; pos = L; }
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  document.querySelectorAll(".file-photos").forEach(function (scroller) {
+    if (scroller.querySelectorAll(".file-photo-zoom").length < 2) return;
+    var wrap = document.createElement("div");
+    wrap.className = "pf-carousel";
+    scroller.parentNode.insertBefore(wrap, scroller);
+    wrap.appendChild(scroller);
+    ticker(scroller, wrap);
   });
-})();
-
-/* ---- 8. Horizontal auto-moving strips: videos, reels, testimonials ---- */
-(function () {
-  var reduceMotion = false;
-  try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
-  document.querySelectorAll(".pf-vid-grid, .pf-testi-grid").forEach(function (strip) {
-    var cards = Array.prototype.slice.call(strip.children);
-    if (cards.length < 2) return;
-    strip.classList.add("pf-strip");
-
-    function current() {
-      var r = strip.getBoundingClientRect();
-      var cx = r.left + r.width / 2;
-      var best = 0, bd = Infinity;
-      cards.forEach(function (c, i) {
-        var cr = c.getBoundingClientRect();
-        var d = Math.abs(cr.left + cr.width / 2 - cx);
-        if (d < bd) { bd = d; best = i; }
-      });
-      return best;
-    }
-    function mark() {
-      var active = current();
-      cards.forEach(function (c, i) { c.classList.toggle("pf-strip-active", i === active); });
-    }
-    function go(i) {
-      var n = cards.length;
-      cards[((i % n) + n) % n].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    }
-    var raf = null;
-    strip.addEventListener("scroll", function () {
-      if (raf) return;
-      raf = requestAnimationFrame(function () { raf = null; mark(); });
-    }, { passive: true });
-    mark();
-
-    var paused = false, hovered = false, playing = false, idleTimer = null, visible = false;
-    function interact() {
-      paused = true;
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(function () { paused = false; }, 7000);
-    }
-    ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
-      strip.addEventListener(ev, interact, { passive: true });
-    });
-    strip.addEventListener("mouseenter", function () { hovered = true; });
-    strip.addEventListener("mouseleave", function () { hovered = false; });
-    strip.querySelectorAll("video").forEach(function (v) {
-      v.addEventListener("play", function () { playing = true; });
-      v.addEventListener("pause", function () { playing = false; });
-      v.addEventListener("ended", function () { playing = false; });
-    });
-    if ("IntersectionObserver" in window) {
-      var io3 = new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { threshold: 0.3 });
-      io3.observe(strip);
-    } else { visible = true; }
-
-    if (!reduceMotion) {
-      setInterval(function () {
-        if (paused || hovered || playing || !visible || document.hidden) return;
-        if (document.body.classList.contains("lb-lock")) return;
-        go(current() + 1);
-      }, 3000);
-    }
-  });
+  document.querySelectorAll(".pf-vid-grid, .pf-testi-grid").forEach(function (strip) { ticker(strip, strip); });
+  if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
 })();
