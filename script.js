@@ -206,8 +206,13 @@ window.pfSetupTestiClamp();
   try {
     if (new URLSearchParams(location.search).get("sent") === "1") {
       var en0 = document.documentElement.lang === "en";
-      status.textContent = en0 ? MSG.en.ok : MSG.ar.ok;
-      status.className = "pf-bf-status ok";
+      var banner = document.createElement("div");
+      banner.className = "pf-bf-status ok pf-bf-sentbanner";
+      banner.setAttribute("role", "status");
+      banner.textContent = en0 ? MSG.en.ok : MSG.ar.ok;
+      var tw = form.closest("section, .pf-brief, .pf-collapsible");
+      var tg = tw && tw.querySelector(".pf-casetoggle-wrap");
+      if (tg && tg.parentNode) tg.parentNode.insertBefore(banner, tg); else form.parentNode.insertBefore(banner, form);
       history.replaceState(null, "", location.pathname + "#pf-brief");
     }
   } catch (e) {}
@@ -283,7 +288,7 @@ window.pfSetupTestiClamp();
   var h = location.hash ? location.hash.slice(1) : "";
   var sent = false;
   try { sent = new URLSearchParams(location.search).get("sent") === "1"; } catch (e) {}
-  var target = sent && h === "pf-brief" && document.getElementById(h);
+  var target = null; /* never auto-open; the sent confirmation is shown outside the closed panel (section 4) */
   if (target && target.classList && (target.classList.contains("pf-case") || target.classList.contains("pf-collapsible"))) {
     target.classList.add("open");
     var b = target.querySelector(".pf-casetoggle");
