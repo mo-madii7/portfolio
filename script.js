@@ -316,15 +316,19 @@ window.pfSetupTestiClamp();
     var cards = Array.prototype.slice.call(scroller.children);
     if (cards.length < 2) return;
     scroller.classList.add("pf-strip");
-    /* seamless loop: one duplicated set after the originals */
-    cards.forEach(function (c) {
-      var k = c.cloneNode(true);
-      k.setAttribute("data-clone", "1");
-      k.setAttribute("aria-hidden", "true");
-      k.__orig = c;
-      k.querySelectorAll("button,a").forEach(function (x) { x.setAttribute("tabindex", "-1"); });
-      scroller.appendChild(k);
-    });
+    /* seamless loop: duplicated sets after the originals (more are added until the strip can scroll one full loop) */
+    function addSet() {
+      cards.forEach(function (c) {
+        var k = c.cloneNode(true);
+        k.setAttribute("data-clone", "1");
+        k.setAttribute("aria-hidden", "true");
+        k.__orig = c;
+        k.querySelectorAll("button,a").forEach(function (x) { x.setAttribute("tabindex", "-1"); });
+        scroller.appendChild(k);
+      });
+      if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
+    }
+    addSet();
     var first = cards[0], clone0 = scroller.children[cards.length];
     function loopLen() { return clone0.offsetLeft - first.offsetLeft; }
 
@@ -360,6 +364,7 @@ window.pfSetupTestiClamp();
       var dt = last ? Math.min(0.1, (t - last) / 1000) : 0;
       last = t;
       var L = loopLen();
+      if (L > 0 && scroller.clientWidth > 0 && scroller.scrollWidth - scroller.clientWidth < L + 2 && scroller.children.length < cards.length * 8) addSet();
       var running = !reduceMotion && L > 0 && visible && !paused && !hovered && !document.hidden &&
         !document.body.classList.contains("lb-lock") && !videoPlaying();
       if (running) {
