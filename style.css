@@ -1043,72 +1043,33 @@ body.lb-lock{overflow:hidden}
 }
 .pf-carousel .file-photos {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   margin: 0;
-  padding: 2px;
+  padding: 2px 19%;
 }
 .pf-carousel .file-photos::-webkit-scrollbar {
   display: none;
 }
 .pf-carousel .file-photo-zoom {
-  flex: 0 0 100%;
+  flex: 0 0 62%;
   scroll-snap-align: center;
+}
+@media (max-width: 600px) {
+  .pf-carousel .file-photos {
+    gap: 10px;
+    padding: 2px 11%;
+  }
+  .pf-carousel .file-photo-zoom {
+    flex: 0 0 78%;
+  }
 }
 .pf-carousel .file-photos img {
   aspect-ratio: 4 / 3;
   object-fit: contain;
   background: #0f0c0a;
-}
-.pf-car-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid var(--ds-hairline);
-  background: rgb(11 10 9 / 0.72);
-  color: var(--pf-paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: transform 0.3s var(--pf-ease), border-color 0.3s, color 0.3s;
-}
-.pf-car-arrow:hover {
-  border-color: var(--pf-orange);
-  color: var(--pf-orange);
-  transform: translateY(-50%) scale(1.1);
-}
-.pf-car-prev {
-  inset-inline-start: 10px;
-}
-.pf-car-next {
-  inset-inline-end: 10px;
-}
-.pf-car-arrow::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid currentColor;
-  border-left: 2px solid currentColor;
-}
-.pf-car-prev::before {
-  transform: rotate(-45deg);
-}
-.pf-car-next::before {
-  transform: rotate(135deg);
-}
-[dir="rtl"] .pf-car-prev::before {
-  transform: rotate(135deg);
-}
-[dir="rtl"] .pf-car-next::before {
-  transform: rotate(-45deg);
 }
 .pf-car-count {
   position: absolute;
