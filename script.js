@@ -242,3 +242,23 @@
     });
   });
 })();
+
+/* ---- 5. Case studies: collapse behind "شاهد العمل" ---- */
+(function () {
+  var secs = Array.prototype.slice.call(document.querySelectorAll(".pf-case"));
+  secs.forEach(function (sec) {
+    var btn = sec.querySelector(".pf-casetoggle");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var open = sec.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  });
+  var h = location.hash ? location.hash.slice(1) : "";
+  var target = h && document.getElementById(h);
+  if (target && target.classList && target.classList.contains("pf-case")) {
+    target.classList.add("open");
+    var b = target.querySelector(".pf-casetoggle");
+    if (b) b.setAttribute("aria-expanded", "true");
+  }
+})();
