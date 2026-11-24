@@ -371,20 +371,29 @@
 
     function current() {
       var r = strip.getBoundingClientRect();
-      var rtl = getComputedStyle(strip).direction === "rtl";
-      var edge = rtl ? r.right : r.left;
+      var cx = r.left + r.width / 2;
       var best = 0, bd = Infinity;
       cards.forEach(function (c, i) {
         var cr = c.getBoundingClientRect();
-        var d = Math.abs((rtl ? cr.right : cr.left) - edge);
+        var d = Math.abs(cr.left + cr.width / 2 - cx);
         if (d < bd) { bd = d; best = i; }
       });
       return best;
     }
+    function mark() {
+      var active = current();
+      cards.forEach(function (c, i) { c.classList.toggle("pf-strip-active", i === active); });
+    }
     function go(i) {
       var n = cards.length;
-      cards[((i % n) + n) % n].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+      cards[((i % n) + n) % n].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
+    var raf = null;
+    strip.addEventListener("scroll", function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () { raf = null; mark(); });
+    }, { passive: true });
+    mark();
 
     var paused = false, hovered = false, playing = false, idleTimer = null, visible = false;
     function interact() {
