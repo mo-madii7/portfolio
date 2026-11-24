@@ -83,6 +83,34 @@
 
 /* ---- 3. Language toggle (AR <-> EN) ---- */
 /* ---- Testimonials: clamp long reviews with bilingual read more ---- */
+
+window.pfOpenTesti = function (textEl) {
+  var m = document.getElementById("pf-tm");
+  if (!m) {
+    m = document.createElement("div");
+    m.id = "pf-tm";
+    m.className = "pf-tm";
+    m.innerHTML = '<div class="pf-tm-card"><button type="button" class="pf-tm-close" aria-label="Close">\u2715</button><div class="pf-tm-who"></div><p class="pf-tm-text"></p></div>';
+    document.body.appendChild(m);
+    m.addEventListener("click", function (e) {
+      if (e.target === m || e.target.closest(".pf-tm-close")) {
+        m.classList.remove("open");
+        document.body.classList.remove("lb-lock");
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && m.classList.contains("open")) {
+        m.classList.remove("open");
+        document.body.classList.remove("lb-lock");
+      }
+    });
+  }
+  var card = textEl.closest(".pf-testi-card");
+  m.querySelector(".pf-tm-who").textContent = card && card.querySelector(".pf-testi-who") ? card.querySelector(".pf-testi-who").textContent : "";
+  m.querySelector(".pf-tm-text").textContent = textEl.textContent;
+  m.classList.add("open");
+  document.body.classList.add("lb-lock");
+};
 window.pfSetupTestiClamp = function () {
   var texts = Array.prototype.slice.call(document.querySelectorAll(".pf-testi-text"));
   texts.forEach(function (t) {
@@ -98,20 +126,7 @@ window.pfSetupTestiClamp = function () {
     btn.setAttribute("data-ar", "\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u0632\u064a\u062f");
     btn.textContent = document.documentElement.lang === "en" ? "Read more" : btn.getAttribute("data-ar");
     t.parentNode.insertBefore(btn, t.nextSibling);
-    btn.addEventListener("click", function () {
-      var expanded = !t.classList.contains("clamped");
-      var en = document.documentElement.lang === "en";
-      if (expanded) {
-        t.classList.add("clamped");
-        btn.setAttribute("data-en", "Read more");
-        btn.setAttribute("data-ar", "\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u0632\u064a\u062f");
-      } else {
-        t.classList.remove("clamped");
-        btn.setAttribute("data-en", "Show less");
-        btn.setAttribute("data-ar", "\u0623\u0638\u0647\u0631 \u0623\u0642\u0644");
-      }
-      btn.textContent = en ? btn.getAttribute("data-en") : btn.getAttribute("data-ar");
-    });
+    btn.addEventListener("click", function () { window.pfOpenTesti(t); });
   });
 };
 window.pfSetupTestiClamp();
