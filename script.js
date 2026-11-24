@@ -298,11 +298,11 @@
 
     function current() {
       var r = scroller.getBoundingClientRect();
-      var rtl = getComputedStyle(scroller).direction === "rtl";
+      var mid = (r.left + r.right) / 2;
       var best = 0, bd = Infinity;
       slides.forEach(function (s, i) {
         var sr = s.getBoundingClientRect();
-        var d = rtl ? Math.abs(sr.right - r.right) : Math.abs(sr.left - r.left);
+        var d = Math.abs((sr.left + sr.right) / 2 - mid);
         if (d < bd) { bd = d; best = i; }
       });
       return best;
