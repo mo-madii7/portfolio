@@ -395,3 +395,34 @@ window.pfSetupTestiClamp();
   document.querySelectorAll(".pf-vid-grid, .pf-testi-grid").forEach(function (strip) { ticker(strip, strip); });
   if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
 })();
+
+/* ---- 9. Brief budget slider (EGP, 0 to 500,000) ---- */
+(function () {
+  var r = document.getElementById("bf-budget");
+  if (!r) return;
+  var num = document.getElementById("bf-budget-num");
+  var val = document.getElementById("bf-budget-val");
+  var out = document.getElementById("bf-budget-out");
+  var open = document.getElementById("bf-budget-open");
+  var MAX = 500000;
+  function fmt(n) { return Number(n).toLocaleString("en-US"); }
+  function render() {
+    var en = document.documentElement.lang === "en";
+    var v = Math.max(0, Math.min(MAX, Number(r.value) || 0));
+    var amount = fmt(v);
+    val.textContent = open.checked ? (en ? "Not decided yet" : "لسه محددتش") : amount + " " + (en ? "EGP" : "ج.م");
+    out.value = open.checked ? "Not decided / مفتوح للاقتراحات" : amount + " EGP";
+    r.disabled = num.disabled = open.checked;
+    r.style.opacity = num.style.opacity = open.checked ? ".4" : "1";
+    r.style.setProperty("--pct", (v / MAX * 100) + "%");
+  }
+  r.addEventListener("input", function () { num.value = r.value; render(); });
+  num.addEventListener("input", function () {
+    var v = Math.max(0, Math.min(MAX, Number(num.value) || 0));
+    r.value = v; render();
+  });
+  num.addEventListener("blur", function () { num.value = r.value; });
+  open.addEventListener("change", render);
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  render();
+})();
