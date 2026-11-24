@@ -1243,7 +1243,7 @@ body.lb-lock{overflow:hidden}
 }
 @media (max-width: 600px) {
   .pf-strip {
-    padding: 2px 11%;
+    padding: 2px 8%;
   }
   .pf-vid-grid.pf-strip .pf-vid-card {
     flex: 0 0 84%;
@@ -1252,7 +1252,7 @@ body.lb-lock{overflow:hidden}
     flex: 0 0 56%;
   }
   .pf-testi-grid.pf-strip .pf-testi-card {
-    flex: 0 0 78%;
+    flex: 0 0 88%;
   }
   .pf-testi-text.clamped {
     -webkit-line-clamp: 5;
