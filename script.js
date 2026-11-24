@@ -292,18 +292,8 @@
     wrap.className = "pf-carousel";
     scroller.parentNode.insertBefore(wrap, scroller);
     wrap.appendChild(scroller);
-    var prev = document.createElement("button");
-    prev.type = "button";
-    prev.className = "pf-car-arrow pf-car-prev";
-    prev.setAttribute("aria-label", "التصميم السابق");
-    var next = document.createElement("button");
-    next.type = "button";
-    next.className = "pf-car-arrow pf-car-next";
-    next.setAttribute("aria-label", "التصميم التالي");
     var count = document.createElement("span");
     count.className = "pf-car-count";
-    wrap.appendChild(prev);
-    wrap.appendChild(next);
     wrap.appendChild(count);
 
     function current() {
@@ -341,8 +331,6 @@
       clearTimeout(idleTimer);
       idleTimer = setTimeout(function () { paused = false; }, 7000);
     }
-    prev.addEventListener("click", function () { interact(); go(current() - 1); });
-    next.addEventListener("click", function () { interact(); go(current() + 1); });
     ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
       scroller.addEventListener(ev, interact, { passive: true });
     });
