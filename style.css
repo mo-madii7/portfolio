@@ -1096,15 +1096,19 @@ body.lb-lock{overflow:hidden}
   width: 10px;
   height: 10px;
   border-top: 2px solid currentColor;
-  border-inline-start: 2px solid currentColor;
+  border-left: 2px solid currentColor;
 }
 .pf-car-prev::before {
   transform: rotate(-45deg);
-  margin-inline-start: 4px;
 }
 .pf-car-next::before {
   transform: rotate(135deg);
-  margin-inline-end: 4px;
+}
+[dir="rtl"] .pf-car-prev::before {
+  transform: rotate(135deg);
+}
+[dir="rtl"] .pf-car-next::before {
+  transform: rotate(-45deg);
 }
 .pf-car-count {
   position: absolute;
