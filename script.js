@@ -396,7 +396,7 @@ window.pfSetupTestiClamp();
   if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
 })();
 
-/* ---- 9. Brief budget slider (EGP, 0 to 500,000) ---- */
+/* ---- 9. Brief budget slider (EGP, 0 to 500,000). Unset until the visitor touches it ---- */
 (function () {
   var r = document.getElementById("bf-budget");
   if (!r) return;
@@ -404,24 +404,34 @@ window.pfSetupTestiClamp();
   var val = document.getElementById("bf-budget-val");
   var out = document.getElementById("bf-budget-out");
   var open = document.getElementById("bf-budget-open");
-  var MAX = 500000, cur = Number(r.value) || 0;
+  var MAX = 500000, cur = 0, touched = false;
   function fmt(n) { return Number(n).toLocaleString("en-US"); }
   function render() {
     var en = document.documentElement.lang === "en";
-    var v = cur;
-    var amount = fmt(v);
-    val.textContent = open.checked ? (en ? "Not decided yet" : "لسه محددتش") : amount + " " + (en ? "EGP" : "ج.م");
-    out.value = open.checked ? "Not decided / مفتوح للاقتراحات" : amount + " EGP";
+    var amount = fmt(cur);
+    if (open.checked) {
+      val.textContent = en ? "Not decided yet" : "لسه محددتش";
+      out.value = "Not decided / مفتوح للاقتراحات"; out.disabled = false;
+    } else if (touched) {
+      val.textContent = amount + " " + (en ? "EGP" : "ج.م");
+      out.value = amount + " EGP"; out.disabled = false;
+    } else {
+      val.textContent = en ? "Pick your budget" : "اختار ميزانيتك";
+      out.value = ""; out.disabled = true;
+    }
     r.disabled = num.disabled = open.checked;
     r.style.opacity = num.style.opacity = open.checked ? ".4" : "1";
-    r.style.setProperty("--pct", (v / MAX * 100) + "%");
+    r.style.setProperty("--pct", (cur / MAX * 100) + "%");
   }
-  r.addEventListener("input", function () { cur = Number(r.value) || 0; num.value = cur; render(); });
+  r.value = 0; num.value = ""; 
+  r.addEventListener("input", function () { touched = true; cur = Number(r.value) || 0; num.value = cur; render(); });
   num.addEventListener("input", function () {
+    if (num.value === "") { touched = false; cur = 0; r.value = 0; render(); return; }
+    touched = true;
     cur = Math.max(0, Math.min(MAX, Math.round(Number(num.value) || 0)));
     r.value = cur; render();
   });
-  num.addEventListener("blur", function () { num.value = cur; });
+  num.addEventListener("blur", function () { if (touched) num.value = cur; });
   open.addEventListener("change", render);
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   render();
