@@ -1199,6 +1199,14 @@ body.lb-lock{overflow:hidden}
 
 
 /* ---- Contact: icons-only platform links ---- */
+.pf-icons-title {
+  margin: 26px 0 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgb(242 237 228 / 0.75);
+}
+
 .pf-icons {
   display: flex;
   flex-wrap: wrap;
