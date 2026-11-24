@@ -179,6 +179,30 @@
     en: { sending: "Sending...", ok: "Done! Your brief reached Mohamad's email, and he will reply soon.", err: "Something went wrong sending. Try again, or send your details on WhatsApp.", required: "Please fill your name, contact and service type first." }
   };
 
+  try {
+    if (new URLSearchParams(location.search).get("sent") === "1") {
+      var en0 = document.documentElement.lang === "en";
+      status.textContent = en0 ? MSG.en.ok : MSG.ar.ok;
+      status.className = "pf-bf-status ok";
+      history.replaceState(null, "", location.pathname + "#pf-brief");
+    }
+  } catch (e) {}
+
+  function classicPost(data) {
+    var f = document.createElement("form");
+    f.method = "POST";
+    f.action = "https://formsubmit.co/mohamad.madih.20@gmail.com";
+    f.style.display = "none";
+    data.append("_next", location.origin + location.pathname + "?sent=1#pf-brief");
+    data.forEach(function (v, k) {
+      var i = document.createElement("input");
+      i.type = "hidden"; i.name = k; i.value = v;
+      f.appendChild(i);
+    });
+    document.body.appendChild(f);
+    f.submit();
+  }
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var en = document.documentElement.lang === "en";
@@ -193,18 +217,28 @@
     data.append("_template", "table");
     data.append("_captcha", "false");
     data.append("_subject", (en ? "New brief: " : "بريف جديد من الموقع: ") + sel.options[sel.selectedIndex].text + " — " + (data.get("الاسم") || ""));
+    var ctrl = null, timer = null;
+    try {
+      if (window.AbortController) {
+        ctrl = new AbortController();
+        timer = setTimeout(function () { ctrl.abort(); }, 12000);
+      }
+    } catch (e) {}
     fetch("https://formsubmit.co/ajax/mohamad.madih.20@gmail.com", {
       method: "POST",
       headers: { "Accept": "application/json" },
-      body: data
+      body: data,
+      signal: ctrl ? ctrl.signal : undefined
     }).then(function (r) {
+      if (timer) clearTimeout(timer);
       if (!r.ok) throw new Error("bad");
       return r.json();
     }).then(function () {
       status.textContent = m.ok; status.className = "pf-bf-status ok";
       form.reset(); syncCat();
     }).catch(function () {
-      status.textContent = m.err; status.className = "pf-bf-status err";
+      if (timer) clearTimeout(timer);
+      classicPost(data);
     });
   });
 })();
