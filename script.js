@@ -210,6 +210,7 @@ window.pfSetupTestiClamp();
       banner.className = "pf-bf-status ok pf-bf-sentbanner";
       banner.setAttribute("role", "status");
       banner.textContent = en0 ? MSG.en.ok : MSG.ar.ok;
+      new MutationObserver(function () { banner.textContent = document.documentElement.lang === "en" ? MSG.en.ok : MSG.ar.ok; }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
       var tw = form.closest("section, .pf-brief, .pf-collapsible");
       var tg = tw && tw.querySelector(".pf-casetoggle-wrap");
       if (tg && tg.parentNode) tg.parentNode.insertBefore(banner, tg); else form.parentNode.insertBefore(banner, form);
