@@ -1298,3 +1298,46 @@ body.lb-lock{overflow:hidden}
 .pf-icon:active {
   transform: scale(0.9);
 }
+
+
+/* ---- v24r: continuous ticker strips ---- */
+.pf-strip, .pf-carousel .file-photos {
+  display: flex;
+  direction: ltr;
+  overflow-x: auto;
+  scroll-snap-type: none;
+  scrollbar-width: none;
+  gap: 14px;
+  padding: 2px 0;
+  align-items: stretch;
+  overscroll-behavior-x: contain;
+}
+.pf-strip::-webkit-scrollbar, .pf-carousel .file-photos::-webkit-scrollbar { display: none; }
+html[dir="rtl"] .pf-strip > *, html[dir="rtl"] .pf-carousel .file-photos > * { direction: rtl; }
+.pf-strip > *, .pf-carousel .file-photo-zoom {
+  scroll-snap-align: none;
+  transform: none !important;
+  opacity: 1 !important;
+  box-shadow: none;
+}
+.pf-car-count { display: none; }
+.pf-carousel .file-photo-zoom { flex: 0 0 min(460px, 62%); }
+.pf-vid-grid.pf-strip .pf-vid-card { flex: 0 0 min(520px, 72%); display: flex; flex-direction: column; }
+.pf-vid-reels.pf-strip .pf-vid-reel { flex: 0 0 min(230px, 52%); }
+.pf-vid-grid.pf-strip .pf-vid-player { flex: 0 0 auto; }
+.pf-vid-grid.pf-strip .pf-vid-cap { flex: 1 1 auto; }
+.pf-vid-reels.pf-strip .pf-vid-cap { min-height: 150px; box-sizing: border-box; overflow: hidden; }
+.pf-vid-reels.pf-strip .pf-vid-skills {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.pf-testi-grid.pf-strip .pf-testi-card { flex: 0 0 min(320px, 46%); aspect-ratio: 1 / 1; }
+@media (max-width: 600px) {
+  .pf-strip, .pf-carousel .file-photos { gap: 10px; padding: 2px 0; }
+  .pf-carousel .file-photo-zoom { flex: 0 0 78%; }
+  .pf-vid-grid.pf-strip .pf-vid-card { flex: 0 0 84%; }
+  .pf-vid-reels.pf-strip .pf-vid-reel { flex: 0 0 58%; }
+  .pf-testi-grid.pf-strip .pf-testi-card { flex: 0 0 72%; }
+}
