@@ -933,3 +933,63 @@ body.lb-lock{overflow:hidden}
 @media(max-width:600px){.pf-vid-reels{grid-template-columns:minmax(0,300px);justify-content:center}}
 @media(min-width:760px){.pf-vid-grid:not(.pf-vid-reels){grid-template-columns:repeat(2,minmax(0,1fr))}}
 .pf-vid{scroll-margin-top:16px}
+
+
+/* ---- Case study collapse behind "شاهد العمل" ---- */
+.pf-case-body {
+  display: none;
+}
+.pf-case.open .pf-case-body {
+  display: block;
+  animation: pfCaseIn 0.5s var(--pf-ease);
+}
+@keyframes pfCaseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.pf-casetoggle-wrap {
+  margin: 2px 0 0;
+}
+.pf-casetoggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border: 1.5px solid var(--ds-hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ds-ink);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.45s var(--pf-ease),
+    border-color 0.3s,
+    color 0.3s;
+}
+.pf-casetoggle:hover {
+  transform: scale(1.05);
+  border-color: var(--pf-orange);
+  color: var(--pf-orange);
+}
+.pf-casetoggle-arrow {
+  width: 9px;
+  height: 9px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg) translate(1px, -2px);
+  transition: transform 0.35s var(--pf-ease);
+}
+.pf-case.open .pf-casetoggle-arrow {
+  transform: rotate(135deg) translate(1px, -2px);
+}
+.pf-casetoggle-less {
+  display: none;
+}
+.pf-case.open .pf-casetoggle-less {
+  display: inline;
+}
+.pf-case.open .pf-casetoggle-more {
+  display: none;
+}
