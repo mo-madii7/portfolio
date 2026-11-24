@@ -95,7 +95,8 @@ window.pfSetupTestiClamp = function () {
     btn.type = "button";
     btn.className = "pf-testi-more";
     btn.setAttribute("data-en", "Read more");
-    btn.textContent = "\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u0632\u064a\u062f";
+    btn.setAttribute("data-ar", "\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u0632\u064a\u062f");
+    btn.textContent = document.documentElement.lang === "en" ? "Read more" : btn.getAttribute("data-ar");
     t.parentNode.insertBefore(btn, t.nextSibling);
     btn.addEventListener("click", function () {
       var expanded = !t.classList.contains("clamped");
@@ -129,7 +130,10 @@ window.pfSetupTestiClamp();
 
   function setLang(lang) {
     var en = lang === "en";
-    els.forEach(function (el) { el.innerHTML = en ? el.getAttribute("data-en") : el.getAttribute("data-ar"); });
+    document.querySelectorAll("[data-en]").forEach(function (el) {
+      if (!el.getAttribute("data-ar")) el.setAttribute("data-ar", el.innerHTML);
+      el.innerHTML = en ? el.getAttribute("data-en") : el.getAttribute("data-ar");
+    });
     phEls.forEach(function (el) { el.setAttribute("placeholder", en ? el.getAttribute("data-en-ph") : el.getAttribute("data-ar-ph")); });
     document.documentElement.lang = en ? "en" : "ar";
     document.documentElement.dir = en ? "ltr" : "rtl";
