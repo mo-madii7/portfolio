@@ -1391,3 +1391,6 @@ html[lang="en"] .pf-marquee-track,html[lang="en"] .pf-wrapmarq-track,html[dir="l
   .pf-shead-tag{max-width:none;margin:0;font-size:14.5px;line-height:1.7}
   .pf-services{padding-inline:6px}
 }
+/* v=2026-11-25e: service cards as a continuous strip */
+.pf-sgrid.pf-strip .pf-scard{flex:0 0 min(250px,62%);box-sizing:border-box}
+@media (max-width:640px){.pf-sgrid.pf-strip .pf-scard{flex:0 0 66%}}
