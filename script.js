@@ -83,9 +83,12 @@
 
 /* ---- 3. Language toggle (AR <-> EN) ---- */
 /* ---- Testimonials: clamp long reviews with bilingual read more ---- */
-(function () {
+window.pfSetupTestiClamp = function () {
   var texts = Array.prototype.slice.call(document.querySelectorAll(".pf-testi-text"));
   texts.forEach(function (t) {
+    var old = t.parentNode.querySelector(".pf-testi-more");
+    if (old) old.remove();
+    t.classList.remove("clamped");
     t.classList.add("clamped");
     if (t.scrollHeight <= t.clientHeight + 4) { t.classList.remove("clamped"); return; }
     var btn = document.createElement("button");
@@ -109,7 +112,8 @@
       btn.textContent = en ? btn.getAttribute("data-en") : btn.getAttribute("data-ar");
     });
   });
-})();
+};
+window.pfSetupTestiClamp();
 
 (function () {
   var KEY = "pf-lang";
@@ -252,6 +256,7 @@
     btn.addEventListener("click", function () {
       var open = sec.classList.toggle("open");
       btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open && sec.id === "pf-testi" && window.pfSetupTestiClamp) window.pfSetupTestiClamp();
     });
   });
   var h = location.hash ? location.hash.slice(1) : "";
@@ -346,7 +351,7 @@
         if (paused || hovered || !visible || document.hidden) return;
         if (document.body.classList.contains("lb-lock")) return;
         go(current() + 1);
-      }, 4000);
+      }, 3200);
     }
 
     /* keep a swipe from opening the lightbox */
@@ -421,7 +426,7 @@
         if (paused || hovered || playing || !visible || document.hidden) return;
         if (document.body.classList.contains("lb-lock")) return;
         go(current() + 1);
-      }, 3500);
+      }, 3000);
     }
   });
 })();
