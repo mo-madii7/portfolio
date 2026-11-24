@@ -392,7 +392,7 @@ window.pfSetupTestiClamp();
     wrap.appendChild(scroller);
     ticker(scroller, wrap);
   });
-  document.querySelectorAll(".pf-vid-grid, .pf-testi-grid").forEach(function (strip) { ticker(strip, strip); });
+  document.querySelectorAll(".pf-vid-grid, .pf-testi-grid, .pf-sgrid").forEach(function (strip) { ticker(strip, strip); });
   if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
 })();
 
