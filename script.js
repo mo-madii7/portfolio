@@ -279,8 +279,11 @@ window.pfSetupTestiClamp();
       if (open && sec.id === "pf-testi" && window.pfSetupTestiClamp) window.pfSetupTestiClamp();
     });
   });
+  /* Sections always start closed; only a click opens them (the one exception: showing the sent-brief confirmation) */
   var h = location.hash ? location.hash.slice(1) : "";
-  var target = h && document.getElementById(h);
+  var sent = false;
+  try { sent = new URLSearchParams(location.search).get("sent") === "1"; } catch (e) {}
+  var target = sent && h === "pf-brief" && document.getElementById(h);
   if (target && target.classList && (target.classList.contains("pf-case") || target.classList.contains("pf-collapsible"))) {
     target.classList.add("open");
     var b = target.querySelector(".pf-casetoggle");
@@ -297,8 +300,8 @@ window.pfSetupTestiClamp();
       btn.setAttribute("aria-expanded", open ? "true" : "false");
     });
   });
-  var h = location.hash ? location.hash.slice(1) : "";
-  var t = h && document.getElementById(h);
+  var h = "";
+  var t = null;
   if (t && t.classList && t.classList.contains("pf-vidgroup")) {
     t.classList.add("open");
     var b = t.querySelector(".pf-vidgroup-toggle");
