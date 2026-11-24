@@ -245,7 +245,7 @@
 
 /* ---- 5. Case studies: collapse behind "شاهد العمل" ---- */
 (function () {
-  var secs = Array.prototype.slice.call(document.querySelectorAll(".pf-case"));
+  var secs = Array.prototype.slice.call(document.querySelectorAll(".pf-case, .pf-collapsible"));
   secs.forEach(function (sec) {
     var btn = sec.querySelector(".pf-casetoggle");
     if (!btn) return;
@@ -256,7 +256,7 @@
   });
   var h = location.hash ? location.hash.slice(1) : "";
   var target = h && document.getElementById(h);
-  if (target && target.classList && target.classList.contains("pf-case")) {
+  if (target && target.classList && (target.classList.contains("pf-case") || target.classList.contains("pf-collapsible"))) {
     target.classList.add("open");
     var b = target.querySelector(".pf-casetoggle");
     if (b) b.setAttribute("aria-expanded", "true");
@@ -357,5 +357,62 @@
     scroller.addEventListener("click", function (e) {
       if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
     }, true);
+  });
+})();
+
+/* ---- 8. Horizontal auto-moving strips: videos, reels, testimonials ---- */
+(function () {
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  document.querySelectorAll(".pf-vid-grid, .pf-testi-grid").forEach(function (strip) {
+    var cards = Array.prototype.slice.call(strip.children);
+    if (cards.length < 2) return;
+    strip.classList.add("pf-strip");
+
+    function current() {
+      var r = strip.getBoundingClientRect();
+      var rtl = getComputedStyle(strip).direction === "rtl";
+      var edge = rtl ? r.right : r.left;
+      var best = 0, bd = Infinity;
+      cards.forEach(function (c, i) {
+        var cr = c.getBoundingClientRect();
+        var d = Math.abs((rtl ? cr.right : cr.left) - edge);
+        if (d < bd) { bd = d; best = i; }
+      });
+      return best;
+    }
+    function go(i) {
+      var n = cards.length;
+      cards[((i % n) + n) % n].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    }
+
+    var paused = false, hovered = false, playing = false, idleTimer = null, visible = false;
+    function interact() {
+      paused = true;
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () { paused = false; }, 7000);
+    }
+    ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
+      strip.addEventListener(ev, interact, { passive: true });
+    });
+    strip.addEventListener("mouseenter", function () { hovered = true; });
+    strip.addEventListener("mouseleave", function () { hovered = false; });
+    strip.querySelectorAll("video").forEach(function (v) {
+      v.addEventListener("play", function () { playing = true; });
+      v.addEventListener("pause", function () { playing = false; });
+      v.addEventListener("ended", function () { playing = false; });
+    });
+    if ("IntersectionObserver" in window) {
+      var io3 = new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { threshold: 0.3 });
+      io3.observe(strip);
+    } else { visible = true; }
+
+    if (!reduceMotion) {
+      setInterval(function () {
+        if (paused || hovered || playing || !visible || document.hidden) return;
+        if (document.body.classList.contains("lb-lock")) return;
+        go(current() + 1);
+      }, 3500);
+    }
   });
 })();
