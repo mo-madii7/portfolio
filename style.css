@@ -1087,7 +1087,10 @@ body.lb-lock{overflow:hidden}
 
 /* ---- Motion polish: carousel slide focus, lightbox zoom, card lift, toggle nudge ---- */
 .pf-carousel .file-photo-zoom {
-  transition: transform 0.5s var(--pf-ease), opacity 0.5s var(--pf-ease);
+  transition: transform 0.45s var(--pf-ease), opacity 0.45s var(--pf-ease), box-shadow 0.45s var(--pf-ease);
+}
+.pf-carousel .file-photo-zoom.pf-car-active img {
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.45);
 }
 .pf-carousel .file-photo-zoom:not(.pf-car-active) {
   transform: scale(0.96);
@@ -1152,7 +1155,7 @@ body.lb-lock{overflow:hidden}
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  align-items: stretch;
+  align-items: flex-start;
   padding: 2px 19%;
 }
 .pf-strip::-webkit-scrollbar {
@@ -1160,7 +1163,10 @@ body.lb-lock{overflow:hidden}
 }
 .pf-strip > * {
   scroll-snap-align: center;
-  transition: transform 0.5s var(--pf-ease), opacity 0.5s var(--pf-ease);
+  transition: transform 0.45s var(--pf-ease), opacity 0.45s var(--pf-ease), box-shadow 0.45s var(--pf-ease);
+}
+.pf-strip > .pf-strip-active {
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.45);
 }
 .pf-strip > *:not(.pf-strip-active) {
   transform: scale(0.94);
