@@ -80,3 +80,131 @@
     x0 = null;
   });
 })();
+
+/* ---- 3. Language toggle (AR <-> EN) ---- */
+/* ---- Testimonials: clamp long reviews with bilingual read more ---- */
+(function () {
+  var texts = Array.prototype.slice.call(document.querySelectorAll(".pf-testi-text"));
+  texts.forEach(function (t) {
+    t.classList.add("clamped");
+    if (t.scrollHeight <= t.clientHeight + 4) { t.classList.remove("clamped"); return; }
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pf-testi-more";
+    btn.setAttribute("data-en", "Read more");
+    btn.textContent = "\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u0632\u064a\u062f";
+    t.parentNode.insertBefore(btn, t.nextSibling);
+    btn.addEventListener("click", function () {
+      var expanded = !t.classList.contains("clamped");
+      var en = document.documentElement.lang === "en";
+      if (expanded) {
+        t.classList.add("clamped");
+        btn.setAttribute("data-en", "Read more");
+        btn.setAttribute("data-ar", "\u0627\u0642\u0631\u0623 \u0627\u0644\u0645\u0632\u064a\u062f");
+      } else {
+        t.classList.remove("clamped");
+        btn.setAttribute("data-en", "Show less");
+        btn.setAttribute("data-ar", "\u0623\u0638\u0647\u0631 \u0623\u0642\u0644");
+      }
+      btn.textContent = en ? btn.getAttribute("data-en") : btn.getAttribute("data-ar");
+    });
+  });
+})();
+
+(function () {
+  var KEY = "pf-lang";
+  var btn = document.getElementById("pf-lang-toggle");
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-en]"));
+  els.forEach(function (el) { el.setAttribute("data-ar", el.innerHTML); });
+  var phEls = Array.prototype.slice.call(document.querySelectorAll("[data-en-ph]"));
+  phEls.forEach(function (el) { el.setAttribute("data-ar-ph", el.getAttribute("placeholder") || ""); });
+  var TITLE = { ar: document.title, en: "Mohamad Madih | Graphic designer & video editor" };
+  var metaDesc = document.querySelector('meta[name="description"]');
+  var DESC = { ar: metaDesc ? metaDesc.getAttribute("content") : "", en: "Mohamad Madih's portfolio, graphic designer and video editor: visual identities, book covers, social media, print and video editing. Every project is a full case study." };
+  var main = document.querySelector("main.file-card");
+
+  function setLang(lang) {
+    var en = lang === "en";
+    els.forEach(function (el) { el.innerHTML = en ? el.getAttribute("data-en") : el.getAttribute("data-ar"); });
+    phEls.forEach(function (el) { el.setAttribute("placeholder", en ? el.getAttribute("data-en-ph") : el.getAttribute("data-ar-ph")); });
+    document.documentElement.lang = en ? "en" : "ar";
+    document.documentElement.dir = en ? "ltr" : "rtl";
+    if (main) { main.setAttribute("dir", en ? "ltr" : "rtl"); main.setAttribute("lang", en ? "en" : "ar"); }
+    document.title = en ? TITLE.en : TITLE.ar;
+    if (metaDesc) metaDesc.setAttribute("content", en ? DESC.en : DESC.ar);
+    if (btn) btn.textContent = en ? "عربي" : "EN";
+    try { localStorage.setItem(KEY, lang); } catch (e) {}
+  }
+  var start = "ar";
+  try {
+    var q = new URLSearchParams(location.search).get("lang");
+    start = q === "en" ? "en" : (localStorage.getItem(KEY) || "ar");
+  } catch (e) {}
+  setLang(start);
+  if (btn) btn.addEventListener("click", function () {
+    setLang(document.documentElement.lang === "en" ? "ar" : "en");
+  });
+})();
+
+/* ---- 4. Brief form: per-category questions + email delivery ---- */
+(function () {
+  var form = document.getElementById("pf-brief-form");
+  if (!form) return;
+  var sel = document.getElementById("bf-cat");
+  var sets = Array.prototype.slice.call(form.querySelectorAll(".pf-bf-cat"));
+  var status = document.getElementById("pf-bf-status");
+
+  function syncCat() {
+    var v = sel.value;
+    sets.forEach(function (fs) {
+      var on = fs.getAttribute("data-cat") === v;
+      fs.classList.toggle("on", on);
+      fs.querySelectorAll("input,select,textarea").forEach(function (f) { f.disabled = !on; });
+    });
+  }
+  sets.forEach(function (fs) {
+    fs.querySelectorAll("input,select,textarea").forEach(function (f) { f.disabled = true; });
+  });
+  sel.addEventListener("change", syncCat);
+  try {
+    var qc = new URLSearchParams(location.search).get("cat");
+    if (qc && sets.some(function (fs) { return fs.getAttribute("data-cat") === qc; })) {
+      sel.value = qc;
+    }
+  } catch (e) {}
+  syncCat();
+
+  var MSG = {
+    ar: { sending: "بيبعت...", ok: "وصل! البريف اتبعت لمحمد على إيميله، وهيرد عليك قريب.", err: "حصلت مشكلة في الإرسال. جرّب تاني، أو ابعت تفاصيلك واتساب.", required: "املأ اسمك ووسيلة التواصل ونوع الخدمة الأول." },
+    en: { sending: "Sending...", ok: "Done! Your brief reached Mohamad's email, and he will reply soon.", err: "Something went wrong sending. Try again, or send your details on WhatsApp.", required: "Please fill your name, contact and service type first." }
+  };
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var en = document.documentElement.lang === "en";
+    var m = en ? MSG.en : MSG.ar;
+    if (!form.reportValidity || !form.checkValidity()) {
+      status.textContent = m.required; status.className = "pf-bf-status err";
+      if (form.reportValidity) form.reportValidity();
+      return;
+    }
+    status.textContent = m.sending; status.className = "pf-bf-status";
+    var data = new FormData(form);
+    data.append("_template", "table");
+    data.append("_captcha", "false");
+    data.append("_subject", (en ? "New brief: " : "بريف جديد من الموقع: ") + sel.options[sel.selectedIndex].text + " — " + (data.get("الاسم") || ""));
+    fetch("https://formsubmit.co/ajax/mohamad.madih.20@gmail.com", {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: data
+    }).then(function (r) {
+      if (!r.ok) throw new Error("bad");
+      return r.json();
+    }).then(function () {
+      status.textContent = m.ok; status.className = "pf-bf-status ok";
+      form.reset(); syncCat();
+    }).catch(function () {
+      status.textContent = m.err; status.className = "pf-bf-status err";
+    });
+  });
+})();
