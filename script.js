@@ -404,11 +404,11 @@ window.pfSetupTestiClamp();
   var val = document.getElementById("bf-budget-val");
   var out = document.getElementById("bf-budget-out");
   var open = document.getElementById("bf-budget-open");
-  var MAX = 500000;
+  var MAX = 500000, cur = Number(r.value) || 0;
   function fmt(n) { return Number(n).toLocaleString("en-US"); }
   function render() {
     var en = document.documentElement.lang === "en";
-    var v = Math.max(0, Math.min(MAX, Number(r.value) || 0));
+    var v = cur;
     var amount = fmt(v);
     val.textContent = open.checked ? (en ? "Not decided yet" : "لسه محددتش") : amount + " " + (en ? "EGP" : "ج.م");
     out.value = open.checked ? "Not decided / مفتوح للاقتراحات" : amount + " EGP";
@@ -416,12 +416,12 @@ window.pfSetupTestiClamp();
     r.style.opacity = num.style.opacity = open.checked ? ".4" : "1";
     r.style.setProperty("--pct", (v / MAX * 100) + "%");
   }
-  r.addEventListener("input", function () { num.value = r.value; render(); });
+  r.addEventListener("input", function () { cur = Number(r.value) || 0; num.value = cur; render(); });
   num.addEventListener("input", function () {
-    var v = Math.max(0, Math.min(MAX, Number(num.value) || 0));
-    r.value = v; render();
+    cur = Math.max(0, Math.min(MAX, Math.round(Number(num.value) || 0)));
+    r.value = cur; render();
   });
-  num.addEventListener("blur", function () { num.value = r.value; });
+  num.addEventListener("blur", function () { num.value = cur; });
   open.addEventListener("change", render);
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   render();
