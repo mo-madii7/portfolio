@@ -917,3 +917,19 @@ body.lb-lock{overflow:hidden}
 
 .pf-testi-text.clamped{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
 .pf-testi-more{margin-top:8px;background:none;border:0;padding:0;font:inherit;font-size:13px;font-weight:700;color:#ffd25e;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+.pf-vid{margin-top:16px;padding:40px 30px 30px;border-radius:24px;background:#100d0b;color:var(--pf-paper)}
+.pf-vid-title{font-size:clamp(30px,5.5vw,54px)}
+.pf-vid-grid{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;align-items:start}
+.pf-vid-card{margin:0;border:1.5px solid rgb(242 237 228/.14);border-radius:16px;background:rgb(242 237 228/.04);overflow:hidden}
+.pf-vid-player{display:block;width:100%;aspect-ratio:16/9;background:#000;object-fit:contain}
+.pf-vid-cap{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:12px 18px}
+.pf-vid-client{font-size:15px;font-weight:700;color:#ffd25e}
+.pf-vid-kind{font-size:13px;opacity:.75}
+@media(max-width:600px){.pf-vid{padding:30px 16px 20px}}
+.pf-vid-sub{margin:30px 0 0;font-size:clamp(20px,3.4vw,28px);font-weight:800}
+.pf-vid-reels{grid-template-columns:repeat(auto-fill,minmax(200px,260px));justify-content:start}
+.pf-vid-reel .pf-vid-player{aspect-ratio:9/16}
+@media(max-width:600px){.pf-vid-reels{grid-template-columns:minmax(0,300px);justify-content:center}}
+@media(min-width:760px){.pf-vid-grid:not(.pf-vid-reels){grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pf-vid{scroll-margin-top:16px}
