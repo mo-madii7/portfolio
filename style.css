@@ -1125,3 +1125,48 @@ body.lb-lock{overflow:hidden}
     animation: none;
   }
 }
+
+
+/* ---- Generic collapsible sections (brief, testimonials) ---- */
+.pf-collapsible .pf-collapse-body {
+  display: none;
+}
+.pf-collapsible.open .pf-collapse-body {
+  display: block;
+  animation: pfCaseIn 0.5s var(--pf-ease);
+}
+.pf-collapsible.open .pf-casetoggle-arrow {
+  transform: rotate(135deg) translate(1px, -2px);
+  animation: none;
+}
+.pf-collapsible.open .pf-casetoggle-less {
+  display: inline;
+}
+.pf-collapsible.open .pf-casetoggle-more {
+  display: none;
+}
+
+/* ---- Horizontal auto-moving strips: videos, reels, testimonials ---- */
+.pf-strip {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  align-items: stretch;
+}
+.pf-strip::-webkit-scrollbar {
+  display: none;
+}
+.pf-strip > * {
+  scroll-snap-align: start;
+}
+.pf-vid-grid.pf-strip .pf-vid-card {
+  flex: 0 0 min(520px, 88%);
+}
+.pf-vid-reels.pf-strip .pf-vid-reel {
+  flex: 0 0 min(240px, 60%);
+}
+.pf-testi-grid.pf-strip .pf-testi-card {
+  flex: 0 0 min(340px, 85%);
+  margin: 0;
+}
