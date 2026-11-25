@@ -412,6 +412,31 @@ window.pfSetupTestiClamp();
     wrap.appendChild(scroller);
     ticker(scroller, wrap);
   });
+  /* featured projects: extra picks, then run the same flowing strip as the other sections */
+  (function () {
+    var fs = document.querySelector(".pf-feat-strip");
+    if (!fs) return;
+    var extra = [
+      ["#pf-case-03", "images/3WY6PZNG.jpg", "عيادة د. محمد فاروق: توعية طبية", "Dr. Mohamed Farouk Clinic: health awareness", ""],
+      ["#pf-case-05", "images/X5UN6OZS.jpg", "دار الرقيم: ما بين الآن وكان", "Dar Al-Raqeem: Between Now and Then", ""],
+      ["#pf-case-07", "images/KRPZPZEP.jpg", "الهلال الأحمر: ورشة الخيام", "Red Crescent: Tent Workshop", ""],
+      ["#pf-case-07", "images/JTHA57T2.jpg", "الصندوق: اليوم العالمي للإقلاع عن التدخين", "The Fund: World No Tobacco Day", ""],
+      ["#pf-case-08", "images/OPT2CES4.jpg", "غلاف كتاب: بوابة نيكسارا", "Book cover: Nexara Gate", " pf-feat-wide"],
+      ["#pf-case-08", "images/IPDBP5VW.jpg", "غلاف كتاب: وميض في نفق العمر", "Book cover: A Flash in Life's Tunnel", " pf-feat-wide"]
+    ];
+    extra.forEach(function (e) {
+      var a = document.createElement("a");
+      a.className = "pf-feat-card" + e[4];
+      a.href = e[0];
+      var im = document.createElement("img");
+      im.src = e[1]; im.alt = e[2]; im.loading = "lazy";
+      var sp = document.createElement("span");
+      sp.setAttribute("data-en", e[3]); sp.textContent = e[2];
+      a.appendChild(im); a.appendChild(sp);
+      fs.appendChild(a);
+    });
+    ticker(fs, fs);
+  })();
   document.querySelectorAll(".pf-vid-grid, .pf-testi-grid, .pf-sgrid, .pf-partners-grid").forEach(function (strip) { ticker(strip, strip); });
   if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
 })();
