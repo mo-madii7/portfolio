@@ -921,7 +921,7 @@ window.pfSetupTestiClamp();
   document.querySelectorAll(".pf-novel").forEach(function (n) { push("novel", "#pf-novels", n.querySelector(".pf-novel-name"), null); });
   document.querySelectorAll(".pf-scard").forEach(function (c) { push("service", "#services", c.querySelector(".pf-scard-name"), c.querySelector(".pf-scard-detail")); });
   document.querySelectorAll(".pf-vid-card").forEach(function (v) { push("video", "#videos", v.querySelector(".pf-vid-client"), v.querySelector(".pf-vid-kind")); });
-  [["#pf-about"], ["#pf-testi"], ["#pf-partners"], ["#pf-contact"], ["#pf-articles"], ["#pf-brief"]].forEach(function (p) {
+  [["#pf-novels"], ["#pf-about"], ["#pf-testi"], ["#pf-partners"], ["#pf-contact"], ["#pf-articles"], ["#pf-brief"]].forEach(function (p) {
     var sec = document.querySelector(p[0]); if (!sec) return;
     push("section", p[0], sec.querySelector(".pf-contact-title, .pf-contact-kicker, h2, h3"), null);
   });
