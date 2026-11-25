@@ -1494,3 +1494,49 @@ html:not([data-view="home"]):not([data-view="services"]) .pf-services{height:0!i
   .pf-feat-card.pf-feat-wide img{width:390px}
   .pf-feat-card{font-size:14px}
   }
+
+/* ===== v=2026-11-25p: laptop refinements ===== */
+/* nav: full width, EN at the far edge, three-line menu */
+.pf-nav{gap:8px}
+.pf-nav-links{max-width:none!important;flex:1;margin-inline:0!important}
+@media(min-width:760px){.pf-nav{padding:0 20px}.pf-nav-links{justify-content:flex-start;gap:28px}}
+@media(max-width:759px){.pf-nav{padding:0 8px;gap:6px}.pf-nav-links{gap:4px}.pf-nav-links a{font-size:12px}.pf-nav #pf-lang-toggle{padding:5px 8px}}
+#pf-menu-btn{flex:0 0 auto;width:36px;height:34px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:transparent;border:1px solid rgb(214 178 90/.35);border-radius:8px;cursor:pointer;padding:0}
+#pf-menu-btn span{display:block;width:16px;height:2px;border-radius:2px;background:#efe6d2}
+#pf-menu-panel{position:absolute;top:50px;inset-inline-start:0;width:min(300px,100vw);max-height:calc(100vh - 60px);overflow:auto;background:#0f0d0b;border:1px solid rgb(214 178 90/.3);border-top:0;border-radius:0 0 14px 14px;padding:8px 0;display:flex;flex-direction:column;z-index:80}
+#pf-menu-panel[hidden]{display:none}
+html[dir="rtl"] #pf-menu-panel{inset-inline-start:auto;inset-inline-end:0}
+#pf-menu-panel a,#pf-menu-panel button{display:block;text-align:start;padding:12px 20px;font:inherit;font-size:15px;font-weight:600;color:#e6dfd0;background:none;border:0;border-bottom:1px solid rgb(255 255 255/.06);text-decoration:none;cursor:pointer}
+#pf-menu-panel a:hover,#pf-menu-panel button:hover{color:#e8c25a;background:rgb(255 255 255/.04)}
+/* hero: photo beside the name on laptop */
+@media(min-width:721px){.pf-hero-grid{align-items:start!important}.pf-hero-visual{padding-top:70px!important}}
+/* hero buttons: smaller, three in one row */
+.pf-prow{gap:8px}
+.pf-prow .pf-pill,.pf-prow .pf-cs-btn{flex:1 1 0;padding:9px 8px;font-size:13.5px;min-width:0;justify-content:center;text-align:center}
+.pf-prow .pf-pill-paper{flex:1 1 0}
+.pf-prow .pf-cs-btn{align-self:auto;border-radius:999px;font-size:13.5px;border:1.5px solid rgb(214 178 90/.55);color:#e8c25a;background:transparent;font-weight:700}
+@media(max-width:400px){.pf-prow .pf-pill,.pf-prow .pf-cs-btn{font-size:12.5px;padding:9px 4px}}
+/* tools: two lines */
+.pf-tools2{border-radius:18px!important;display:block!important;width:fit-content;max-width:100%}
+.pf-tools2 .pf-tl{display:block;line-height:1.8}
+/* services: main heading like the others, full-width strip */
+.pf-shead{flex-direction:column!important;align-items:flex-start!important;gap:6px!important;margin:30px 0 14px!important;padding-inline:0!important}
+.pf-shead-title.pf-contact-title{font-size:clamp(26px,7vw,40px)!important;margin:0}
+.pf-shead-tag{max-width:none;margin:0}
+@media(min-width:641px){
+  .pf-services{padding-inline:0!important}
+  .pf-services .pf-shead{padding-inline:max(48px,calc((100% - 1240px)/2))!important}
+  .pf-sgrid.pf-strip{padding-inline:max(48px,calc((100% - 1240px)/2))!important;width:100%;box-sizing:border-box}
+}
+/* featured strip: train, no stop */
+.pf-feat-strip.pf-strip{cursor:pointer}
+/* testimonials: always visible, no button, smaller */
+#pf-testi .pf-casetoggle-wrap{display:none!important}
+#pf-testi .pf-collapse-body{display:block!important}
+html .pf-testi-grid.pf-strip .pf-testi-card{flex:0 0 min(270px,40%)}
+html .pf-testi-grid.pf-strip .pf-testi-text{font-size:13.5px;line-height:1.75}
+@media(max-width:640px){html .pf-testi-grid.pf-strip .pf-testi-card{flex:0 0 64%}}
+
+#pf-menu-panel{inset-inline:auto!important;top:50px}
+.pf-prow .pf-cs-btn{white-space:nowrap}
+@media(max-width:560px){.pf-prow .pf-cs-btn .pf-caret{display:none}.pf-tools2{font-size:11.5px;padding:10px 12px}}
