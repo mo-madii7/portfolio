@@ -989,3 +989,18 @@ window.pfSetupTestiClamp();
   wireSearch(document.getElementById("pf-gsearch-input"), document.getElementById("pf-gsearch-results"));
   wireSearch(document.getElementById("pf-menu-search"), document.getElementById("pf-menu-search-results"));
 })();
+
+/* ---- 14. Mobile search affordance: icon beside language toggle expands the nav search (v=2026-11-26q) ---- */
+(function () {
+  var btn = document.getElementById("pf-search-btn");
+  var box = document.querySelector(".pf-gsearch");
+  var input = document.getElementById("pf-gsearch-input");
+  if (!btn || !box || !input) return;
+  var root = document.documentElement;
+  function open() { root.classList.add("pf-search-open"); btn.setAttribute("aria-expanded", "true"); setTimeout(function () { input.focus(); }, 60); }
+  function close() { root.classList.remove("pf-search-open"); btn.setAttribute("aria-expanded", "false"); }
+  btn.addEventListener("click", function (e) { e.stopPropagation(); if (root.classList.contains("pf-search-open")) close(); else open(); });
+  input.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  document.addEventListener("click", function (e) { if (root.classList.contains("pf-search-open") && !box.contains(e.target) && e.target !== btn && !btn.contains(e.target)) close(); });
+  box.addEventListener("click", function (e) { if (e.target.closest(".pf-gsearch-item")) close(); });
+})();
