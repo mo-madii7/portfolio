@@ -1543,3 +1543,5 @@ html .pf-testi-grid.pf-strip .pf-testi-text{font-size:13.5px;line-height:1.75}
 
 
 .pf-svc-cs{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 18px 56px}.pf-svc-cs .pf-menu{width:min(420px,100%)}.pf-svc-cs .pf-pay{width:min(420px,100%)}.pf-svc-cs .pf-cs-btn{font-size:15px;padding:11px 28px}
+
+.pf-svc-cs .pf-pill,.pf-svc-cs .pf-pay-row{text-align:center;justify-content:center}.pf-svc-cs .pf-menu .pf-pill,.pf-svc-cs .pf-pay .pf-pill{display:flex;align-items:center;justify-content:center;text-align:center}.pf-svc-cs .pf-pay-row{justify-content:space-between}
