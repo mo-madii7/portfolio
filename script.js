@@ -323,7 +323,7 @@ window.pfSetupTestiClamp();
 
   function ticker(scroller, hoverTarget) {
     /* partners strip runs as a non-stop one-direction train: no hover pause, no manual drag/swipe */
-    var train = scroller.classList.contains("pf-partners-grid");
+    var train = scroller.classList.contains("pf-partners-grid") || scroller.classList.contains("pf-feat-strip");
     var spd = train ? 65 : SPEED; /* partners strip runs a bit faster per client request */
     var cards = Array.prototype.slice.call(scroller.children);
     if (cards.length < 2) return;
@@ -524,4 +524,29 @@ window.pfSetupTestiClamp();
 
   var acv = document.getElementById("pf-about-cv"), cv = document.getElementById("pf-cv-btn");
   if (acv && cv) acv.addEventListener("click", function (e) { e.preventDefault(); cv.click(); });
+})();
+
+/* ---- 10. Three-line menu, testimonials always open ---- */
+(function () {
+  var ts = document.getElementById("pf-testi");
+  if (ts) { ts.classList.add("open"); var tb = ts.querySelector(".pf-casetoggle"); if (tb) tb.setAttribute("aria-expanded", "true"); if (window.pfSetupTestiClamp) window.pfSetupTestiClamp(); }
+  var btn = document.getElementById("pf-menu-btn"), panel = document.getElementById("pf-menu-panel");
+  if (!btn || !panel) return;
+  function close() { panel.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+  btn.addEventListener("click", function (e) { e.stopPropagation(); var o = panel.hidden; if (o) { var r = btn.getBoundingClientRect(); var w = Math.min(300, window.innerWidth); var l = Math.max(0, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w)); panel.style.left = l + "px"; panel.style.right = "auto"; } panel.hidden = !o; btn.setAttribute("aria-expanded", o ? "true" : "false"); });
+  document.addEventListener("click", function (e) { if (!panel.hidden && !panel.contains(e.target)) close(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  panel.addEventListener("click", function (e) {
+    var el = e.target.closest("a,button"); if (!el) return;
+    var act = el.getAttribute("data-act");
+    close();
+    if (act === "cv") { var cv = document.getElementById("pf-cv-btn"); if (cv) cv.click(); }
+    else if (act === "cs") {
+      if (location.hash && location.hash !== "#home") location.hash = "#home";
+      setTimeout(function () {
+        var b = document.getElementById("pf-cs-btn"), m = document.getElementById("pf-cs-menu");
+        if (b) { if (m && m.hidden) b.click(); b.scrollIntoView({ block: "center" }); }
+      }, 120);
+    }
+  });
 })();
