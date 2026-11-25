@@ -324,6 +324,7 @@ window.pfSetupTestiClamp();
   function ticker(scroller, hoverTarget) {
     /* partners strip runs as a non-stop one-direction train: no hover pause, no manual drag/swipe */
     var train = scroller.classList.contains("pf-partners-grid");
+    var spd = train ? 65 : SPEED; /* partners strip runs a bit faster per client request */
     var cards = Array.prototype.slice.call(scroller.children);
     if (cards.length < 2) return;
     scroller.classList.add("pf-strip");
@@ -384,7 +385,7 @@ window.pfSetupTestiClamp();
       var running = !reduceMotion && L > 0 && visible && (train || (!paused && !hovered)) && !document.hidden &&
         !document.body.classList.contains("lb-lock") && !videoPlaying();
       if (running) {
-        pos += SPEED * dt;
+        pos += spd * dt;
         if (pos >= L) pos -= L;
         scroller.scrollLeft = pos;
       } else if (train) {
