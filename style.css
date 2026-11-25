@@ -1587,7 +1587,7 @@ html .pf-feat-all.pf-px { color: color-mix(in srgb, #d9a441, #ff9a2e calc(var(--
 @media (hover: hover) and (pointer: fine) {
   html .pf-feat-card:hover { box-shadow: none !important; }
   html .pf-feat-card img { transition: box-shadow .45s ease; }
-  html .pf-feat-card:hover img { box-shadow: 0 0 26px rgb(255 150 50 / .14), 0 10px 34px rgb(255 130 30 / .13); }
+  html .pf-feat-card:hover img { box-shadow: 0 0 34px rgb(255 150 50 / .42), 0 12px 44px rgb(255 130 30 / .32); }
 }
 
 
