@@ -550,3 +550,34 @@ window.pfSetupTestiClamp();
     }
   });
 })();
+
+/* ---- 11. Client services block at the end of the Services page ---- */
+(function () {
+  var brief = document.getElementById("pf-brief"), srcMenu = document.getElementById("pf-cs-menu"), srcPanel = document.getElementById("pf-pay-panel");
+  if (!brief || !srcMenu || !srcPanel || document.getElementById("pf-svc-cs")) return;
+  var sec = document.createElement("section");
+  sec.className = "pf-svc-cs"; sec.id = "pf-svc-cs";
+  var btn = document.createElement("button");
+  btn.type = "button"; btn.className = "pf-cs-btn"; btn.setAttribute("aria-expanded", "false");
+  btn.setAttribute("data-en", 'Client services <span class="pf-caret">▾</span>');
+  btn.innerHTML = 'خدمات العملاء <span class="pf-caret">▾</span>';
+  var menu = srcMenu.cloneNode(true); menu.removeAttribute("id"); menu.hidden = true;
+  var pay = menu.querySelector("#pf-pay-btn"); if (pay) pay.removeAttribute("id");
+  var panel = srcPanel.cloneNode(true); panel.removeAttribute("id"); panel.hidden = true;
+  var walBtn = panel.querySelector("#pf-wal-btn"), wal = panel.querySelector("#pf-wal");
+  if (walBtn) walBtn.removeAttribute("id"); if (wal) { wal.removeAttribute("id"); wal.hidden = true; }
+  function tg(b, p) { b.addEventListener("click", function () { var o = p.hidden; p.hidden = !o; b.setAttribute("aria-expanded", o ? "true" : "false"); }); }
+  tg(btn, menu); if (pay) tg(pay, panel); if (walBtn && wal) tg(walBtn, wal);
+  panel.querySelectorAll(".pf-pay-copy").forEach(function (c) {
+    c.addEventListener("click", function () {
+      var v = c.getAttribute("data-copy");
+      var d = function () { c.textContent = document.documentElement.lang === "en" ? "Copied" : "تم النسخ"; setTimeout(function () { c.textContent = document.documentElement.lang === "en" ? "Copy" : "نسخ"; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(d, d);
+      else { var a = document.createElement("textarea"); a.value = v; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(a); d(); }
+    });
+  });
+  var wrap = document.createElement("div"); wrap.className = "pf-pay";
+  wrap.appendChild(panel);
+  sec.appendChild(btn); sec.appendChild(menu); sec.appendChild(wrap);
+  brief.parentNode.insertBefore(sec, brief.nextSibling);
+})();
