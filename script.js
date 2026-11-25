@@ -397,7 +397,7 @@ window.pfSetupTestiClamp();
       if (L > 0) {
         /* swiping past either end wraps into the duplicate set */
         if (scroller.scrollLeft >= L) { scroller.scrollLeft -= L; pos = scroller.scrollLeft; }
-        else if (scroller.scrollLeft <= 0 && !running && pos <= 0) { scroller.scrollLeft = L; pos = L; }
+        else if (scroller.scrollLeft <= 0 && !running && pos <= 0) { scroller.scrollLeft = L - 1; pos = L - 1; }
       }
       requestAnimationFrame(frame);
     }
