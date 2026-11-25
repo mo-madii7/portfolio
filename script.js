@@ -749,10 +749,12 @@ window.pfSetupTestiClamp();
     clearTimeout(m._t); m._t = setTimeout(function () { m.textContent = ""; }, 4000);
   }
   var saved = null; try { saved = localStorage.getItem(TK); } catch (e) {}
-  var keys = items.map(function (i) { return i.key; }).join(",");
-  fetch(LIKES_API + "/counts?items=" + encodeURIComponent(keys), { headers: auth(saved) }).then(function (r) { if (!r.ok) throw new Error("c"); return r.json(); }).then(function (d) {
-    items.forEach(function (it) { if (typeof d.counts[it.key] === "number") show(it, d.counts[it.key], (d.mine || []).indexOf(it.key) > -1); });
-  }).catch(function () {});
+  var uniq = []; items.forEach(function (i) { if (uniq.indexOf(i.key) < 0) uniq.push(i.key); });
+  for (var ci = 0; ci < uniq.length; ci += 15) (function (chunk) { /* the service answers up to 20 keys per request */
+    fetch(LIKES_API + "/counts?items=" + encodeURIComponent(chunk.join(",")), { headers: auth(saved) }).then(function (r) { if (!r.ok) throw new Error("c"); return r.json(); }).then(function (d) {
+      items.forEach(function (it) { if (chunk.indexOf(it.key) > -1 && typeof d.counts[it.key] === "number") show(it, d.counts[it.key], (d.mine || []).indexOf(it.key) > -1); });
+    }).catch(function () {});
+  })(uniq.slice(ci, ci + 15));
   items.forEach(function (it) {
     it.btn.addEventListener("click", function () {
       if (it.btn.disabled) return;
