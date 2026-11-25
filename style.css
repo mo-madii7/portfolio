@@ -1422,3 +1422,61 @@ html[lang="en"] .pf-marquee-track,html[lang="en"] .pf-wrapmarq-track,html[dir="l
     scroll-padding-inline: 18px;
   }
   }
+
+/* ===== v=2026-11-25k: full-width, calmer luxury look, top nav, page views, new hero buttons ===== */
+html{scroll-padding-top:62px}
+body{padding-top:50px;background:#0b0a09}
+.file-card{max-width:none!important;padding:0!important;margin:0!important}
+.pf-page{padding:0!important;max-width:none!important;background:#0b0a09!important}
+.pf-hero,.pf-services,.pf-featured,.pf-testi,.pf-partners,.pf-contact,.pf-about,.pf-bookrow{border-radius:0!important;border:0!important;margin:0!important;box-shadow:none!important}
+.pf-hero,.pf-testi,.pf-partners{background:#0d0b0a!important}
+.pf-services,.pf-featured{background:#0b0a09!important}
+.pf-contact,.pf-about{background:#110e0b!important}
+.pf-hero::before,.pf-hero::after{opacity:.16!important;animation:none!important}
+.pf-hero-photo,.pf-hero-ring{box-shadow:0 0 0 1px rgb(214 178 90/.35),0 0 16px rgb(200 120 40/.16)!important}
+.pf-casenum{text-shadow:none!important}
+.pf-pill,.pf-pill:hover{box-shadow:none!important;filter:none!important}
+.pf-pill:hover{transform:none}
+.pf-pill-paper{background:#efe6d2!important;color:#14110f!important}
+.pf-pill-ghost{background:transparent!important;border:1.5px solid rgb(242 237 228/.28)!important;backdrop-filter:none!important}
+.pf-pill-gold{background:linear-gradient(90deg,#d9a441,#c47a2a)!important;color:#14110f!important;border:0!important;font-weight:800}
+.pf-testi-card{box-shadow:none!important;background:#14110f!important;border:1px solid rgb(214 178 90/.2)!important}
+.pf-casetoggle{box-shadow:none!important;background:#16130f!important;border:1px solid rgb(214 178 90/.35)!important}
+h1,h2,h3,.pf-contact-title,.pf-hero-name{line-height:1.5!important;padding-block:.12em .2em!important;overflow:visible!important}
+.pf-contact-title{font-size:clamp(26px,7vw,40px)!important}
+/* top nav */
+.pf-nav{position:fixed;top:0;left:0;right:0;z-index:70;height:50px;display:flex;align-items:center;gap:12px;padding:0 12px;background:#0b0a09;border-bottom:1px solid #26221e;font-family:inherit}
+.pf-nav-links{display:flex;flex:1;justify-content:space-between;gap:6px;max-width:720px;margin-inline:auto 0}
+.pf-nav-links a{color:#cfc8bb;font-size:12.5px;font-weight:600;text-decoration:none;padding:15px 2px 13px;border-bottom:2px solid transparent;white-space:nowrap}
+.pf-nav-links a.on{color:#e8c25a;border-bottom-color:#c47a2a}
+.pf-nav #pf-lang-toggle{position:static;inset:auto;min-width:0;padding:5px 11px;font-size:11px;border-radius:8px;background:#16130f;border:1px solid rgb(214 178 90/.35);color:#efe6d2;backdrop-filter:none;transform:none}
+@media(min-width:760px){.pf-nav-links{gap:28px;justify-content:flex-start;margin-inline:0}.pf-nav-links a{font-size:14px}}
+/* page views */
+html:not([data-view="home"]) .pf-hero,html:not([data-view="home"]) .pf-marquee,html:not([data-view="home"]) .pf-featured,html:not([data-view="home"]) #pf-testi,html:not([data-view="home"]) #pf-partners,
+html:not([data-view="works"]) .pf-case,html:not([data-view="services"]) .pf-brief,html:not([data-view="videos"]) .pf-vid,html:not([data-view="about"]) #pf-about,
+html:not([data-view="home"]):not([data-view="services"]) .pf-services{height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important}
+/* hero role and buttons */
+.pf-role-l1,.pf-role-l2{display:block}.pf-role-l2{margin-top:4px}
+.pf-role-l2 bdi{display:inline-block;white-space:nowrap}
+.pf-role-sep{display:inline-block;width:1px;height:.9em;background:rgb(214 178 90/.55);margin:0 12px;vertical-align:middle}
+.pf-pills-v2{display:flex!important;flex-direction:column;gap:10px;align-items:stretch}
+.pf-pills-v2 .pf-pill{text-align:center;justify-content:center;margin:0}
+.pf-pills-v2 .pf-book{width:100%;padding:12px 16px;font-size:15px;outline:1.5px dashed rgb(255 255 255/.7);outline-offset:3px}
+.pf-prow{display:flex;gap:10px}.pf-prow .pf-pill{flex:1}.pf-prow .pf-pill-paper{flex:1.3}
+.pf-menu{display:flex;gap:10px;padding:12px;border:1px solid rgb(214 178 90/.25);border-radius:16px;background:#12100d}
+.pf-menu[hidden]{display:none}.pf-menu .pf-pill{flex:1}
+.pf-quiet{align-self:center;color:#d8cfbd;font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid rgb(214 178 90/.5);padding:2px 0;margin-top:4px}
+.pf-cs-btn{align-self:center;font:inherit;font-size:12.5px;font-weight:700;color:#e8c25a;background:transparent;border:1px solid rgb(214 178 90/.4);border-radius:999px;padding:7px 18px;cursor:pointer}
+.pf-caret{font-size:.8em}
+.pf-pills-v2 #pf-pay-btn{font:inherit}
+/* featured projects */
+.pf-featured{padding:30px 18px 24px}
+.pf-feat-strip{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;margin-inline:-18px;padding:4px 18px 8px}
+.pf-feat-card{flex:0 0 150px;scroll-snap-align:start;color:#cfc8bb;text-decoration:none;font-size:12px}
+.pf-feat-card img{width:150px;height:188px;object-fit:cover;border-radius:16px;display:block;margin-bottom:6px}
+.pf-feat-all{display:inline-block;margin-top:10px;font-size:12px;color:#d9a441;text-decoration:none}
+/* about, booking row, contact */
+.pf-about{padding:36px 18px 30px}.pf-about-p{color:#cfc8bb;line-height:1.9}.pf-about .pf-tools{margin:14px 0 18px}
+.pf-bookrow{padding:22px 18px;text-align:center;background:#0d0b0a}.pf-bookrow .pf-book{display:inline-block;padding:11px 22px;outline:1.5px dashed rgb(255 255 255/.7);outline-offset:3px}
+.pf-contact{padding-inline:18px}
+.pf-contact-foot{display:none!important}
