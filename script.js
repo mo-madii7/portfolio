@@ -864,7 +864,7 @@ window.pfSetupTestiClamp();
 
 /* ---- 13. Works filters + global site search; montage headings made truly inert (v=2026-11-26p) ---- */
 (function () {
-  function norm(s) { return (s || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/\s+/g, " ").trim(); }
+  function norm(s) { return (s || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ئ/g, "ي").replace(/ؤ/g, "و").replace(/ة/g, "ه").replace(/\s+/g, " ").trim(); }
   function curEn() { return document.documentElement.lang === "en"; }
 
   /* montage group headings: strip the collapse listener and drop from tab order (visually unchanged) */
