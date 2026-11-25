@@ -592,25 +592,26 @@ window.pfSetupTestiClamp();
   });
 })();
 
-/* public page-view counter (GoatCounter native counter): shows the real count, including 0; hidden if unknown or on error */
+/* public site-visit counter (own service, shown within seconds): one count per browser per 24h on page load; opens/browsers, not unique people; hidden if unknown */
 (function () {
+  var API = "https://portfolio-likes.mohamad-madih-20.workers.dev";
+  var DAY = 86400000;
+  window.pfSeen = function (k) { try { var t = parseInt(localStorage.getItem("pf_v_" + k), 10); return !isNaN(t) && Date.now() - t < DAY && Date.now() >= t; } catch (e) { return !!(window.pfMem && window.pfMem[k]); } };
+  window.pfMark = function (k) { try { localStorage.setItem("pf_v_" + k, String(Date.now())); } catch (e) { (window.pfMem = window.pfMem || {})[k] = 1; } };
   var box = document.getElementById("pf-views"), num = document.getElementById("pf-views-num");
   if (!box || !num || !window.fetch) return;
-  var cn = document.querySelector('link[rel="canonical"]');
-  var path = "/portfolio/";
-  try { if (cn && cn.href) path = new URL(cn.href).pathname; } catch (e) {}
-  var ctrl = ("AbortController" in window) ? new AbortController() : null;
-  setTimeout(function () {
-    var timer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) {} } }, 5000);
-    fetch("https://mo-madih.goatcounter.com/counter/" + path + ".json", ctrl ? { signal: ctrl.signal } : {})
-      .then(function (r) { if (!r.ok && r.status !== 404) throw new Error("no count"); return r.json(); }) /* GoatCounter answers 404 with a zero count for a path with no views yet */
-      .then(function (d) {
-        clearTimeout(timer);
-        var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
-        /* GoatCounter caches counts for up to 4 hours, so a 0 can be stale: show only a positive real count */ if (!isNaN(n) && n > 0) { num.textContent = String(n); box.hidden = false; }
-      })
-      .catch(function () { clearTimeout(timer); });
-  }, 1500);
+  var lab = box.querySelector("span[data-en]");
+  if (lab) { lab.setAttribute("data-en", "Site visits"); lab.textContent = "\u0632\u064a\u0627\u0631\u0627\u062a \u0627\u0644\u0645\u0648\u0642\u0639"; }
+  function ok(r) { if (!r.ok) throw new Error("x"); return r.json(); }
+  function show() {
+    return fetch(API + "/counts?items=site-visits").then(ok).then(function (d) {
+      var n = d && d.views ? d.views["site-visits"] : null;
+      if (typeof n === "number") { num.textContent = String(n); box.hidden = false; }
+    });
+  }
+  var step = window.pfSeen("site-visits") ? Promise.resolve() :
+    fetch(API + "/view", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ item: "site-visits" }) }).then(ok).then(function () { window.pfMark("site-visits"); });
+  step.catch(function () {}).then(show).catch(function () {});
 })();
 
 /* GoatCounter click events: anonymous counts of opens (CV, WhatsApp, links, cases, novels); the brief counts only when it was really sent */
@@ -618,6 +619,7 @@ window.pfSetupTestiClamp();
   function slug(x) { return String(x || "").replace(/\s+/g, " ").trim().toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g, "-").replace(/^-|-$/g, "").slice(0, 40); }
   window.pfTrack = function (name) {
     try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "click-" + name, title: name, event: true }); } catch (e) {}
+    try { if (window.pfCountView) window.pfCountView(name); } catch (e) {}
   };
   document.addEventListener("click", function (e) {
     var t = e.target; if (!t || !t.closest) return;
@@ -650,7 +652,7 @@ window.pfSetupTestiClamp();
   if (/[?&]sent=1/.test(location.search)) { var tries = 0, iv = setInterval(function () { if (window.goatcounter && window.goatcounter.count) { clearInterval(iv); window.pfTrack("brief-sent"); } else if (++tries > 30) clearInterval(iv); }, 200); }
 })();
 
-/* Per-item strip under each work and novel: opens (GoatCounter event counts, can lag up to 4h) and, when the likes service is configured, undoable likes. Counts are opens/browsers, not unique people. */
+/* Per-item strip under each work and novel: opens (own service, live) and, when the likes service is configured, undoable likes. Counts are opens/browsers, not unique people. */
 (function () {
   var GC = "https://mo-madih.goatcounter.com/counter/";
   var LIKES_API = "https://portfolio-likes.mohamad-madih-20.workers.dev"; /* set to the likes service URL when it is live; empty = no heart is shown */
@@ -741,16 +743,16 @@ window.pfSetupTestiClamp();
     });
   }
 
-  function readOpens(it) {
-    return fetch(GC + "click-" + it.event + ".json").then(function (r) {
-      if (!r.ok && r.status !== 404) throw new Error("x"); return r.json(); /* 404 + zero body = no opens recorded yet */
-    }).then(function (d) {
-      var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
-      if (!isNaN(n)) { S[it.key].opens = n; paint(it.key); }
-    }).catch(function () {});
-  }
-  var seenEv = {};
-  setTimeout(function () { items.forEach(function (it) { if (seenEv[it.key]) return; seenEv[it.key] = 1; readOpens(it); }); }, 1200);
+  /* opens/plays: counted by the likes service (live within seconds); one count per browser per item per 24h */
+  window.pfCountView = function (name) {
+    var key = null, m;
+    if ((m = /^work-open-(.+)$/.exec(name))) key = "work-" + m[1]; else if ((m = /^novel-open-(\d+)$/.exec(name))) key = "novel-" + m[1]; else if ((m = /^play-(.+)$/.exec(name))) key = m[1];
+    if (!key || !S[key] || !LIKES_API || (window.pfSeen && window.pfSeen(key))) return;
+    fetch(LIKES_API + "/view", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ item: key }) })
+      .then(function (r) { if (!r.ok) throw new Error("v"); return r.json(); })
+      .then(function (d) { if (window.pfMark) window.pfMark(key); if (typeof d.count === "number") { S[key].opens = d.count; paint(key); } })
+      .catch(function () {});
+  };
 
   if (!LIKES_API) return;
   var TK = "pf_voter_token";
@@ -772,7 +774,7 @@ window.pfSetupTestiClamp();
   var uniq = Object.keys(S);
   for (var ci = 0; ci < uniq.length; ci += 15) (function (chunk) { /* the service answers up to 20 keys per request */
     fetch(LIKES_API + "/counts?items=" + encodeURIComponent(chunk.join(",")), { headers: auth(saved) }).then(function (r) { if (!r.ok) throw new Error("c"); return r.json(); }).then(function (d) {
-      chunk.forEach(function (k) { if (typeof d.counts[k] === "number") { S[k].likes = d.counts[k]; S[k].liked = (d.mine || []).indexOf(k) > -1; paint(k); } });
+      chunk.forEach(function (k) { if (d.views && typeof d.views[k] === "number") { S[k].opens = d.views[k]; paint(k); } if (typeof d.counts[k] === "number") { S[k].likes = d.counts[k]; S[k].liked = (d.mine || []).indexOf(k) > -1; paint(k); } });
     }).catch(function () {});
   })(uniq.slice(ci, ci + 15));
   document.addEventListener("click", function (e) {
