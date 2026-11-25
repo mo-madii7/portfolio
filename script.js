@@ -649,3 +649,89 @@ window.pfSetupTestiClamp();
   }, true);
   if (/[?&]sent=1/.test(location.search)) { var tries = 0, iv = setInterval(function () { if (window.goatcounter && window.goatcounter.count) { clearInterval(iv); window.pfTrack("brief-sent"); } else if (++tries > 30) clearInterval(iv); }, 200); }
 })();
+
+/* Per-item strip under each work and novel: opens (GoatCounter event counts, can lag up to 4h) and, when the likes service is configured, undoable likes. Counts are opens/browsers, not unique people. */
+(function () {
+  var GC = "https://mo-madih.goatcounter.com/counter/";
+  var LIKES_API = "https://portfolio-likes.mohamad-madih-20.workers.dev"; /* set to the likes service URL when it is live; empty = no heart is shown */
+  var EYE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var HEART = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+  var st = document.createElement("style");
+  st.textContent = ".pf-meta{display:flex;align-items:center;gap:16px;margin-top:14px;padding:8px 0;border-top:1px solid currentColor;border-top-color:rgba(127,127,127,.28);font-size:13px;line-height:1;opacity:.85}" +
+    ".pf-meta-i{display:inline-flex;align-items:center;gap:6px;color:inherit}.pf-meta-i[hidden]{display:none}" +
+    ".pf-meta button.pf-meta-i{background:none;border:0;padding:4px 2px;font:inherit;color:inherit;cursor:pointer;border-radius:8px}" +
+    ".pf-meta button.pf-meta-i:focus-visible{outline:2px solid currentColor;outline-offset:2px}" +
+    ".pf-meta button.pf-meta-i[aria-pressed=true] svg{fill:#e0556b;stroke:#e0556b}" +
+    ".pf-meta button.pf-meta-i[disabled]{opacity:.5;cursor:default}" +
+    ".pf-novel-cell{display:flex;flex-direction:column}.pf-novel-cell .pf-meta{margin-top:8px;padding-inline:4px;color:#efe6d2}";
+  document.head.appendChild(st);
+
+  var items = []; /* {key, event, host, eye, num, btn, lnum} */
+  function make(key, eventName, host) {
+    var m = document.createElement("div"); m.className = "pf-meta";
+    var eye = document.createElement("span"); eye.className = "pf-meta-i"; eye.hidden = true;
+    eye.setAttribute("aria-label", "عدد مرات الفتح / Opens"); eye.title = "عدد مرات الفتح / Opens";
+    eye.innerHTML = EYE + '<span class="pf-meta-n"></span>';
+    m.appendChild(eye);
+    var it = { key: key, event: eventName, eye: eye, num: eye.lastChild, btn: null, lnum: null, liked: false };
+    if (LIKES_API) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "pf-meta-i"; b.hidden = true; b.setAttribute("aria-pressed", "false");
+      b.setAttribute("aria-label", "إعجاب / Like"); b.title = "إعجاب / Like";
+      b.innerHTML = HEART + '<span class="pf-meta-n"></span>';
+      m.appendChild(b); it.btn = b; it.lnum = b.lastChild;
+    }
+    host.appendChild(m); items.push(it);
+  }
+  var cases = document.querySelectorAll(".pf-case, .pf-collapsible");
+  Array.prototype.forEach.call(cases, function (sec) {
+    if (!sec.id) return;
+    var host = sec.querySelector(".pf-casehead-text"); if (!host) return;
+    make("work-" + sec.id, "work-open-" + sec.id, host);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".pf-novel"), function (nv, i) {
+    var cell = document.createElement("div"); cell.className = "pf-novel-cell";
+    nv.parentNode.insertBefore(cell, nv); cell.appendChild(nv);
+    make("novel-" + (i + 1), "novel-open-" + (i + 1), cell);
+  });
+  if (!items.length || !window.fetch) return;
+
+  function readOpens(it) {
+    return fetch(GC + "click-" + it.event + ".json").then(function (r) {
+      if (!r.ok && r.status !== 404) throw new Error("x"); return r.json(); /* 404 + zero body = no opens recorded yet */
+    }).then(function (d) {
+      var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
+      if (!isNaN(n)) { it.num.textContent = String(n); it.eye.hidden = false; }
+    }).catch(function () {});
+  }
+  setTimeout(function () { items.forEach(readOpens); }, 1200);
+
+  if (!LIKES_API) return;
+  var TK = "pf_voter_token";
+  function token() {
+    var t = null; try { t = localStorage.getItem(TK); } catch (e) {}
+    if (t) return Promise.resolve(t);
+    return fetch(LIKES_API + "/token", { method: "POST" }).then(function (r) { if (!r.ok) throw new Error("t"); return r.json(); }).then(function (d) {
+      try { localStorage.setItem(TK, d.token); } catch (e) {} return d.token;
+    });
+  }
+  function auth(t) { return t ? { Authorization: "Bearer " + t } : {}; }
+  function show(it, n, liked) {
+    it.liked = liked; it.lnum.textContent = String(n); it.btn.hidden = false; it.btn.setAttribute("aria-pressed", liked ? "true" : "false");
+  }
+  var saved = null; try { saved = localStorage.getItem(TK); } catch (e) {}
+  var keys = items.map(function (i) { return i.key; }).join(",");
+  fetch(LIKES_API + "/counts?items=" + encodeURIComponent(keys), { headers: auth(saved) }).then(function (r) { if (!r.ok) throw new Error("c"); return r.json(); }).then(function (d) {
+    items.forEach(function (it) { if (typeof d.counts[it.key] === "number") show(it, d.counts[it.key], (d.mine || []).indexOf(it.key) > -1); });
+  }).catch(function () {});
+  items.forEach(function (it) {
+    it.btn.addEventListener("click", function () {
+      if (it.btn.disabled) return;
+      var want = !it.liked, prev = parseInt(it.lnum.textContent, 10) || 0;
+      it.btn.disabled = true; show(it, Math.max(0, prev + (want ? 1 : -1)), want);
+      token().then(function (t) {
+        return fetch(LIKES_API + "/like", { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, auth(t)), body: JSON.stringify({ item: it.key, liked: want }) });
+      }).then(function (r) { if (!r.ok) throw new Error("l"); return r.json(); }).then(function (d) { show(it, d.count, d.liked); })
+        .catch(function () { show(it, prev, !want); }).then(function () { it.btn.disabled = false; });
+    });
+  });
+})();
