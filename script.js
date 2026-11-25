@@ -607,7 +607,7 @@ window.pfSetupTestiClamp();
       .then(function (d) {
         clearTimeout(timer);
         var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
-        if (!isNaN(n) && n >= 0) { num.textContent = String(n); box.hidden = false; }
+        /* GoatCounter caches counts for up to 4 hours, so a 0 can be stale: show only a positive real count */ if (!isNaN(n) && n > 0) { num.textContent = String(n); box.hidden = false; }
       })
       .catch(function () { clearTimeout(timer); });
   }, 1500);
