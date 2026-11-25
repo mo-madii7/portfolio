@@ -789,29 +789,44 @@ window.pfSetupTestiClamp();
   });
 })();
 
-/* ---- 11. Soft cursor glow + seamless image marquee (v=2026-11-26d) ---- */
+/* ---- 11. Proximity glow: a button warms up gradually as the mouse comes near it (desktop mouse only) ---- */
 (function () {
   document.querySelectorAll(".pf-wrapmarq-track img").forEach(function (i) { i.loading = "eager"; });
   var ok = false;
   try { ok = window.matchMedia("(hover: hover) and (pointer: fine)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
   if (!ok) return;
-  var g = document.createElement("div");
-  g.id = "pf-glow"; g.setAttribute("aria-hidden", "true");
-  document.body.appendChild(g);
-  var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0, seen = false;
-  function step() {
-    cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18;
-    g.style.setProperty("--pf-mx", cx.toFixed(1) + "px");
-    g.style.setProperty("--pf-my", cy.toFixed(1) + "px");
-    if (Math.abs(tx - cx) > 0.5 || Math.abs(ty - cy) > 0.5) raf = requestAnimationFrame(step); else raf = 0;
+  var SEL = ".pf-pill,.pf-casetoggle,.pf-cs-btn,.pf-vidgroup-toggle,.pf-icon,.pf-pay-copy,.pf-feat-all,#pf-lang-toggle,.pf-nav-links a";
+  var R = 120; /* px: how far from the button the glow starts */
+  var items = [], mx = -9999, my = -9999, raf = 0;
+  function collect() { items = Array.prototype.slice.call(document.querySelectorAll(SEL)).map(function (el) { return { el: el, cur: 0, tgt: 0 }; }); }
+  collect();
+  function frame() {
+    raf = 0;
+    var busy = false, vh = window.innerHeight;
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i], r = it.el.getBoundingClientRect();
+      if (r.width && r.bottom > -R && r.top < vh + R) {
+        var dx = Math.max(r.left - mx, 0, mx - r.right), dy = Math.max(r.top - my, 0, my - r.bottom);
+        var d = Math.sqrt(dx * dx + dy * dy), p = d >= R ? 0 : 1 - d / R;
+        it.tgt = p * p * (3 - 2 * p); /* smoothstep: soft start, full at the edge */
+      } else it.tgt = 0;
+      it.cur += (it.tgt - it.cur) * 0.2;
+      if (Math.abs(it.tgt - it.cur) < 0.004) it.cur = it.tgt; else busy = true;
+      if (it.cur > 0.01) {
+        if (!it.on) { it.el.classList.add("pf-px"); it.on = true; }
+        it.el.style.setProperty("--prox", it.cur.toFixed(3));
+      } else if (it.on) { it.el.classList.remove("pf-px"); it.el.style.removeProperty("--prox"); it.on = false; }
+    }
+    if (busy) raf = requestAnimationFrame(frame);
   }
+  function kick() { if (!raf) raf = requestAnimationFrame(frame); }
   window.addEventListener("pointermove", function (e) {
     if (e.pointerType && e.pointerType !== "mouse") return;
-    tx = e.clientX; ty = e.clientY;
-    if (!seen) { seen = true; cx = tx; cy = ty; g.classList.add("on"); }
-    if (!raf) raf = requestAnimationFrame(step);
+    mx = e.clientX; my = e.clientY; kick();
   }, { passive: true });
-  document.documentElement.addEventListener("pointerleave", function () { g.classList.remove("on"); seen = false; });
+  document.documentElement.addEventListener("pointerleave", function () { mx = my = -9999; kick(); });
+  window.addEventListener("scroll", function () { if (mx > -9000) kick(); }, { passive: true });
+  window.addEventListener("load", collect);
 })();
 
 /* ---- 12. CSS marquees: repeat the content until one half of the track is wider than the strip, so the 50% loop never shows an empty edge (v=2026-11-26f) ---- */
