@@ -673,13 +673,13 @@ window.pfSetupTestiClamp();
     var m = document.createElement("div"); m.className = "pf-meta";
     var eye = document.createElement("span"); eye.className = "pf-meta-i"; eye.hidden = true;
     eye.setAttribute("aria-label", label); eye.title = label;
-    eye.innerHTML = EYE + '<span class="pf-meta-n"></span>';
+    eye.innerHTML = EYE + '<span class="pf-meta-n"></span>'; eye.setAttribute("data-k", key);
     m.appendChild(eye);
     var it = { key: key, event: eventName, eye: eye, num: eye.lastChild, btn: null, lnum: null, liked: false };
     if (LIKES_API) {
       var b = document.createElement("button"); b.type = "button"; b.className = "pf-meta-i"; b.hidden = true; b.setAttribute("aria-pressed", "false");
       b.setAttribute("aria-label", "إعجاب / Like"); b.title = "إعجاب / Like";
-      b.innerHTML = HEART + '<span class="pf-meta-n"></span>';
+      b.innerHTML = HEART + '<span class="pf-meta-n"></span>'; b.setAttribute("data-k", key);
       m.appendChild(b); it.btn = b; it.lnum = b.lastChild;
     }
     host.appendChild(m); items.push(it);
@@ -719,15 +719,38 @@ window.pfSetupTestiClamp();
   }, true);
   if (!items.length || !window.fetch) return;
 
+  var S = {}; /* key -> { opens: number|null, likes: number|null, liked: bool, busy: bool } ; DOM copies made later by the loop tickers are repainted from here */
+  items.forEach(function (i) { S[i.key] = S[i.key] || { opens: null, likes: null, liked: false, busy: false }; });
+  function paint(key) {
+    var st = S[key]; if (!st) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.pf-meta [data-k]'), function (el) {
+      if (el.getAttribute("data-k") !== key) return;
+      var n = el.querySelector(".pf-meta-n");
+      if (el.tagName === "BUTTON") {
+        if (st.likes === null) return;
+        n.textContent = String(st.likes); el.hidden = false; el.setAttribute("aria-pressed", st.liked ? "true" : "false"); el.disabled = st.busy;
+      } else if (st.opens !== null) { n.textContent = String(st.opens); el.hidden = false; }
+    });
+  }
+  function paintAll() { Object.keys(S).forEach(paint); }
+  /* the loop tickers add more clone sets later; repaint so every copy shows the live numbers and works */
+  if (window.MutationObserver) {
+    var tmr = null;
+    Array.prototype.forEach.call(document.querySelectorAll(".pf-vid-grid"), function (g) {
+      new MutationObserver(function () { clearTimeout(tmr); tmr = setTimeout(paintAll, 80); }).observe(g, { childList: true });
+    });
+  }
+
   function readOpens(it) {
     return fetch(GC + "click-" + it.event + ".json").then(function (r) {
       if (!r.ok && r.status !== 404) throw new Error("x"); return r.json(); /* 404 + zero body = no opens recorded yet */
     }).then(function (d) {
       var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
-      if (!isNaN(n)) { it.num.textContent = String(n); it.eye.hidden = false; }
+      if (!isNaN(n)) { S[it.key].opens = n; paint(it.key); }
     }).catch(function () {});
   }
-  setTimeout(function () { items.forEach(readOpens); }, 1200);
+  var seenEv = {};
+  setTimeout(function () { items.forEach(function (it) { if (seenEv[it.key]) return; seenEv[it.key] = 1; readOpens(it); }); }, 1200);
 
   if (!LIKES_API) return;
   var TK = "pf_voter_token";
@@ -739,31 +762,27 @@ window.pfSetupTestiClamp();
     });
   }
   function auth(t) { return t ? { Authorization: "Bearer " + t } : {}; }
-  function show(it, n, liked) {
-    items.forEach(function (o) { if (o.key !== it.key) return; o.liked = liked; o.lnum.textContent = String(n); o.btn.hidden = false; o.btn.setAttribute("aria-pressed", liked ? "true" : "false"); });
-  }
-  function note(it) {
-    var p = it.btn.parentNode, m = p.querySelector(".pf-meta-msg");
+  function note(btn) {
+    var p = btn.parentNode, m = p.querySelector(".pf-meta-msg");
     if (!m) { m = document.createElement("span"); m.className = "pf-meta-msg"; m.setAttribute("role", "status"); m.style.cssText = "font-size:12px;opacity:.85;margin-inline-start:8px"; p.appendChild(m); }
     m.textContent = "\u062d\u0627\u0648\u0644 \u0644\u0627\u062d\u0642\u064b\u0627 / Try again later";
     clearTimeout(m._t); m._t = setTimeout(function () { m.textContent = ""; }, 4000);
   }
   var saved = null; try { saved = localStorage.getItem(TK); } catch (e) {}
-  var uniq = []; items.forEach(function (i) { if (uniq.indexOf(i.key) < 0) uniq.push(i.key); });
+  var uniq = Object.keys(S);
   for (var ci = 0; ci < uniq.length; ci += 15) (function (chunk) { /* the service answers up to 20 keys per request */
     fetch(LIKES_API + "/counts?items=" + encodeURIComponent(chunk.join(",")), { headers: auth(saved) }).then(function (r) { if (!r.ok) throw new Error("c"); return r.json(); }).then(function (d) {
-      items.forEach(function (it) { if (chunk.indexOf(it.key) > -1 && typeof d.counts[it.key] === "number") show(it, d.counts[it.key], (d.mine || []).indexOf(it.key) > -1); });
+      chunk.forEach(function (k) { if (typeof d.counts[k] === "number") { S[k].likes = d.counts[k]; S[k].liked = (d.mine || []).indexOf(k) > -1; paint(k); } });
     }).catch(function () {});
   })(uniq.slice(ci, ci + 15));
-  items.forEach(function (it) {
-    it.btn.addEventListener("click", function () {
-      if (it.btn.disabled) return;
-      var want = !it.liked, prev = parseInt(it.lnum.textContent, 10) || 0;
-      it.btn.disabled = true; show(it, Math.max(0, prev + (want ? 1 : -1)), want);
-      token().then(function (t) {
-        return fetch(LIKES_API + "/like", { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, auth(t)), body: JSON.stringify({ item: it.key, liked: want }) });
-      }).then(function (r) { if (!r.ok) throw new Error("l"); return r.json(); }).then(function (d) { show(it, d.count, d.liked); })
-        .catch(function () { show(it, prev, !want); note(it); }).then(function () { it.btn.disabled = false; });
-    });
+  document.addEventListener("click", function (e) {
+    var b = e.target && e.target.closest && e.target.closest(".pf-meta button[data-k]"); if (!b) return;
+    var key = b.getAttribute("data-k"), st = S[key]; if (!st || st.busy || st.likes === null) return;
+    var want = !st.liked, prev = st.likes, was = st.liked;
+    st.busy = true; st.likes = Math.max(0, prev + (want ? 1 : -1)); st.liked = want; paint(key);
+    token().then(function (t) {
+      return fetch(LIKES_API + "/like", { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, auth(t)), body: JSON.stringify({ item: key, liked: want }) });
+    }).then(function (r) { if (!r.ok) throw new Error("l"); return r.json(); }).then(function (d) { st.likes = d.count; st.liked = d.liked; })
+      .catch(function () { st.likes = prev; st.liked = was; note(b); }).then(function () { st.busy = false; paint(key); });
   });
 })();
