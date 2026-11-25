@@ -1561,3 +1561,20 @@ html:not([data-view="about"]) #pf-novels,html:not([data-view="about"]) #pf-artic
 .pf-articles-soon{margin:14px 0 10px;border:1px dashed rgb(214 178 90/.45);border-radius:16px;padding:26px 18px;text-align:center;color:#cfc8bb}
 .pf-views{text-align:center;color:#9d9484;font-size:12.5px;padding:10px 18px 26px}
 .pf-views bdi{color:#cfc8bb;font-weight:700}
+
+/* ===== v=2026-11-26d: seamless tickers + soft cursor glow ===== */
+/* no leading/trailing padding on looping strips: first card and its clone then sit at the identical offset, so the wrap never shows a gap or a jump */
+html .pf-strip, html .pf-sgrid.pf-strip, html .pf-feat-strip.pf-strip, html .pf-testi-grid.pf-strip, html .pf-partners-grid.pf-strip { padding-inline: 0 !important; scroll-padding-inline: 0 !important; }
+/* image marquee: the track width must include the last gap so a 50% shift equals exactly one half */
+.pf-wrapmarq-track { padding-inline-end: 14px; box-sizing: content-box; }
+.pf-wrapmarq-track img { flex: 0 0 auto; }
+/* cursor glow: one soft warm light that follows the mouse (desktop only, never blocks clicks) */
+#pf-glow { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; transition: opacity .6s ease; mix-blend-mode: screen;
+  background: radial-gradient(360px circle at var(--pf-mx, 50%) var(--pf-my, 50%), rgb(255 140 50 / .10), rgb(255 140 50 / .04) 45%, transparent 70%); }
+#pf-glow.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) { #pf-glow { display: none; } }
+/* quiet warm lift on hover for the main cards (luxury, not festive) */
+@media (hover: hover) and (pointer: fine) {
+  .pf-scard, .pf-feat-card, .pf-vid-card, .pf-vid-reel, .pf-testi-card, .pf-novel { transition: box-shadow .45s ease, border-color .45s ease; }
+  .pf-scard:hover, .pf-feat-card:hover, .pf-vid-card:hover, .pf-vid-reel:hover, .pf-testi-card:hover, .pf-novel:hover { box-shadow: 0 0 0 1px rgb(255 150 60 / .28), 0 10px 34px rgb(255 130 30 / .13) !important; }
+}
