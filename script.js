@@ -264,7 +264,7 @@ window.pfSetupTestiClamp();
       if (!r.ok) throw new Error("bad");
       return r.json();
     }).then(function () {
-      status.textContent = m.ok; status.className = "pf-bf-status ok";
+      status.textContent = m.ok; status.className = "pf-bf-status ok"; if (window.pfTrack) window.pfTrack("brief-sent");
       form.reset(); syncCat();
     }).catch(function () {
       if (timer) clearTimeout(timer);
@@ -592,20 +592,60 @@ window.pfSetupTestiClamp();
   });
 })();
 
-/* public page-view counter (GoatCounter native counter); stays hidden unless a real count arrives */
+/* public page-view counter (GoatCounter native counter): shows the real count, including 0; hidden if unknown or on error */
 (function () {
   var box = document.getElementById("pf-views"), num = document.getElementById("pf-views-num");
   if (!box || !num || !window.fetch) return;
+  var cn = document.querySelector('link[rel="canonical"]');
+  var path = "/portfolio/";
+  try { if (cn && cn.href) path = new URL(cn.href).pathname; } catch (e) {}
   var ctrl = ("AbortController" in window) ? new AbortController() : null;
-  var done = false;
-  var timer = setTimeout(function () { done = true; if (ctrl) { try { ctrl.abort(); } catch (e) {} } }, 5000);
-  fetch("https://mo-madih.goatcounter.com/counter/" + location.pathname + ".json", ctrl ? { signal: ctrl.signal } : {})
-    .then(function (r) { if (!r.ok) throw new Error("bad status"); return r.json(); })
-    .then(function (d) {
-      if (done) return;
-      clearTimeout(timer);
-      var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
-      if (!isNaN(n) && n > 0) { num.textContent = String(n); box.hidden = false; }
-    })
-    .catch(function () { clearTimeout(timer); });
+  setTimeout(function () {
+    var timer = setTimeout(function () { if (ctrl) { try { ctrl.abort(); } catch (e) {} } }, 5000);
+    fetch("https://mo-madih.goatcounter.com/counter/" + path + ".json", ctrl ? { signal: ctrl.signal } : {})
+      .then(function (r) { if (!r.ok && r.status !== 404) throw new Error("no count"); return r.json(); }) /* GoatCounter answers 404 with a zero count for a path with no views yet */
+      .then(function (d) {
+        clearTimeout(timer);
+        var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
+        if (!isNaN(n) && n >= 0) { num.textContent = String(n); box.hidden = false; }
+      })
+      .catch(function () { clearTimeout(timer); });
+  }, 1500);
+})();
+
+/* GoatCounter click events: anonymous counts of opens (CV, WhatsApp, links, cases, novels); the brief counts only when it was really sent */
+(function () {
+  function slug(x) { return String(x || "").replace(/\s+/g, " ").trim().toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g, "-").replace(/^-|-$/g, "").slice(0, 40); }
+  window.pfTrack = function (name) {
+    try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "click-" + name, title: name, event: true }); } catch (e) {}
+  };
+  document.addEventListener("click", function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    var a = t.closest("a[href]");
+    if (a) {
+      var h = a.getAttribute("href") || "";
+      if (/wa\.me|whatsapp\.com/i.test(h)) return window.pfTrack("whatsapp");
+      if (/behance\.net/i.test(h)) return window.pfTrack("behance");
+      if (/linkedin\.com/i.test(h)) return window.pfTrack("linkedin");
+      if (/facebook\.com/i.test(h)) return window.pfTrack("facebook");
+      if (/instagram\.com/i.test(h)) return window.pfTrack("instagram");
+      if (/^mailto:/i.test(h)) return window.pfTrack("email");
+      if (/ipn\.eg/i.test(h)) return window.pfTrack("instapay");
+    }
+    if (t.closest("#pf-cv-btn")) return window.pfTrack("cv-open");
+    var nv = t.closest(".pf-novel");
+    if (nv) {
+      if (!nv.classList.contains("on")) { var all = document.querySelectorAll(".pf-novel"); window.pfTrack("novel-open-" + (Array.prototype.indexOf.call(all, nv) + 1)); }
+      return;
+    }
+    var tg = t.closest(".pf-casetoggle");
+    if (tg) {
+      var sec = tg.closest(".pf-case, .pf-collapsible");
+      if (sec && !sec.classList.contains("open")) {
+        var ti = sec.querySelector(".pf-casetitle");
+        window.pfTrack("work-open-" + (sec.id || slug(ti && (ti.getAttribute("data-en") || ti.textContent))));
+      }
+    }
+  }, true);
+  if (/[?&]sent=1/.test(location.search)) { var tries = 0, iv = setInterval(function () { if (window.goatcounter && window.goatcounter.count) { clearInterval(iv); window.pfTrack("brief-sent"); } else if (++tries > 30) clearInterval(iv); }, 200); }
 })();
