@@ -332,6 +332,9 @@ window.pfSetupTestiClamp();
         k.setAttribute("data-clone", "1");
         k.setAttribute("aria-hidden", "true");
         k.__orig = c;
+        /* clones never pass through the reveal observer: force them revealed so they never stay blurred/hidden */
+        if (k.classList) k.classList.add("pf-in");
+        k.querySelectorAll(".pf-rv").forEach(function (x) { x.classList.add("pf-in"); });
         k.querySelectorAll("button,a").forEach(function (x) { x.setAttribute("tabindex", "-1"); });
         scroller.appendChild(k);
       });
