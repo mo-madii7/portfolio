@@ -788,3 +788,28 @@ window.pfSetupTestiClamp();
       .catch(function () { st.likes = prev; st.liked = was; note(b); }).then(function () { st.busy = false; paint(key); });
   });
 })();
+
+/* ---- 11. Soft cursor glow + seamless image marquee (v=2026-11-26d) ---- */
+(function () {
+  document.querySelectorAll(".pf-wrapmarq-track img").forEach(function (i) { i.loading = "eager"; });
+  var ok = false;
+  try { ok = window.matchMedia("(hover: hover) and (pointer: fine)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  if (!ok) return;
+  var g = document.createElement("div");
+  g.id = "pf-glow"; g.setAttribute("aria-hidden", "true");
+  document.body.appendChild(g);
+  var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0, seen = false;
+  function step() {
+    cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18;
+    g.style.setProperty("--pf-mx", cx.toFixed(1) + "px");
+    g.style.setProperty("--pf-my", cy.toFixed(1) + "px");
+    if (Math.abs(tx - cx) > 0.5 || Math.abs(ty - cy) > 0.5) raf = requestAnimationFrame(step); else raf = 0;
+  }
+  window.addEventListener("pointermove", function (e) {
+    if (e.pointerType && e.pointerType !== "mouse") return;
+    tx = e.clientX; ty = e.clientY;
+    if (!seen) { seen = true; cx = tx; cy = ty; g.classList.add("on"); }
+    if (!raf) raf = requestAnimationFrame(step);
+  }, { passive: true });
+  document.documentElement.addEventListener("pointerleave", function () { g.classList.remove("on"); seen = false; });
+})();
