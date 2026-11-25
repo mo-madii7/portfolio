@@ -1545,3 +1545,19 @@ html .pf-testi-grid.pf-strip .pf-testi-text{font-size:13.5px;line-height:1.75}
 .pf-svc-cs{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 18px 56px}.pf-svc-cs .pf-menu{width:min(420px,100%)}.pf-svc-cs .pf-pay{width:min(420px,100%)}.pf-svc-cs .pf-cs-btn{font-size:15px;padding:11px 28px}
 
 .pf-svc-cs .pf-pill,.pf-svc-cs .pf-pay-row{text-align:center;justify-content:center}.pf-svc-cs .pf-menu .pf-pill,.pf-svc-cs .pf-pay .pf-pill{display:flex;align-items:center;justify-content:center;text-align:center}.pf-svc-cs .pf-pay-row{justify-content:space-between}
+
+/* ===== v=2026-11-25t: novels & articles sections in the about view ===== */
+html:not([data-view="about"]) #pf-novels,html:not([data-view="about"]) #pf-articles{height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important}
+.pf-novels,.pf-articles{background:#110e0b!important;padding:6px 18px 26px}
+.pf-novels-hint{color:#9d9484;font-size:12.5px;margin:8px 0 0}
+.pf-novels-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:16px}
+@media(min-width:760px){.pf-novels-grid{grid-template-columns:1fr 1fr;gap:24px}}
+.pf-novel{position:relative;display:block;width:100%;padding:0 0 14px;border:1px solid rgb(214 178 90/.25);border-radius:18px;overflow:hidden;background:#0d0b0a;cursor:pointer;font:inherit;text-align:start;color:inherit}
+.pf-novel img{display:block;width:100%;height:auto}
+.pf-novel-name{display:block;padding:12px 16px 0;color:#efe6d2;font-weight:700;font-size:15px}
+.pf-novel-reveal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:rgb(11 10 9/.9);color:#e8c25a;font-weight:800;font-size:17px;line-height:1.9;opacity:0;visibility:hidden;transition:opacity .25s ease}
+.pf-novel.on .pf-novel-reveal{opacity:1;visibility:visible}
+.pf-novel:focus-visible{outline:2px solid #d9a441;outline-offset:2px}
+.pf-articles-soon{margin:14px 0 10px;border:1px dashed rgb(214 178 90/.45);border-radius:16px;padding:26px 18px;text-align:center;color:#cfc8bb}
+.pf-views{text-align:center;color:#9d9484;font-size:12.5px;padding:10px 18px 26px}
+.pf-views bdi{color:#cfc8bb;font-weight:700}
