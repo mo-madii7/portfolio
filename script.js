@@ -322,6 +322,8 @@ window.pfSetupTestiClamp();
   var SPEED = 42; /* px per second */
 
   function ticker(scroller, hoverTarget) {
+    /* partners strip runs as a non-stop one-direction train: no hover pause, no manual drag/swipe */
+    var train = scroller.classList.contains("pf-partners-grid");
     var cards = Array.prototype.slice.call(scroller.children);
     if (cards.length < 2) return;
     scroller.classList.add("pf-strip");
@@ -350,11 +352,13 @@ window.pfSetupTestiClamp();
       clearTimeout(idleTimer);
       idleTimer = setTimeout(function () { paused = false; }, 4000);
     }
-    ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
-      scroller.addEventListener(ev, interact, { passive: true });
-    });
-    hoverTarget.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") hovered = true; });
-    hoverTarget.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") hovered = false; });
+    if (!train) {
+      ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
+        scroller.addEventListener(ev, interact, { passive: true });
+      });
+      hoverTarget.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") hovered = true; });
+      hoverTarget.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") hovered = false; });
+    }
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { threshold: 0.25 }).observe(hoverTarget);
     } else { visible = true; }
@@ -377,12 +381,15 @@ window.pfSetupTestiClamp();
       last = t;
       var L = loopLen();
       if (L > 0 && scroller.clientWidth > 0 && scroller.scrollWidth - scroller.clientWidth < L + 2 && scroller.children.length < cards.length * 8) addSet();
-      var running = !reduceMotion && L > 0 && visible && !paused && !hovered && !document.hidden &&
+      var running = !reduceMotion && L > 0 && visible && (train || (!paused && !hovered)) && !document.hidden &&
         !document.body.classList.contains("lb-lock") && !videoPlaying();
       if (running) {
         pos += SPEED * dt;
         if (pos >= L) pos -= L;
         scroller.scrollLeft = pos;
+      } else if (train) {
+        /* train strip ignores external scroll shifts and snaps back to its own position */
+        if (L > 0) { pos = pos % L; scroller.scrollLeft = pos; }
       } else {
         pos = scroller.scrollLeft;
       }
