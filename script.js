@@ -489,7 +489,7 @@ window.pfSetupTestiClamp();
     if (h === "works" || /^pf-case-/.test(h)) return "works";
     if (h === "services" || h === "pf-brief") return "services";
     if (h === "videos" || h === "pf-vid") return "videos";
-    if (h === "about") return "about";
+    if (h === "about" || h === "pf-novels" || h === "pf-articles") return "about";
     return "home";
   }
   function markNav() {
@@ -860,4 +860,132 @@ window.pfSetupTestiClamp();
     var ro = new ResizeObserver(function () { clearTimeout(rt); rt = setTimeout(all, 60); });
     document.querySelectorAll(".pf-marquee, .pf-wrapmarq").forEach(function (m) { ro.observe(m); });
   }
+})();
+
+/* ---- 13. Works filters + global site search; montage headings made truly inert (v=2026-11-26p) ---- */
+(function () {
+  function norm(s) { return (s || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/\s+/g, " ").trim(); }
+  function curEn() { return document.documentElement.lang === "en"; }
+
+  /* montage group headings: strip the collapse listener and drop from tab order (visually unchanged) */
+  document.querySelectorAll(".pf-vidgroup-toggle").forEach(function (btn) {
+    var clone = btn.cloneNode(true);
+    clone.setAttribute("tabindex", "-1");
+    clone.setAttribute("aria-disabled", "true");
+    btn.parentNode.replaceChild(clone, btn);
+  });
+
+  /* Works page: project/client search + category chips */
+  var cases = Array.prototype.slice.call(document.querySelectorAll("section.pf-case"));
+  cases.forEach(function (sec) {
+    var t = sec.querySelector(".pf-casetitle"), s = sec.querySelector(".pf-casesub");
+    sec.__hay = norm([(t && t.textContent) || "", (t && t.getAttribute("data-en")) || "", (s && s.textContent) || "", (s && s.getAttribute("data-en")) || ""].join(" "));
+  });
+  var wfInput = document.getElementById("pf-wf-search");
+  var wfChips = Array.prototype.slice.call(document.querySelectorAll(".pf-wf-chip"));
+  var wfEmpty = document.getElementById("pf-wf-empty");
+  var wfCat = "all";
+  function applyWorksFilter() {
+    var q = norm(wfInput ? wfInput.value : "");
+    var shown = 0;
+    cases.forEach(function (sec) {
+      var show = (wfCat === "all" || sec.getAttribute("data-cat") === wfCat) && (!q || sec.__hay.indexOf(q) !== -1);
+      sec.classList.toggle("pf-filtered-out", !show);
+      if (show) shown++;
+    });
+    if (wfEmpty) wfEmpty.hidden = shown !== 0;
+  }
+  function resetWorksFilter() {
+    wfCat = "all";
+    if (wfInput) wfInput.value = "";
+    wfChips.forEach(function (c) { c.classList.toggle("on", c.getAttribute("data-cat") === "all"); });
+    applyWorksFilter();
+  }
+  if (wfInput) wfInput.addEventListener("input", applyWorksFilter);
+  wfChips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      wfCat = chip.getAttribute("data-cat") || "all";
+      wfChips.forEach(function (c) { c.classList.toggle("on", c === chip); });
+      applyWorksFilter();
+    });
+  });
+
+  /* Global site search: works, novels, services, videos, sections */
+  var KINDS = { work: ["عمل", "Work"], novel: ["رواية", "Novel"], service: ["خدمة", "Service"], video: ["فيديو", "Video"], section: ["قسم", "Section"] };
+  var index = [];
+  function push(kind, hash, el, sub) {
+    if (!el || el.closest("[data-clone]")) return;
+    index.push({ kind: kind, hash: hash, ar: el.textContent.trim(), en: el.getAttribute("data-en") || el.textContent.trim(), subAr: sub ? sub.textContent.trim() : "", subEn: sub ? (sub.getAttribute("data-en") || sub.textContent.trim()) : "" });
+  }
+  cases.forEach(function (sec) { push("work", "#" + sec.id, sec.querySelector(".pf-casetitle"), sec.querySelector(".pf-casesub")); });
+  document.querySelectorAll(".pf-novel").forEach(function (n) { push("novel", "#pf-novels", n.querySelector(".pf-novel-name"), null); });
+  document.querySelectorAll(".pf-scard").forEach(function (c) { push("service", "#services", c.querySelector(".pf-scard-name"), c.querySelector(".pf-scard-detail")); });
+  document.querySelectorAll(".pf-vid-card").forEach(function (v) { push("video", "#videos", v.querySelector(".pf-vid-client"), v.querySelector(".pf-vid-kind")); });
+  [["#pf-about"], ["#pf-testi"], ["#pf-partners"], ["#pf-contact"], ["#pf-articles"], ["#pf-brief"]].forEach(function (p) {
+    var sec = document.querySelector(p[0]); if (!sec) return;
+    push("section", p[0], sec.querySelector(".pf-contact-title, .pf-contact-kicker, h2, h3"), null);
+  });
+
+  function wireSearch(input, box) {
+    if (!input || !box) return;
+    var items = [];
+    function render() {
+      var q = norm(input.value);
+      box.innerHTML = "";
+      items = [];
+      if (!q) { box.hidden = true; return; }
+      var en = curEn();
+      items = index.filter(function (it) { return norm(it.ar + " " + it.en + " " + it.subAr + " " + it.subEn).indexOf(q) !== -1; }).slice(0, 8);
+      if (!items.length) {
+        var d = document.createElement("div");
+        d.className = "pf-gsearch-empty";
+        d.textContent = en ? "No results" : "لا توجد نتائج";
+        box.appendChild(d);
+        box.hidden = false;
+        return;
+      }
+      items.forEach(function (it) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "pf-gsearch-item";
+        var k = document.createElement("span");
+        k.className = "pf-gsearch-kind";
+        k.textContent = KINDS[it.kind][en ? 1 : 0];
+        var t = document.createElement("span");
+        t.className = "pf-gsearch-title";
+        t.textContent = en ? it.en : it.ar;
+        b.appendChild(k);
+        b.appendChild(t);
+        b.addEventListener("click", function () { go(it); });
+        box.appendChild(b);
+      });
+      box.hidden = false;
+    }
+    function go(it) {
+      box.hidden = true;
+      input.value = "";
+      if (it.hash.indexOf("#pf-case-") === 0) {
+        var sec = document.querySelector(it.hash);
+        if (sec && sec.classList.contains("pf-filtered-out")) resetWorksFilter();
+      }
+      var panel = document.getElementById("pf-menu-panel");
+      if (panel && !panel.hidden) { panel.hidden = true; var mb = document.getElementById("pf-menu-btn"); if (mb) mb.setAttribute("aria-expanded", "false"); }
+      input.blur();
+      if (location.hash === it.hash) {
+        var el = document.getElementById(it.hash.slice(1));
+        if (el) el.scrollIntoView({ block: "start" });
+      } else {
+        location.hash = it.hash;
+      }
+    }
+    input.addEventListener("input", render);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); if (items.length && !box.hidden) go(items[0]); }
+      if (e.key === "Escape") { box.hidden = true; input.blur(); }
+    });
+    document.addEventListener("click", function (e) { if (!box.hidden && !box.contains(e.target) && e.target !== input) box.hidden = true; });
+    if ("MutationObserver" in window) new MutationObserver(function () { if (!box.hidden) render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  }
+  wireSearch(document.getElementById("pf-gsearch-input"), document.getElementById("pf-gsearch-results"));
+  wireSearch(document.getElementById("pf-menu-search"), document.getElementById("pf-menu-search-results"));
 })();
