@@ -1596,3 +1596,6 @@ html .pf-feat-all.pf-px { color: color-mix(in srgb, #d9a441, #ff9a2e calc(var(--
   html .pf-scard:hover { border-color: var(--pf-orange); }
   html .pf-testi-card:hover { border-color: var(--pf-orange) !important; }
 }
+
+/* v=2026-11-26o: montage groups always expanded, toggle inert */
+html .pf-vidgroup-toggle { pointer-events: none; cursor: default; }
