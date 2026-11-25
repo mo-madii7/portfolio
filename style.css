@@ -1581,3 +1581,11 @@ html .pf-px.pf-px { box-shadow: 0 0 calc(var(--prox, 0) * 28px) rgb(255 150 50 /
 html .pf-casetoggle.pf-px, html .pf-pill-ghost.pf-px, html .pf-cs-btn.pf-px, html .pf-vidgroup-toggle.pf-px, html .pf-pay-copy.pf-px, html #pf-lang-toggle.pf-px { color: color-mix(in srgb, #efe6d2, #ff9a2e calc(var(--prox, 0) * 100%)); }
 html .pf-nav-links a.pf-px { color: color-mix(in srgb, #cfc8bb, #e8c25a calc(var(--prox, 0) * 100%)); box-shadow: none !important; }
 html .pf-feat-all.pf-px { color: color-mix(in srgb, #d9a441, #ff9a2e calc(var(--prox, 0) * 100%)); box-shadow: none !important; }
+
+
+/* ===== v=2026-11-26j: featured-project hover glow hugs the image only, never the caption ===== */
+@media (hover: hover) and (pointer: fine) {
+  html .pf-feat-card:hover { box-shadow: none !important; }
+  html .pf-feat-card img { transition: box-shadow .45s ease; }
+  html .pf-feat-card:hover img { box-shadow: 0 0 26px rgb(255 150 50 / .14), 0 10px 34px rgb(255 130 30 / .13); }
+}
