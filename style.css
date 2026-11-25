@@ -1576,11 +1576,12 @@ html .pf-strip, html .pf-sgrid.pf-strip, html .pf-feat-strip.pf-strip, html .pf-
 /* quiet warm lift on hover for the main cards (luxury, not festive) */
 @media (hover: hover) and (pointer: fine) {
   .pf-scard, .pf-feat-card, .pf-vid-card, .pf-vid-reel, .pf-testi-card, .pf-novel { transition: box-shadow .45s ease, border-color .45s ease; }
-  .pf-scard:hover, .pf-feat-card:hover, .pf-vid-card:hover, .pf-vid-reel:hover, .pf-testi-card:hover, .pf-novel:hover { box-shadow: 0 0 0 1px rgb(255 150 60 / .28), 0 10px 34px rgb(255 130 30 / .13) !important; }
+  .pf-scard:hover, .pf-feat-card:hover, .pf-vid-card:hover, .pf-vid-reel:hover, .pf-testi-card:hover, .pf-novel:hover { box-shadow: 0 0 26px rgb(255 150 50 / .14), 0 10px 34px rgb(255 130 30 / .13) !important; }
 }
 
-/* ===== v=2026-11-26g: proximity glow on buttons (replaces the cursor-following light) ===== */
+/* ===== v=2026-11-26h: proximity glow without outline rings - soft halo only, follows each element's own radius ===== */
 #pf-glow { display: none !important; }
-html .pf-px.pf-px { box-shadow: 0 0 calc(var(--prox, 0) * 24px) calc(var(--prox, 0) * 1px) rgb(255 150 50 / calc(var(--prox, 0) * .34)), inset 0 0 0 1px rgb(255 165 70 / calc(var(--prox, 0) * .5)) !important; }
+html .pf-px.pf-px { box-shadow: 0 0 calc(var(--prox, 0) * 28px) rgb(255 150 50 / calc(var(--prox, 0) * .32)) !important; }
 html .pf-casetoggle.pf-px, html .pf-pill-ghost.pf-px, html .pf-cs-btn.pf-px, html .pf-vidgroup-toggle.pf-px, html .pf-pay-copy.pf-px, html #pf-lang-toggle.pf-px { color: color-mix(in srgb, #efe6d2, #ff9a2e calc(var(--prox, 0) * 100%)); }
-html .pf-nav-links a.pf-px:not(.on) { color: color-mix(in srgb, #cfc8bb, #e8c25a calc(var(--prox, 0) * 100%)); box-shadow: none !important; }
+html .pf-nav-links a.pf-px { color: color-mix(in srgb, #cfc8bb, #e8c25a calc(var(--prox, 0) * 100%)); box-shadow: none !important; }
+html .pf-feat-all.pf-px { color: color-mix(in srgb, #d9a441, #ff9a2e calc(var(--prox, 0) * 100%)); box-shadow: none !important; }
