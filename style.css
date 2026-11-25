@@ -1640,4 +1640,4 @@ html.pf-search-open .pf-gsearch{display:block}
 
 /* v=2026-11-26r: brief submit contrast+spacing (gradient restored via inline-rule fix in index.html) */
 .pf-bf-submit{margin-top:12px}
-@media(max-width:600px){.pf-bf-submit{align-self:stretch}}
+@media(max-width:600px){.pf-bf-submit{align-self:stretch;justify-content:center}}
