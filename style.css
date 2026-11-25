@@ -590,7 +590,6 @@ button{font:inherit;color:inherit}
 }
 .pf-scard:hover {
   transform: translateY(-6px) scale(1.01);
-  border-color: var(--pf-orange);
   background: #1d1712;
   box-shadow: 0 18px 44px rgb(255 122 24 / 0.12);
 }
@@ -970,7 +969,6 @@ body.lb-lock{overflow:hidden}
 }
 .pf-casetoggle:hover {
   transform: scale(1.05);
-  border-color: var(--pf-orange);
   color: var(--pf-orange);
 }
 .pf-casetoggle-arrow {
@@ -1018,7 +1016,6 @@ body.lb-lock{overflow:hidden}
 }
 .pf-vidgroup-toggle:hover {
   color: var(--pf-orange);
-  border-color: var(--pf-orange);
 }
 .pf-vidgroup-title {
   font-size: clamp(20px, 3.4vw, 28px);
@@ -1108,7 +1105,6 @@ body.lb-lock{overflow:hidden}
 }
 .pf-vid-card:hover {
   transform: translateY(-4px);
-  border-color: rgb(255 122 24 / 0.5);
 }
 .pf-casetoggle-arrow,
 .pf-vidgroup-toggle .pf-casetoggle-arrow {
@@ -1579,7 +1575,7 @@ html .pf-strip, html .pf-sgrid.pf-strip, html .pf-feat-strip.pf-strip, html .pf-
   .pf-scard:hover, .pf-feat-card:hover, .pf-vid-card:hover, .pf-vid-reel:hover, .pf-testi-card:hover, .pf-novel:hover { box-shadow: 0 0 26px rgb(255 150 50 / .14), 0 10px 34px rgb(255 130 30 / .13) !important; }
 }
 
-/* ===== v=2026-11-26h: proximity glow without outline rings - soft halo only, follows each element's own radius ===== */
+/* ===== v=2026-11-26i: glow only - also no hover border-color flips; baseline borders stay as-is ===== */
 #pf-glow { display: none !important; }
 html .pf-px.pf-px { box-shadow: 0 0 calc(var(--prox, 0) * 28px) rgb(255 150 50 / calc(var(--prox, 0) * .32)) !important; }
 html .pf-casetoggle.pf-px, html .pf-pill-ghost.pf-px, html .pf-cs-btn.pf-px, html .pf-vidgroup-toggle.pf-px, html .pf-pay-copy.pf-px, html #pf-lang-toggle.pf-px { color: color-mix(in srgb, #efe6d2, #ff9a2e calc(var(--prox, 0) * 100%)); }
