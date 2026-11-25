@@ -718,6 +718,12 @@ window.pfSetupTestiClamp();
   function show(it, n, liked) {
     it.liked = liked; it.lnum.textContent = String(n); it.btn.hidden = false; it.btn.setAttribute("aria-pressed", liked ? "true" : "false");
   }
+  function note(it) {
+    var p = it.btn.parentNode, m = p.querySelector(".pf-meta-msg");
+    if (!m) { m = document.createElement("span"); m.className = "pf-meta-msg"; m.setAttribute("role", "status"); m.style.cssText = "font-size:12px;opacity:.85;margin-inline-start:8px"; p.appendChild(m); }
+    m.textContent = "\u062d\u0627\u0648\u0644 \u0644\u0627\u062d\u0642\u064b\u0627 / Try again later";
+    clearTimeout(m._t); m._t = setTimeout(function () { m.textContent = ""; }, 4000);
+  }
   var saved = null; try { saved = localStorage.getItem(TK); } catch (e) {}
   var keys = items.map(function (i) { return i.key; }).join(",");
   fetch(LIKES_API + "/counts?items=" + encodeURIComponent(keys), { headers: auth(saved) }).then(function (r) { if (!r.ok) throw new Error("c"); return r.json(); }).then(function (d) {
@@ -731,7 +737,7 @@ window.pfSetupTestiClamp();
       token().then(function (t) {
         return fetch(LIKES_API + "/like", { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, auth(t)), body: JSON.stringify({ item: it.key, liked: want }) });
       }).then(function (r) { if (!r.ok) throw new Error("l"); return r.json(); }).then(function (d) { show(it, d.count, d.liked); })
-        .catch(function () { show(it, prev, !want); }).then(function () { it.btn.disabled = false; });
+        .catch(function () { show(it, prev, !want); note(it); }).then(function () { it.btn.disabled = false; });
     });
   });
 })();
