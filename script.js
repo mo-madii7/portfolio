@@ -456,3 +456,47 @@ window.pfSetupTestiClamp();
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   render();
 })();
+
+/* ---- 8b. Page views (home / works / services / videos / about), hero menus, nav state ---- */
+(function () {
+  var root = document.documentElement;
+  function viewFor(h) {
+    if (h === "works" || /^pf-case-/.test(h)) return "works";
+    if (h === "services" || h === "pf-brief") return "services";
+    if (h === "videos" || h === "pf-vid") return "videos";
+    if (h === "about") return "about";
+    return "home";
+  }
+  function markNav() {
+    var v = root.getAttribute("data-view");
+    document.querySelectorAll(".pf-nav-links a").forEach(function (a) {
+      a.classList.toggle("on", a.getAttribute("data-view") === v);
+    });
+  }
+  function route(initial) {
+    var h = location.hash ? location.hash.slice(1) : "";
+    var v = viewFor(h);
+    root.setAttribute("data-view", v);
+    markNav();
+    var pageHash = h === "" || h === "home" || h === "works" || h === "services" || h === "videos" || h === "about";
+    if (pageHash) { if (!initial) window.scrollTo(0, 0); return; }
+    var el = document.getElementById(h);
+    if (el) setTimeout(function () { el.scrollIntoView({ block: "start" }); }, 30);
+  }
+  window.addEventListener("hashchange", function () { route(false); });
+  route(true);
+
+  function toggleMenu(btn, menu) {
+    if (!btn || !menu) return;
+    btn.addEventListener("click", function () {
+      var open = menu.hidden;
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+  toggleMenu(document.getElementById("pf-work-btn"), document.getElementById("pf-work-menu"));
+  toggleMenu(document.getElementById("pf-cs-btn"), document.getElementById("pf-cs-menu"));
+
+  var acv = document.getElementById("pf-about-cv"), cv = document.getElementById("pf-cv-btn");
+  if (acv && cv) acv.addEventListener("click", function (e) { e.preventDefault(); cv.click(); });
+})();
