@@ -663,14 +663,16 @@ window.pfSetupTestiClamp();
     ".pf-meta button.pf-meta-i:focus-visible{outline:2px solid currentColor;outline-offset:2px}" +
     ".pf-meta button.pf-meta-i[aria-pressed=true] svg{fill:#e0556b;stroke:#e0556b}" +
     ".pf-meta button.pf-meta-i[disabled]{opacity:.5;cursor:default}" +
+    ".pf-vid-card .pf-meta{margin-top:10px;padding:8px 4px 0}" +
     ".pf-novel-cell{display:flex;flex-direction:column}.pf-novel-cell .pf-meta{margin-top:8px;padding-inline:4px;color:#efe6d2}";
   document.head.appendChild(st);
 
   var items = []; /* {key, event, host, eye, num, btn, lnum} */
-  function make(key, eventName, host) {
+  function make(key, eventName, host, label) {
+    label = label || "عدد مرات الفتح / Opens";
     var m = document.createElement("div"); m.className = "pf-meta";
     var eye = document.createElement("span"); eye.className = "pf-meta-i"; eye.hidden = true;
-    eye.setAttribute("aria-label", "عدد مرات الفتح / Opens"); eye.title = "عدد مرات الفتح / Opens";
+    eye.setAttribute("aria-label", label); eye.title = label;
     eye.innerHTML = EYE + '<span class="pf-meta-n"></span>';
     m.appendChild(eye);
     var it = { key: key, event: eventName, eye: eye, num: eye.lastChild, btn: null, lnum: null, liked: false };
@@ -693,6 +695,28 @@ window.pfSetupTestiClamp();
     nv.parentNode.insertBefore(cell, nv); cell.appendChild(nv);
     make("novel-" + (i + 1), "novel-open-" + (i + 1), cell);
   });
+  /* videos and reels: strip under each card (clones of the loop share the original's counts); the eye counts plays (first play per page load) */
+  var playLabel = "عدد مرات التشغيل / Plays";
+  function vkey(card, kind) {
+    var v = card.querySelector("video"); var s = v ? (v.getAttribute("src") || (v.querySelector("source") || {}).src || v.currentSrc || "") : "";
+    var n = s.split("/").pop().split("?")[0].replace(/\.[a-z0-9]+$/i, "").toLowerCase().replace(/^[0-9]+[-_]*/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    if (kind === "reel") n = n.replace(/^reel-/, "").replace(/-reel$/, "");
+    return n ? kind + "-" + n : "";
+  }
+  [["pf-vg-videos-body", "video"], ["pf-vg-reels-body", "reel"]].forEach(function (g) {
+    var body = document.getElementById(g[0]); if (!body) return;
+    Array.prototype.forEach.call(body.querySelectorAll(".pf-vid-card"), function (card) {
+      var k = vkey(card, g[1]); if (!k) return;
+      make(k, "play-" + k, card, playLabel);
+      if (card.getAttribute("data-clone")) { var bt = card.querySelector(".pf-meta button"); if (bt) bt.tabIndex = -1; }
+    });
+  });
+  var played = {};
+  document.addEventListener("play", function (e) {
+    var card = e.target && e.target.closest && e.target.closest(".pf-vid-card"); if (!card) return;
+    var k = vkey(card, card.closest("#pf-vg-reels-body") ? "reel" : "video"); if (!k || played[k]) return;
+    played[k] = 1; if (window.pfTrack) window.pfTrack("play-" + k);
+  }, true);
   if (!items.length || !window.fetch) return;
 
   function readOpens(it) {
@@ -716,7 +740,7 @@ window.pfSetupTestiClamp();
   }
   function auth(t) { return t ? { Authorization: "Bearer " + t } : {}; }
   function show(it, n, liked) {
-    it.liked = liked; it.lnum.textContent = String(n); it.btn.hidden = false; it.btn.setAttribute("aria-pressed", liked ? "true" : "false");
+    items.forEach(function (o) { if (o.key !== it.key) return; o.liked = liked; o.lnum.textContent = String(n); o.btn.hidden = false; o.btn.setAttribute("aria-pressed", liked ? "true" : "false"); });
   }
   function note(it) {
     var p = it.btn.parentNode, m = p.querySelector(".pf-meta-msg");
