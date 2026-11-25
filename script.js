@@ -813,3 +813,36 @@ window.pfSetupTestiClamp();
   }, { passive: true });
   document.documentElement.addEventListener("pointerleave", function () { g.classList.remove("on"); seen = false; });
 })();
+
+/* ---- 12. CSS marquees: repeat the content until one half of the track is wider than the strip, so the 50% loop never shows an empty edge (v=2026-11-26f) ---- */
+(function () {
+  function fill(t) {
+    if (!t.__n) {
+      var n0 = t.children.length;
+      if (n0 < 2 || n0 % 2) return;
+      t.__n = n0 / 2;
+    }
+    var n = t.__n, kids = t.children, c = t.parentElement.clientWidth;
+    if (c < 50) return;
+    var setW = Math.abs(kids[n].getBoundingClientRect().left - kids[0].getBoundingClientRect().left);
+    if (!(setW > 5)) return;
+    var need = 2 * Math.max(1, Math.ceil((c + 4) / setW)), have = Math.round(kids.length / n);
+    for (var s = have; s < need; s++) {
+      for (var i = 0; i < n; i++) {
+        var k = kids[i].cloneNode(true);
+        k.setAttribute("aria-hidden", "true");
+        if (k.tagName === "IMG") k.loading = "eager";
+        t.appendChild(k);
+      }
+    }
+  }
+  function all() { document.querySelectorAll(".pf-marquee-track, .pf-wrapmarq-track").forEach(fill); }
+  all();
+  window.addEventListener("load", all);
+  var rt = 0;
+  window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(all, 150); });
+  if ("ResizeObserver" in window) {
+    var ro = new ResizeObserver(function () { clearTimeout(rt); rt = setTimeout(all, 60); });
+    document.querySelectorAll(".pf-marquee, .pf-wrapmarq").forEach(function (m) { ro.observe(m); });
+  }
+})();
