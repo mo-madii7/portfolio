@@ -581,3 +581,31 @@ window.pfSetupTestiClamp();
   sec.appendChild(btn); sec.appendChild(menu); sec.appendChild(wrap);
   brief.parentNode.insertBefore(sec, brief.nextSibling);
 })();
+
+/* novel covers: tap to reveal release news */
+(function () {
+  document.querySelectorAll(".pf-novel").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var on = b.classList.toggle("on");
+      b.setAttribute("aria-expanded", on ? "true" : "false");
+    });
+  });
+})();
+
+/* public page-view counter (GoatCounter native counter); stays hidden unless a real count arrives */
+(function () {
+  var box = document.getElementById("pf-views"), num = document.getElementById("pf-views-num");
+  if (!box || !num || !window.fetch) return;
+  var ctrl = ("AbortController" in window) ? new AbortController() : null;
+  var done = false;
+  var timer = setTimeout(function () { done = true; if (ctrl) { try { ctrl.abort(); } catch (e) {} } }, 5000);
+  fetch("https://mo-madih.goatcounter.com/counter/" + location.pathname + ".json", ctrl ? { signal: ctrl.signal } : {})
+    .then(function (r) { if (!r.ok) throw new Error("bad status"); return r.json(); })
+    .then(function (d) {
+      if (done) return;
+      clearTimeout(timer);
+      var n = parseInt(String(d.count).replace(/[^0-9]/g, ""), 10);
+      if (!isNaN(n) && n > 0) { num.textContent = String(n); box.hidden = false; }
+    })
+    .catch(function () { clearTimeout(timer); });
+})();
