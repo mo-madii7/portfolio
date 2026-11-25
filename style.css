@@ -1589,3 +1589,10 @@ html .pf-feat-all.pf-px { color: color-mix(in srgb, #d9a441, #ff9a2e calc(var(--
   html .pf-feat-card img { transition: box-shadow .45s ease; }
   html .pf-feat-card:hover img { box-shadow: 0 0 26px rgb(255 150 50 / .14), 0 10px 34px rgb(255 130 30 / .13); }
 }
+
+
+/* ===== v=2026-11-26k: restore gold hover outline on service + testimonial cards (user-approved; rounded corners unchanged) ===== */
+@media (hover: hover) and (pointer: fine) {
+  html .pf-scard:hover { border-color: var(--pf-orange); }
+  html .pf-testi-card:hover { border-color: var(--pf-orange) !important; }
+}
