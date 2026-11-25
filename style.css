@@ -1480,3 +1480,17 @@ html:not([data-view="home"]):not([data-view="services"]) .pf-services{height:0!i
 .pf-bookrow{padding:22px 18px;text-align:center;background:#0d0b0a}.pf-bookrow .pf-book{display:inline-block;padding:11px 22px;outline:1.5px dashed rgb(255 255 255/.7);outline-offset:3px}
 .pf-contact{padding-inline:18px}
 .pf-contact-foot{display:none!important}
+
+/* featured strip: flowing ticker + wide book covers (v=2026-11-25n) */
+.pf-feat-strip.pf-strip{scroll-snap-type:none;direction:ltr;gap:12px}
+.pf-feat-strip.pf-strip>.pf-feat-card{flex:0 0 150px;direction:rtl}
+.pf-feat-strip.pf-strip>.pf-feat-wide{flex:0 0 280px}
+.pf-feat-card span{display:block;line-height:1.5}
+.pf-feat-card.pf-feat-wide img{width:280px;object-fit:cover;object-position:right center}
+@media (min-width:900px){
+  .pf-feat-card,.pf-feat-strip.pf-strip>.pf-feat-card{flex-basis:210px}
+  .pf-feat-card img{width:210px;height:263px}
+  .pf-feat-strip.pf-strip>.pf-feat-wide{flex-basis:390px}
+  .pf-feat-card.pf-feat-wide img{width:390px}
+  .pf-feat-card{font-size:14px}
+  }
