@@ -96,6 +96,20 @@ details.hub-en summary{cursor:pointer;opacity:.7;font-size:.85rem}
           <textarea class="dv-textarea" id="ar-excerpt" rows="2"></textarea></div>
         <div><label class="dv-label" for="ar-body">نص المقال (سطر فاضي بين كل فقرة والتانية)</label>
           <textarea class="dv-textarea" id="ar-body" rows="12"></textarea></div>
+        <details class="hub-en" id="ar-en-box"><summary>الترجمة الإنجليزية (بتتملى تلقائيًا — تقدر تراجعها وتعدّلها)</summary>
+          <div class="hub-fields">
+            <input class="dv-input" id="ar-date-en" type="text" dir="ltr" placeholder="Date in English">
+            <input class="dv-input" id="ar-title-en" type="text" dir="ltr" placeholder="Article title in English">
+            <textarea class="dv-textarea" id="ar-excerpt-en" rows="2" dir="ltr" placeholder="English excerpt"></textarea>
+            <textarea class="dv-textarea" id="ar-body-en" rows="10" dir="ltr" placeholder="English body (blank line between paragraphs)"></textarea>
+            <div class="dv-btn-row" style="margin:0"><button class="dv-btn dv-btn-line" id="ar-retrans" type="button">↻ ترجم تلقائيًا من الأول</button></div>
+          </div>
+        </details>
+        <div class="hub-trstat" id="ar-tr-status" hidden></div>
+        <div class="dv-callout dv-danger" id="ar-en-warn" hidden>
+          <div class="dv-callout-title">الإنجليزي ناقص</div>
+          <div class="dv-callout-body">المقال هيتجهّز بالعربي بس، وهيبقى فاضي لما الزائر يدوس EN في الموقع. وسّع «الترجمة الإنجليزية» فوق ودوس «ترجم تلقائيًا من الأول» أو اكتب الترجمة بنفسك.</div>
+        </div>
       </div>
       <div class="dv-btn-row">
         <button class="dv-btn dv-btn-line" id="ar-preview" type="button">معاينة المقال</button>
@@ -233,7 +247,8 @@ function renderArticles(){
     el.innerHTML = '<div class="hub-card hub-muted">مفيش مقالات منشورة لسه — أول مقال هيتعمل من الفورم اللي تحت.</div>';
   } else {
     el.innerHTML = data.articles.map(function(a){
-      return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(a.title)+'</strong><div class="hub-muted">'+esc(a.date_ar)+' — articles/'+esc(a.slug)+'.html</div></div>'+
+      var miss = (a.title_en||"").trim() ? "" : '<span class="hub-enmiss">الإنجليزي ناقص</span>';
+      return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(a.title)+'</strong>'+miss+'<div class="hub-muted">'+esc(a.date_ar)+' — articles/'+esc(a.slug)+'.html</div></div>'+
         '<span><button class="dv-btn dv-btn-line" data-ar-edit="'+esc(a.slug)+'" type="button">عدّل</button> '+
         '<button class="dv-btn dv-btn-line" data-ar-del="'+esc(a.slug)+'" type="button">امسح</button></span></div></div>';
     }).join("");
@@ -245,6 +260,9 @@ function renderArticles(){
         var a = await api("/api/site/article?slug="+encodeURIComponent(slug), {headers: hdrs()});
         $("ar-title").value = a.title; $("ar-slug").value = a.slug; $("ar-slug").disabled = true;
         $("ar-date").value = a.date_ar; $("ar-excerpt").value = a.excerpt; $("ar-body").value = a.body;
+        $("ar-date-en").value = a.date_en||""; $("ar-title-en").value = a.title_en||"";
+        $("ar-excerpt-en").value = a.excerpt_en||""; $("ar-body-en").value = a.body_en||"";
+        $("ar-en-warn").hidden = true;
         editingSlug = a.slug;
         $("ar-add").textContent = "جهّز التعديل للنشر";
         $("ar-cancel").hidden = false;
@@ -275,7 +293,8 @@ function renderWorks(){
       return '<span class="hub-photo"><img src="../'+esc(p.src)+'" alt="" loading="lazy">'+
         '<button data-ph-del="'+wi+'|'+esc(p.src)+'" type="button">امسح</button></span>';
     }).join("");
-    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(w.title)+'</strong> <span class="hub-muted">('+esc(w.id)+')</span><div class="hub-muted">'+esc(w.sub)+'</div></div>'+
+    var missW = (w.title_en||"").trim() ? "" : '<span class="hub-enmiss">الإنجليزي ناقص</span>';
+    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(w.title)+'</strong>'+missW+' <span class="hub-muted">('+esc(w.id)+')</span><div class="hub-muted">'+esc(w.sub)+'</div></div>'+
       '<span><button class="dv-btn dv-btn-line" data-wk-edit="'+wi+'" type="button">عدّل النصوص</button> '+
       '<button class="dv-btn dv-btn-line" data-wk-del="'+wi+'" type="button">امسح العمل</button></span></div>'+
       facts+
@@ -292,26 +311,51 @@ function renderWorks(){
     stage({op:"work_remove", id:w.id}, "حذف عمل");
     data.works.splice(data.works.indexOf(w),1); renderWorks();
   };});
-  el.querySelectorAll("[data-wk-edit]").forEach(function(b){ b.onclick = function(){
+  el.querySelectorAll("[data-wk-edit]").forEach(function(b){ b.onclick = async function(){
+    if (busy) return;
     var w = data.works[+b.getAttribute("data-wk-edit")];
     var t = prompt("اسم العمل:", w.title); if(t===null) return;
     var s = prompt("سطر الوصف:", w.sub); if(s===null) return;
-    if(t!==w.title){ stage({op:"case_text", id:w.id, field:"title", ar:t}, "تعديل عنوان"); w.title=t; }
-    if(s!==w.sub){ stage({op:"case_text", id:w.id, field:"sub", ar:s}, "تعديل وصف"); w.sub=s; }
+    busy = true;
+    var trFail = false;
+    if(t!==w.title){
+      var te = await trQuiet(t); if (te===null){ te=""; trFail = true; }
+      stage({op:"case_text", id:w.id, field:"title", ar:t, en:te}, "تعديل عنوان"); w.title=t; w.title_en=te;
+    }
+    if(s!==w.sub){
+      var se = await trQuiet(s); if (se===null){ se=""; trFail = true; }
+      stage({op:"case_text", id:w.id, field:"sub", ar:s, en:se}, "تعديل وصف"); w.sub=s; w.sub_en=se;
+    }
+    busy = false;
+    if (trFail) alert("الترجمة التلقائية ما كملتش — التعديل العربي اتجهّز، والإنجليزي هيبقى فاضي لحد ما تعدّله تاني.");
     renderWorks();
   };});
-  el.querySelectorAll("[data-wk-res]").forEach(function(b){ b.onclick = function(){
+  el.querySelectorAll("[data-wk-res]").forEach(function(b){ b.onclick = async function(){
+    if (busy) return;
     var w = data.works[+b.getAttribute("data-wk-res")];
     var t = prompt("النتيجة:", w.result); if(t===null||t===w.result) return;
-    stage({op:"case_text", id:w.id, field:"result", ar:t}, "تعديل نتيجة"); w.result=t; renderWorks();
+    busy = true;
+    var re = await trQuiet(t); var trFail = (re===null); if (trFail) re = "";
+    stage({op:"case_text", id:w.id, field:"result", ar:t, en:re}, "تعديل نتيجة"); w.result=t;
+    busy = false;
+    if (trFail) alert("الترجمة التلقائية ما كملتش — التعديل العربي اتجهّز، والإنجليزي هيبقى فاضي لحد ما تعدّله تاني.");
+    renderWorks();
   };});
-  el.querySelectorAll("[data-fact]").forEach(function(b){ b.onclick = function(){
+  el.querySelectorAll("[data-fact]").forEach(function(b){ b.onclick = async function(){
+    if (busy) return;
     var parts = b.getAttribute("data-fact").split(":"); var w = data.works[+parts[0]]; var fi = +parts[1];
     var f = w.facts[fi];
     var dt = prompt("البند:", f.dt); if(dt===null) return;
     var dd = prompt("القيمة:", f.dd); if(dd===null) return;
-    stage({op:"case_text", id:w.id, field:"fact", index:fi, dt:dt, dd:dd}, "تعديل تفصيلة");
-    w.facts[fi] = {dt:dt, dd:dd}; renderWorks();
+    if (dt===f.dt && dd===f.dd) return;
+    busy = true;
+    var dte = await trQuiet(dt), dde = await trQuiet(dd);
+    var trFail = (dte===null || dde===null); if (dte===null) dte=""; if (dde===null) dde="";
+    stage({op:"case_text", id:w.id, field:"fact", index:fi, dt:dt, dd:dd, dt_en:dte, dd_en:dde}, "تعديل تفصيلة");
+    w.facts[fi] = {dt:dt, dd:dd, dt_en:dte, dd_en:dde};
+    busy = false;
+    if (trFail) alert("الترجمة التلقائية ما كملتش — التعديل العربي اتجهّز، والإنجليزي هيبقى فاضي لحد ما تعدّله تاني.");
+    renderWorks();
   };});
   el.querySelectorAll("[data-ph-del]").forEach(function(b){ b.onclick = function(){
     var parts = b.getAttribute("data-ph-del").split("|"); var w = data.works[+parts[0]]; var src = parts[1];
@@ -412,21 +456,38 @@ function renderTesti(){
 function renderTexts(){
   var el = $("tx-about");
   el.innerHTML = data.about.map(function(p, i){
-    return '<div class="hub-card"><div class="hub-muted">فقرة '+(i+1)+'</div>'+
+    var missT = (p.en||"").trim() ? "" : ' <span class="hub-enmiss">الإنجليزي ناقص</span>';
+    return '<div class="hub-card"><div class="hub-muted">فقرة '+(i+1)+missT+'</div>'+
       '<textarea class="dv-textarea" rows="3" id="tx-p'+i+'">'+esc(p.ar)+'</textarea>'+
+      '<div class="hub-muted">الترجمة الإنجليزية (بتظهر لما الزائر يدوس EN في الموقع)</div>'+
+      '<textarea class="dv-textarea" rows="3" dir="ltr" id="tx-p'+i+'-en">'+esc(p.en||"")+'</textarea>'+
       '<div class="dv-btn-row"><button class="dv-btn dv-btn-line" data-tx="'+i+'" type="button">جهّز التعديل</button></div></div>';
   }).join("");
-  el.querySelectorAll("[data-tx]").forEach(function(b){ b.onclick = function(){
+  el.querySelectorAll("[data-tx]").forEach(function(b){ b.onclick = async function(){
+    if (busy) return;
     var i = +b.getAttribute("data-tx");
     var v = $("tx-p"+i).value.trim(); if(!v) return alert("الفقرة فاضية");
-    if(v === data.about[i].ar) return;
-    stage({op:"text", key:"about-"+(i+1), ar:v}, "تعديل نص «عني»");
-    data.about[i].ar = v;
+    var enEl = $("tx-p"+i+"-en");
+    var en = enEl.value.trim();
+    var oldEn = (data.about[i].en||"").trim();
+    if (v === data.about[i].ar && en === oldEn) return;
+    busy = true;
+    var trFail = false;
+    if (v !== data.about[i].ar && en === oldEn){
+      var t = await trQuiet(v);
+      if (t===null) trFail = true; else { en = t; enEl.value = t; }
+    }
+    busy = false;
+    if (trFail){ if(!confirm("الترجمة التلقائية ما كملتش — تجهّز التعديل بالعربي بس؟ (الإنجليزي هيبقى فاضي في نسخة EN)")) return; }
+    stage({op:"text", key:"about-"+(i+1), ar:v, en:en}, "تعديل نص «عني»");
+    data.about[i].ar = v; data.about[i].en = en;
+    renderTexts();
   };});
 
   var nv = $("tx-novels");
   nv.innerHTML = data.novels.map(function(n){
-    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(n.name)+'</strong><div class="hub-muted">'+esc(n.reveal)+'</div></div>'+
+    var missN = (n.name_en||"").trim() ? "" : '<span class="hub-enmiss">الإنجليزي ناقص</span>';
+    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(n.name)+'</strong>'+missN+'<div class="hub-muted">'+esc(n.reveal)+'</div></div>'+
       '<button class="dv-btn dv-btn-line" data-nv-del="'+esc(n.name)+'" type="button">امسح</button></div></div>';
   }).join("");
   nv.querySelectorAll("[data-nv-del]").forEach(function(b){ b.onclick = function(){
@@ -476,7 +537,7 @@ function uploadImage(file){
   });
 }
 
-/* ---------- auto translation: MyMemory (free, no key) ---------- */
+/* ---------- auto translation: site worker (Workers AI) first, MyMemory fallback ---------- */
 var MM_EMAIL = "mohamad.madih.20@gmail.com";
 function mmBytes(s){ var b=0; for(var i=0;i<s.length;i++){ var c=s.charCodeAt(i); b += c<128?1:(c<2048?2:(c<65536?3:4)); } return b; }
 function mmChunks(text){
@@ -499,6 +560,13 @@ async function translateEn(ar){
   ar = String(ar==null?"":ar).trim();
   if (!ar) return "";
   if (!/[\u0600-\u06FF]/.test(ar)) return ar;
+  try {
+    var rw = await fetch(API + "/api/site/translate", {method:"POST", headers: hdrs(), body: JSON.stringify({texts:[ar]})});
+    if (rw.ok){
+      var dw = await rw.json();
+      if (dw && dw.ok && dw.translations && typeof dw.translations[0]==="string" && dw.translations[0].trim()) return dw.translations[0].trim();
+    }
+  } catch(e){}
   var chunks = mmChunks(ar), out = [];
   for (var i=0;i<chunks.length;i++){
     var url = "https://api.mymemory.translated.net/get?q="+encodeURIComponent(chunks[i])+"&langpair=ar|en&de="+encodeURIComponent(MM_EMAIL);
@@ -513,8 +581,8 @@ async function translateEn(ar){
   }
   return out.join(" ").replace(/[ \t]+/g," ").trim();
 }
-function trStatus(msg){
-  var el = $("ts-tr-status");
+function trStatus(msg, id){
+  var el = $(id || "ts-tr-status");
   if (!msg){ el.hidden = true; el.textContent=""; return; }
   el.hidden = false; el.textContent = msg;
 }
@@ -528,6 +596,11 @@ async function autoFillEn(arName, arText, nameEnEl, textEnEl){
     try { textEnEl.value = await translateEn(arText); } catch(e){ failed = true; }
   }
   return failed;
+}
+
+/* Like translateEn but never throws: returns null on failure so callers can warn and continue. */
+async function trQuiet(ar){
+  try { return await translateEn(ar); } catch(e){ return null; }
 }
 
 /* ---------- article template (preview replica of the worker template) ---------- */
@@ -573,6 +646,7 @@ $("hub-tabs").addEventListener("click", function(e){
 });
 
 $("ar-date").value = new Date().toLocaleDateString("ar-EG", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
+$("ar-date-en").value = new Date().toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
 
 $("ar-preview").onclick = function(){
   var o = {title: $("ar-title").value.trim()||"بدون عنوان", date_ar: $("ar-date").value.trim(), body: $("ar-body").value};
@@ -589,16 +663,52 @@ function resetArticleForm(){
   $("ar-cancel").hidden = true;
   $("ar-slug").disabled = false;
   $("ar-title").value=$("ar-slug").value=$("ar-excerpt").value=$("ar-body").value="";
+  $("ar-title-en").value=$("ar-excerpt-en").value=$("ar-body-en").value="";
+  $("ar-en-warn").hidden = true;
 }
 $("ar-cancel").onclick = function(){ resetArticleForm(); };
-$("ar-add").onclick = function(){
+$("ar-retrans").onclick = async function(){
+  if (busy) return;
+  var map = [["ar-date","ar-date-en"],["ar-title","ar-title-en"],["ar-excerpt","ar-excerpt-en"],["ar-body","ar-body-en"]];
+  busy = true; trStatus("بترجم تلقائيًا…", "ar-tr-status");
+  var failed = false;
+  for (var i=0;i<map.length;i++){
+    var v = $(map[i][0]).value.trim();
+    if (!v) continue;
+    var t = await trQuiet(v);
+    if (t===null){ failed = true; } else $(map[i][1]).value = t;
+  }
+  busy = false;
+  if (failed) trStatus("الترجمة ما كملتش — جرّب تاني أو اكتبها بنفسك.", "ar-tr-status");
+  else { trStatus("", "ar-tr-status"); $("ar-en-box").open = true; $("ar-en-warn").hidden = true; note("اترجمت", "راجع الترجمة الإنجليزية وعدّلها لو حابب، وبعدها دوس «جهّز»."); }
+};
+$("ar-add").onclick = async function(){
+  if (busy) return;
   var title = $("ar-title").value.trim(), excerpt = $("ar-excerpt").value.trim(),
       body = $("ar-body").value.trim(), date_ar = $("ar-date").value.trim();
   if(!title || !body) return alert("العنوان ونص المقال مطلوبين.");
+  busy = true; trStatus("بترجم تلقائيًا…", "ar-tr-status");
+  var failed = false;
+  var pairs = [["ar-date","ar-date-en",date_ar],["ar-title","ar-title-en",title],["ar-excerpt","ar-excerpt-en",excerpt],["ar-body","ar-body-en",body]];
+  for (var i=0;i<pairs.length;i++){
+    var el = $(pairs[i][1]);
+    if (!el.value.trim() && pairs[i][2].trim()){
+      var t = await trQuiet(pairs[i][2]);
+      if (t===null){ failed = true; } else el.value = t;
+    }
+  }
+  trStatus("", "ar-tr-status");
+  busy = false;
+  var date_en = $("ar-date-en").value.trim(), title_en = $("ar-title-en").value.trim(),
+      excerpt_en = $("ar-excerpt-en").value.trim(), body_en = $("ar-body-en").value.trim();
+  if (failed || !title_en || !body_en){
+    $("ar-en-warn").hidden = false; $("ar-en-box").open = true;
+    if(!confirm("الترجمة الإنجليزية ناقصة أو الترجمة التلقائية ما كملتش.\n\nتجهّز المقال بالعربي بس؟ (هيبقى فاضي في نسخة EN لحد ما تكمله بعدين)")) return;
+  } else { $("ar-en-warn").hidden = true; }
   if (editingSlug) {
-    stage({op:"article_edit", slug:editingSlug, title:title, excerpt:excerpt, date_ar:date_ar, body:body}, "تعديل مقال");
+    stage({op:"article_edit", slug:editingSlug, title:title, excerpt:excerpt, date_ar:date_ar, body:body, title_en:title_en, excerpt_en:excerpt_en, date_en:date_en, body_en:body_en}, "تعديل مقال");
     var a = data.articles.find(function(x){return x.slug===editingSlug;});
-    if(a){ a.title=title; a.excerpt=excerpt; a.date_ar=date_ar; }
+    if(a){ a.title=title; a.excerpt=excerpt; a.date_ar=date_ar; a.title_en=title_en; a.excerpt_en=excerpt_en; a.date_en=date_en; }
     resetArticleForm();
     renderArticles();
     return;
@@ -606,13 +716,14 @@ $("ar-add").onclick = function(){
   var slug = $("ar-slug").value.trim().toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
   if(!slug) slug = "article-" + Date.now().toString(36);
   if(data.articles.some(function(a){return a.slug===slug;})) return alert("الرابط ده مستخدم قبل كده، غيّره.");
-  stage({op:"article_add", slug:slug, title:title, excerpt:excerpt, date_ar:date_ar, body:body}, "مقال جديد");
-  data.articles.push({slug:slug, title:title, excerpt:excerpt, date_ar:date_ar});
+  stage({op:"article_add", slug:slug, title:title, excerpt:excerpt, date_ar:date_ar, body:body, title_en:title_en, excerpt_en:excerpt_en, date_en:date_en, body_en:body_en}, "مقال جديد");
+  data.articles.push({slug:slug, title:title, excerpt:excerpt, date_ar:date_ar, title_en:title_en, excerpt_en:excerpt_en, date_en:date_en});
   resetArticleForm();
   renderArticles();
 };
 
-$("wk-add").onclick = function(){
+$("wk-add").onclick = async function(){
+  if (busy) return;
   var title = $("wk-title").value.trim(), sub = $("wk-sub").value.trim(), cat = $("wk-cat").value,
       result = $("wk-result").value.trim();
   if(!title) return alert("اسم العمل مطلوب.");
@@ -621,7 +732,15 @@ $("wk-add").onclick = function(){
     if(p.length<2) return null;
     return {dt: p[0].trim(), dd: p.slice(1).join(":").trim()};
   }).filter(Boolean);
-  stage({op:"work_add", title:title, sub:sub, cat:cat, facts:facts, result:result}, "عمل جديد");
+  busy = true;
+  note("بترجم تلقائيًا…", "اسم العمل والوصف والتفاصيل والنتيجة بتتترجم للإنجليزي قبل التجهيز.");
+  var trFail = false;
+  async function T(v){ if(!v || !v.trim()) return ""; var t = await trQuiet(v); if (t===null){ trFail = true; return ""; } return t; }
+  var title_en = await T(title), sub_en = await T(sub), result_en = await T(result);
+  for (var i=0;i<facts.length;i++){ facts[i].dt_en = await T(facts[i].dt); facts[i].dd_en = await T(facts[i].dd); }
+  busy = false;
+  if (trFail) alert("الترجمة التلقائية ما كملتش لبعض الحقول — العمل هيتجهّز بالعربي، والإنجليزي الناقص هيبقى فاضي لحد ما تعدّله بعدين.");
+  stage({op:"work_add", title:title, sub:sub, cat:cat, facts:facts, result:result, title_en:title_en, sub_en:sub_en, result_en:result_en}, "عمل جديد");
   $("wk-title").value=$("wk-sub").value=$("wk-facts").value=$("wk-result").value="";
   note("اتجهّز العمل", "هيظهر في القايمة بعد النشر، وبعدها تقدر تضيفله صور.");
 };
@@ -672,9 +791,13 @@ $("nv-add").onclick = async function(){
   try {
     busy = true;
     var src = await uploadImage(f);
-    stage({op:"novel_add", name:name, reveal:reveal||"قريبًا", img:src}, "رواية جديدة");
-    data.novels.push({name:name, reveal:reveal||"قريبًا", img:src});
+    var trFail = false;
+    var name_en = await trQuiet(name); if (name_en===null){ name_en=""; trFail = true; }
+    var reveal_en = await trQuiet(reveal||"قريبًا"); if (reveal_en===null){ reveal_en=""; trFail = true; }
+    stage({op:"novel_add", name:name, reveal:reveal||"قريبًا", img:src, name_en:name_en, reveal_en:reveal_en}, "رواية جديدة");
+    data.novels.push({name:name, reveal:reveal||"قريبًا", img:src, name_en:name_en, reveal_en:reveal_en});
     $("nv-name").value=$("nv-reveal").value=""; $("nv-img").value="";
+    if (trFail) alert("الترجمة التلقائية ما كملتش — الرواية اتجهّزت بالعربي بس، والإنجليزي هيبقى فاضي لحد ما تعدّله بعدين.");
     renderTexts();
   } catch(e){ alert("الرفع ما تمش: "+e.message); }
   busy = false;
