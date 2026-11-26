@@ -1537,6 +1537,11 @@ html .pf-testi-grid.pf-strip .pf-testi-text{font-size:13.5px;line-height:1.75}
 
 .pf-svc-cs{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 18px 56px}.pf-svc-cs .pf-menu{width:min(420px,100%)}.pf-svc-cs .pf-pay{width:min(420px,100%)}.pf-svc-cs .pf-cs-btn{font-size:15px;padding:11px 28px}
 
+/* policies entry: rights button beside client-services + footer link (v=2026-11-26u) */
+.pf-svc-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:nowrap}
+.pf-svc-cs .pf-svc-row .pf-cs-btn{white-space:nowrap;font-size:12px;padding:9px 12px}
+@media(min-width:640px){.pf-svc-cs .pf-svc-row .pf-cs-btn{font-size:13.5px;padding:10px 18px}}
+.pf-pol-link{color:#f6c65b;text-decoration:none;border-bottom:1px solid rgb(246 198 91/.4);padding-bottom:1px;font-weight:600}
 .pf-svc-cs .pf-pill,.pf-svc-cs .pf-pay-row{text-align:center;justify-content:center}.pf-svc-cs .pf-menu .pf-pill,.pf-svc-cs .pf-pay .pf-pill{display:flex;align-items:center;justify-content:center;text-align:center}.pf-svc-cs .pf-pay-row{justify-content:space-between}
 
 /* ===== v=2026-11-25t: novels & articles sections in the about view ===== */
