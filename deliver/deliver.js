@@ -164,8 +164,6 @@
     codeInput.value = pre;
     openCode(pre);
   }
-})();
-
   /* in-page image preview */
   function openPreview(url, name) {
     var lb = $("dv-lightbox"); if (!lb) return;
@@ -189,3 +187,4 @@
     lbEl.addEventListener("click", function (e) { if (e.target === lbEl) closePreview(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePreview(); });
   })();
+})();
