@@ -579,7 +579,8 @@ window.pfSetupTestiClamp();
   var wrap = document.createElement("div"); wrap.className = "pf-pay";
   wrap.appendChild(panel);
   sec.appendChild(btn); sec.appendChild(menu); sec.appendChild(wrap);
-  brief.parentNode.insertBefore(sec, brief.nextSibling);
+  var recv = document.getElementById("pf-receive");
+  brief.parentNode.insertBefore(sec, (recv && recv.nextSibling) || brief.nextSibling);
 })();
 
 /* novel covers: tap to reveal release news */
