@@ -200,8 +200,8 @@
       var n = (j * w + i) * 4, r = p[n], gg = p[n + 1], b2 = p[n + 2], mn = Math.min(r, gg, b2);
       var a0 = Math.max(0, Math.min(1, (238 - mn) / 40));
       var yellow = r > 200 && b2 < 140 && gg > 150;
-      if (yellow) { p[n] = 245; p[n + 1] = 176; p[n + 2] = 0; } else { p[n] = 214; p[n + 1] = 74; p[n + 2] = 8; }
-      var t = 0.72 + 0.28 * blot(i, j);
+      if (yellow) { p[n] = 28; p[n + 1] = 58; p[n + 2] = 160; } else { p[n] = 18; p[n + 1] = 40; p[n + 2] = 130; }
+      var t = 0.72 + 0.28 * blot(i, j); if (yellow && (i - 570) * (i - 570) + (j - 440) * (j - 440) < 3000) t *= 0.3;
       var f = rnd(), grain = f < 0.06 ? 0.15 : 0.85 + 0.15 * f;
       p[n + 3] = Math.round(255 * a0 * t * grain);
     }
