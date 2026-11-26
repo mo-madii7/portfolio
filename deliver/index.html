@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>استلام الأعمال — Mohamad Madih</title>
+<meta name="description" content="استلم ملفات مشروعك الأصلية بكود التسليم الخاص بك.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deliver.css">
+</head>
+<body>
+<main class="dv-wrap">
+
+  <header class="dv-head">
+    <a class="dv-back" href="../">← الرئيسية</a>
+    <h1 class="dv-title">استلام الأعمال</h1>
+    <p class="dv-sub">صفحة خاصة بتسليمة واحدة. الكود اللي معاك بيفتح تسليمتك بس.</p>
+  </header>
+
+  <!-- code entry -->
+  <section id="dv-entry">
+    <label class="dv-label" for="dv-code">كود التسليم</label>
+    <input class="dv-codeinput" id="dv-code" autocomplete="off" spellcheck="false"
+           placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
+    <p class="dv-hint">الكود وصلك من محمد على واتساب مع رابط الصفحة دي.</p>
+    <div class="dv-btn-row">
+      <button class="dv-btn dv-btn-gold" id="dv-open">فتح التسليمة</button>
+    </div>
+    <div class="dv-callout dv-danger" id="dv-entry-err" hidden>
+      <div class="dv-callout-title">الكود مش شغال</div>
+      <div class="dv-callout-body" id="dv-entry-err-text"></div>
+    </div>
+  </section>
+
+  <!-- delivery room -->
+  <section class="dv-room" id="dv-room" hidden>
+    <div>
+      <h2 class="dv-room-title" id="dv-project"></h2>
+      <p class="dv-room-sub" id="dv-client"></p>
+    </div>
+
+    <div class="dv-count">
+      <div class="dv-count-time" id="dv-count">--:--:--</div>
+      <div class="dv-count-label">الوقت المتبقي لاستخدام الكود وتحميل الملفات</div>
+    </div>
+
+    <dl class="dv-facts" id="dv-facts"></dl>
+
+    <section>
+      <p class="dv-kicker">من المصمم</p>
+      <h3 class="dv-h2">شرح الفكرة</h3>
+      <div class="dv-explain-body" id="dv-explain"></div>
+    </section>
+
+    <section>
+      <h3 class="dv-h2">الملفات</h3>
+      <div class="dv-grid" id="dv-grid"></div>
+      <div class="dv-btn-row">
+        <button class="dv-btn dv-btn-gold" id="dv-download-all">تحميل كل الملفات بالجودة الأصلية</button>
+      </div>
+      <p class="dv-hint">التحميل بيبدأ فورًا بالجودة الأصلية من غير أي ضغط.</p>
+    </section>
+
+    <div class="dv-callout dv-warn">
+      <div class="dv-callout-title">إيه اللي بيحصل آخر المدة؟</div>
+      <div class="dv-callout-body">الكود بيتقفل في ميعاده بالظبط، حتى لو الصفحة مفتوحة، وبعدها التحميل بيقف. أي نسخة نزّلتها على جهازك قبل كده بتفضل عندك طبعًا. لو احتجت الملفات بعد القفل، كلم محمد يجهّزلك تسليمة جديدة.</div>
+    </div>
+
+    <div class="dv-btn-row">
+      <button class="dv-btn dv-btn-ghost" id="dv-another">أدخل كود تاني</button>
+      <a class="dv-btn dv-btn-ghost" href="../">الرئيسية</a>
+    </div>
+  </section>
+
+  <!-- expired -->
+  <section class="dv-state" id="dv-expired" hidden>
+    <h2 class="dv-state-title">التسليمة دي انتهت</h2>
+    <div class="dv-center"><div class="dv-lock">🔒</div></div>
+    <p class="dv-state-text">الكود ده اتقفل لانتهاء مدته، والتحميل منه وقف. لو محتاج ملفاتك تاني، كلم محمد يجددلك تسليمة جديدة.</p>
+    <div class="dv-callout dv-note">
+      <div class="dv-callout-title">قفل الكود ≠ ضاعت الصور</div>
+      <div class="dv-callout-body">القفل بيوقف الوصول والتحميل بس في ميعاده بالظبط. أي نسخة نزّلتها على جهازك قبل القفل بتفضل عندك، ومحمد يقدر يعملك كود جديد لو احتجت.</div>
+    </div>
+    <div class="dv-btn-row">
+      <a class="dv-btn dv-btn-line" href="../#pf-contact">تواصل مع محمد</a>
+      <button class="dv-btn dv-btn-ghost" id="dv-expired-back">الرئيسية</button>
+    </div>
+  </section>
+
+  <!-- wrong code -->
+  <section class="dv-state" id="dv-wrong" hidden>
+    <h2 class="dv-state-title">الكود ده مش شغال</h2>
+    <div class="dv-callout dv-danger">
+      <div class="dv-callout-title">كود غلط</div>
+      <div class="dv-callout-body">اتأكد إنك كاتب الكود زي ما وصلك بالظبط، بالشرطات والحروف الكبيرة، أو اطلبه من محمد تاني.</div>
+    </div>
+    <div class="dv-btn-row">
+      <button class="dv-btn dv-btn-line" id="dv-retry">جرّب كود تاني</button>
+      <button class="dv-btn dv-btn-ghost" id="dv-wrong-home">الرئيسية</button>
+    </div>
+  </section>
+
+  <footer class="dv-foot">
+    <p>الملفات بتتحمّل بنسختها الأصلية زي ما اتسلّمت، من غير ضغط ولا تعديل.</p>
+  </footer>
+</main>
+<script src="deliver.js"></script>
+</body>
+</html>
