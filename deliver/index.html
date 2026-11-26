@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="deliver.css?v=4">
+<link rel="stylesheet" href="deliver.css?v=5">
 </head>
 <body>
 <button type="button" class="dv-langbtn" id="dv-lang" aria-label="Language">EN</button>
@@ -68,6 +68,29 @@
       <p class="dv-hint" id="dv-dl-hint" data-en="Download starts right away in original quality, with no compression.">التحميل بيبدأ فورًا بالجودة الأصلية من غير أي ضغط.</p>
     </section>
 
+    <section id="dv-notes">
+      <h3 class="dv-h2" data-en="Comments and revisions">ملاحظات وتعديلات</h3>
+      <p class="dv-hint" data-en="Write your notes or the revisions you want here. Mohamad is notified of every note. You can send more than one." >اكتب ملاحظاتك أو التعديلات اللي عايزها هنا. محمد بيوصله إشعار بكل ملاحظة، وتقدر تبعت أكتر من واحدة.</p>
+      <div class="dv-notes-list" id="dv-notes-list"></div>
+      <form class="dv-notes-form" id="dv-notes-form" autocomplete="off">
+        <label class="dv-label" for="dv-note-name" data-en="Your name (optional)">اسمك (اختياري)</label>
+        <input class="dv-input" id="dv-note-name" maxlength="80">
+        <label class="dv-label" for="dv-note-kind" data-en="Type">النوع</label>
+        <select class="dv-input" id="dv-note-kind">
+          <option value="note" data-en="Note">ملاحظة</option>
+          <option value="revision" data-en="Revision request">طلب تعديل</option>
+          <option value="approval" data-en="Approval">موافقة</option>
+        </select>
+        <label class="dv-label" for="dv-note-body" data-en="Your message">رسالتك</label>
+        <textarea class="dv-textarea" id="dv-note-body" maxlength="2000"></textarea>
+        <div class="dv-btn-row">
+          <button class="dv-btn dv-btn-gold" type="submit" id="dv-note-send" data-en="Send">إرسال</button>
+        </div>
+        <p class="dv-hint" id="dv-note-msg" hidden></p>
+      </form>
+      <p class="dv-hint" data-en="Notes are deleted automatically together with the files when the delivery period ends.">الملاحظات بتتحذف تلقائيًا مع الملفات لما مدة التسليمة تخلص.</p>
+    </section>
+
     <div class="dv-callout dv-warn">
       <div class="dv-callout-title" data-en="What happens when time runs out?">إيه اللي بيحصل آخر المدة؟</div>
       <div class="dv-callout-body" data-en="The code locks exactly on time, even if the page is open, and downloading stops after that. Any copy you already downloaded stays with you. If you need the files after it locks, contact Mohamad and he will prepare a new delivery.">الكود بيتقفل في ميعاده بالظبط، حتى لو الصفحة مفتوحة، وبعدها التحميل بيقف. أي نسخة نزّلتها على جهازك قبل كده بتفضل عندك طبعًا. لو احتجت الملفات بعد القفل، كلم محمد يجهّزلك تسليمة جديدة.</div>
@@ -119,6 +142,7 @@
     </figure>
   </div>
 </main>
-<script src="deliver.js?v=6"></script>
+<script src="deliver.js?v=7"></script>
 </body>
 </html>
+
