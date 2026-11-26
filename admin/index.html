@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة تحكم الموقع — خاصة بمحمد</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../deliver/deliver.css?v=3">
+<style>
+.hub-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px}
+.hub-tab{padding:9px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font-family:inherit;font-size:.95rem;cursor:pointer}
+.hub-tab.on{background:#c9a24b;border-color:#c9a24b;color:#16130c;font-weight:700}
+.hub-card{border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px;margin:10px 0}
+.hub-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hub-muted{opacity:.65;font-size:.87rem}
+.hub-photos{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.hub-photo{position:relative;width:110px}
+.hub-photo img{width:110px;height:78px;object-fit:cover;border-radius:10px;display:block}
+.hub-photo button{position:absolute;top:4px;inset-inline-start:4px;background:rgba(120,20,20,.9);color:#fff;border:0;border-radius:8px;font-size:.75rem;padding:2px 8px;cursor:pointer}
+.hub-stagebar{position:sticky;top:0;z-index:5;background:#181510;border:1px solid #c9a24b;border-radius:12px;padding:10px 14px;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hub-fields{display:grid;gap:10px;margin-top:10px}
+.hub-iframe{width:100%;min-height:1400px;border:0;border-radius:14px;background:#fff1}
+.hub-hist button{margin-inline-start:8px}
+.hub-prev{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.hub-prev-box{background:#0c0d10;border:1px solid rgba(255,255,255,.2);border-radius:16px;max-width:820px;width:100%;max-height:88vh;overflow:auto;padding:8px}
+.hub-prev iframe{width:100%;height:70vh;border:0;background:#0c0d10;border-radius:10px}
+.hub-prev .hub-row{padding:8px}
+details.hub-en summary{cursor:pointer;opacity:.7;font-size:.85rem}
+</style>
+</head>
+<body>
+<main class="dv-wrap">
+  <header class="dv-head">
+    <a class="dv-back" href="../">← الرئيسية</a>
+    <h1 class="dv-title">لوحة تحكم الموقع</h1>
+    <p class="dv-sub">خاصة بيك إنت بس. مفتاح اللوحة ما بيتحفظش غير في الجلسة دي. كل تعديلاتك بتتجمّع هنا، وما بتتنشرش على الموقع غير لما تدوس «انشر».</p>
+  </header>
+
+  <section id="hub-gate">
+    <label class="dv-label" for="hub-key">مفتاح اللوحة</label>
+    <input class="dv-input" id="hub-key" type="password" dir="ltr" autocomplete="off">
+    <div class="dv-btn-row">
+      <button class="dv-btn dv-btn-gold" id="hub-enter">دخول</button>
+    </div>
+    <div class="dv-callout dv-danger" id="hub-gate-err" hidden>
+      <div class="dv-callout-title">مشكلة في الدخول</div>
+      <div class="dv-callout-body" id="hub-gate-err-text"></div>
+    </div>
+  </section>
+
+  <div id="hub-app" hidden>
+    <div class="hub-stagebar" id="hub-stagebar" hidden>
+      <span id="hub-stagecount"></span>
+      <span class="dv-btn-row" style="margin:0">
+        <button class="dv-btn dv-btn-line" id="hub-preview" type="button">معاينة</button>
+        <button class="dv-btn dv-btn-gold" id="hub-publish" type="button">انشر على الموقع</button>
+        <button class="dv-btn dv-btn-line" id="hub-discard" type="button">إلغاء الكل</button>
+      </span>
+    </div>
+    <div class="dv-callout dv-danger" id="hub-conflict" hidden>
+      <div class="dv-callout-title">المحتوى اتغيّر برّه اللوحة</div>
+      <div class="dv-callout-body">حصل تعديل على الموقع من مكان تاني بعد ما فتحت اللوحة، فالنشر اترفض حمايةً للتعديل ده. تعديلاتك المجهّزة محفوظة تحت. دوس «حدّث البيانات» عشان تشوف أحدث نسخة، وبعدها انشر تاني لو لسه عايز تعديلاتك.</div>
+      <div class="dv-btn-row"><button class="dv-btn dv-btn-gold" id="hub-reload" type="button">حدّث البيانات</button></div>
+    </div>
+    <div class="dv-callout" id="hub-ok" hidden>
+      <div class="dv-callout-title" id="hub-ok-title">تم</div>
+      <div class="dv-callout-body" id="hub-ok-text"></div>
+    </div>
+
+    <nav class="hub-tabs" id="hub-tabs">
+      <button class="hub-tab on" data-tab="articles">مقالات</button>
+      <button class="hub-tab" data-tab="works">الأعمال والصور</button>
+      <button class="hub-tab" data-tab="testi">آراء العملاء</button>
+      <button class="hub-tab" data-tab="texts">نصوص وروايات</button>
+      <button class="hub-tab" data-tab="deliveries">تسليمات الأعمال</button>
+      <button class="hub-tab" data-tab="history">السجل والاسترجاع</button>
+    </nav>
+
+    <section id="tab-articles" class="hub-panel">
+      <h2 class="dv-h2">المقالات</h2>
+      <div id="ar-list"></div>
+      <h2 class="dv-h2" style="margin-top:26px">مقال جديد</h2>
+      <div class="hub-fields">
+        <div><label class="dv-label" for="ar-title">عنوان المقال</label>
+          <input class="dv-input" id="ar-title" type="text"></div>
+        <div><label class="dv-label" for="ar-slug">رابط المقال (حروف إنجليزية صغيرة وشرطات، مثال: my-first-article)</label>
+          <input class="dv-input" id="ar-slug" type="text" dir="ltr" placeholder="my-first-article"></div>
+        <div><label class="dv-label" for="ar-date">التاريخ</label>
+          <input class="dv-input" id="ar-date" type="text"></div>
+        <div><label class="dv-label" for="ar-excerpt">مقتطف قصير (سطر أو سطرين يظهروا في القايمة)</label>
+          <textarea class="dv-textarea" id="ar-excerpt" rows="2"></textarea></div>
+        <div><label class="dv-label" for="ar-body">نص المقال (سطر فاضي بين كل فقرة والتانية)</label>
+          <textarea class="dv-textarea" id="ar-body" rows="12"></textarea></div>
+      </div>
+      <div class="dv-btn-row">
+        <button class="dv-btn dv-btn-line" id="ar-preview" type="button">معاينة المقال</button>
+        <button class="dv-btn dv-btn-gold" id="ar-add" type="button">جهّز المقال للنشر</button>
+      </div>
+      <p class="dv-hint">«جهّز» بيضيفه للتعديلات المعلّقة فوق، والمقال ما يظهرش على الموقع غير بعد ما تدوس «انشر على الموقع». النشر بياخد دقيقة بالظبط تقريبًا عشان يظهر.</p>
+    </section>
+
+    <section id="tab-works" class="hub-panel" hidden>
+      <h2 class="dv-h2">الأعمال والصور</h2>
+      <p class="dv-hint">كل عمل تحته صوره ونصوصه. تقدر تضيف صور أو تمسحها، وتعدّل العنوان والوصف والتفاصيل والنتيجة. الصورة الجديدة بتترفع على طول (لحد ٢٥ ميجا)، وباقي التعديلات بتتجهّز وتتنشر مع زر «انشر».</p>
+      <div id="wk-list"></div>
+      <h2 class="dv-h2" style="margin-top:26px">عمل جديد</h2>
+      <div class="hub-fields">
+        <div><label class="dv-label" for="wk-title">اسم العمل</label><input class="dv-input" id="wk-title" type="text"></div>
+        <div><label class="dv-label" for="wk-sub">سطر الوصف تحت الاسم</label><input class="dv-input" id="wk-sub" type="text"></div>
+        <div><label class="dv-label" for="wk-cat">التصنيف</label><select class="dv-input" id="wk-cat"></select></div>
+        <div><label class="dv-label">تفاصيل العمل (البند : القيمة — سطر لكل بند)</label>
+          <textarea class="dv-textarea" id="wk-facts" rows="3" placeholder="العميل : اسم العميل&#10;النطاق : هوية بصرية"></textarea></div>
+        <div><label class="dv-label" for="wk-result">النتيجة</label>
+          <textarea class="dv-textarea" id="wk-result" rows="3"></textarea></div>
+      </div>
+      <div class="dv-btn-row"><button class="dv-btn dv-btn-gold" id="wk-add" type="button">جهّز العمل للنشر</button></div>
+      <p class="dv-hint">العمل الجديد بينزل من غير صور؛ بعد النشر تقدر تضيفله صور من قايمة الأعمال. شكل العمل الجديد بيتبع نمط الموقع الداكن العادي.</p>
+    </section>
+
+    <section id="tab-testi" class="hub-panel" hidden>
+      <h2 class="dv-h2">آراء العملاء</h2>
+      <div id="ts-list"></div>
+      <h2 class="dv-h2" style="margin-top:26px">رأي جديد</h2>
+      <div class="hub-fields">
+        <div><label class="dv-label" for="ts-name">اسم العميل</label><input class="dv-input" id="ts-name" type="text"></div>
+        <div><label class="dv-label" for="ts-text">نص الرأي</label><textarea class="dv-textarea" id="ts-text" rows="3"></textarea></div>
+        <details class="hub-en"><summary>الترجمة الإنجليزية (اختياري — للزرار الإنجليزي في الموقع)</summary>
+          <div class="hub-fields">
+            <input class="dv-input" id="ts-name-en" type="text" dir="ltr" placeholder="Client name in English">
+            <textarea class="dv-textarea" id="ts-text-en" rows="3" dir="ltr" placeholder="English text"></textarea>
+          </div>
+        </details>
+      </div>
+      <div class="dv-btn-row"><button class="dv-btn dv-btn-gold" id="ts-add" type="button">جهّز الرأي للنشر</button></div>
+    </section>
+
+    <section id="tab-texts" class="hub-panel" hidden>
+      <h2 class="dv-h2">قسم «عني»</h2>
+      <div id="tx-about"></div>
+      <h2 class="dv-h2" style="margin-top:26px">الروايات</h2>
+      <div id="tx-novels"></div>
+      <h2 class="dv-h2" style="margin-top:26px">رواية جديدة</h2>
+      <div class="hub-fields">
+        <div><label class="dv-label" for="nv-name">اسم الرواية</label><input class="dv-input" id="nv-name" type="text"></div>
+        <div><label class="dv-label" for="nv-reveal">خبر الصدور (بيظهر لما حد يدوس على الغلاف)</label><input class="dv-input" id="nv-reveal" type="text"></div>
+        <div><label class="dv-label" for="nv-img">صورة الغلاف</label><input class="dv-input" id="nv-img" type="file" accept=".jpg,.jpeg,.png,.webp"></div>
+      </div>
+      <div class="dv-btn-row"><button class="dv-btn dv-btn-gold" id="nv-add" type="button">ارفع الغلاف وجهّز الرواية</button></div>
+    </section>
+
+    <section id="tab-deliveries" class="hub-panel" hidden>
+      <h2 class="dv-h2">تسليمات الأعمال</h2>
+      <p class="dv-hint">دي لوحة التسليمات نفسها جوّه اللوحة دي — مفتاحها الخاص هو اللي بيفتحها، زي ما هي بالظبط.</p>
+      <iframe class="hub-iframe" id="dl-frame" title="لوحة التسليمات"></iframe>
+    </section>
+
+    <section id="tab-history" class="hub-panel" hidden>
+      <h2 class="dv-h2">آخر النشرات</h2>
+      <p class="dv-hint">كل نشر من اللوحة أو تعديل على ملفات الموقع بيظهر هنا. «استرجاع» بيرجّع محتوى الصفحة الرئيسية لشكلها وقت النسخة دي، وبيتحفظ كمان في السجل — يعني مفيش حاجة بتضيع.</p>
+      <div id="hs-list"></div>
+    </section>
+  </div>
+
+  <div class="hub-prev" id="hub-prev" hidden>
+    <div class="hub-prev-box">
+      <div class="hub-row"><strong id="hub-prev-title">معاينة</strong>
+        <button class="dv-btn dv-btn-line" id="hub-prev-close" type="button">قفل</button></div>
+      <div id="hub-prev-body"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+var API = "https://portfolio-deliver.mohamad-madih-20.workers.dev";
+var key = sessionStorage.getItem("hub_site_key") || "";
+var data = null;          // parsed site content (server state)
+var staged = [];          // pending ops
+var busy = false;
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function hdrs(){return {"X-Site-Key": key, "Content-Type": "application/json"};}
+function note(t, body){ $("hub-ok-title").textContent = t; $("hub-ok-text").textContent = body; $("hub-ok").hidden = false; clearTimeout(note._t); note._t = setTimeout(function(){ $("hub-ok").hidden = true; }, 9000); }
+function fail(where, msg){ var el = $(where); el.hidden = false; }
+function gateErr(m){ $("hub-gate-err").hidden = false; $("hub-gate-err-text").textContent = m; }
+
+function stage(op, label){
+  staged.push(op);
+  renderStage();
+  note("اتجهّز", label + " — لسه مش على الموقع. دوس «انشر على الموقع» فوق لما تخلّص.");
+}
+function renderStage(){
+  var bar = $("hub-stagebar");
+  bar.hidden = staged.length === 0;
+  $("hub-stagecount").textContent = staged.length ? ("عندك " + staged.length + " تعديل مش متنشر") : "";
+  $("hub-conflict").hidden = true;
+}
+
+async function api(path, opts){
+  var r = await fetch(API + path, opts);
+  var d = null; try { d = await r.json(); } catch(e){}
+  if (r.status === 409) { $("hub-conflict").hidden = false; window.scrollTo(0,0); throw new Error("conflict"); }
+  if (!r.ok) throw new Error((d && d.error) || ("http_" + r.status));
+  return d;
+}
+
+async function loadContent(){
+  data = await api("/api/site/content", {headers: hdrs()});
+  renderAll();
+}
+
+/* ---------- render ---------- */
+function renderAll(){ renderArticles(); renderWorks(); renderTesti(); renderTexts(); renderHistory(); }
+
+function renderArticles(){
+  var el = $("ar-list");
+  if (!data.articles.length){
+    el.innerHTML = '<div class="hub-card hub-muted">مفيش مقالات منشورة لسه — أول مقال هيتعمل من الفورم اللي تحت.</div>';
+  } else {
+    el.innerHTML = data.articles.map(function(a){
+      return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(a.title)+'</strong><div class="hub-muted">'+esc(a.date_ar)+' — articles/'+esc(a.slug)+'.html</div></div>'+
+        '<button class="dv-btn dv-btn-line" data-ar-del="'+esc(a.slug)+'" type="button">امسح</button></div></div>';
+    }).join("");
+  }
+  el.querySelectorAll("[data-ar-del]").forEach(function(b){
+    b.onclick = function(){
+      if(!confirm("تمسح المقال ده من الموقع؟")) return;
+      var slug = b.getAttribute("data-ar-del");
+      stage({op:"article_remove", slug:slug}, "حذف مقال");
+      data.articles = data.articles.filter(function(a){return a.slug!==slug;});
+      renderArticles();
+    };
+  });
+}
+
+function renderWorks(){
+  var el = $("wk-list");
+  el.innerHTML = data.works.map(function(w, wi){
+    var facts = w.facts.map(function(f, fi){
+      return '<div class="hub-row" style="margin:4px 0"><span>'+esc(f.dt)+': '+esc(f.dd)+'</span>'+
+        '<button class="dv-btn dv-btn-line" data-fact="'+wi+':'+fi+'" type="button">عدّل</button></div>';
+    }).join("");
+    var photos = w.photos.map(function(p){
+      return '<span class="hub-photo"><img src="../'+esc(p.src)+'" alt="" loading="lazy">'+
+        '<button data-ph-del="'+wi+'|'+esc(p.src)+'" type="button">امسح</button></span>';
+    }).join("");
+    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(w.title)+'</strong> <span class="hub-muted">('+esc(w.id)+')</span><div class="hub-muted">'+esc(w.sub)+'</div></div>'+
+      '<span><button class="dv-btn dv-btn-line" data-wk-edit="'+wi+'" type="button">عدّل النصوص</button> '+
+      '<button class="dv-btn dv-btn-line" data-wk-del="'+wi+'" type="button">امسح العمل</button></span></div>'+
+      facts+
+      '<div class="hub-row" style="margin-top:6px"><span class="hub-muted">النتيجة: '+esc(w.result.slice(0,90))+(w.result.length>90?"…":"")+'</span>'+
+      '<button class="dv-btn dv-btn-line" data-wk-res="'+wi+'" type="button">عدّل النتيجة</button></div>'+
+      '<div class="hub-photos">'+photos+
+      '<span class="hub-photo" style="display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,.3);border-radius:10px;height:78px;cursor:pointer" data-ph-add="'+wi+'">+ صورة</span></div>'+
+      '</div>';
+  }).join("");
+
+  el.querySelectorAll("[data-wk-del]").forEach(function(b){ b.onclick = function(){
+    var w = data.works[+b.getAttribute("data-wk-del")];
+    if(!confirm("تمسح العمل «"+w.title+"» كله من الموقع؟")) return;
+    stage({op:"work_remove", id:w.id}, "حذف عمل");
+    data.works.splice(data.works.indexOf(w),1); renderWorks();
+  };});
+  el.querySelectorAll("[data-wk-edit]").forEach(function(b){ b.onclick = function(){
+    var w = data.works[+b.getAttribute("data-wk-edit")];
+    var t = prompt("اسم العمل:", w.title); if(t===null) return;
+    var s = prompt("سطر الوصف:", w.sub); if(s===null) return;
+    if(t!==w.title){ stage({op:"case_text", id:w.id, field:"title", ar:t}, "تعديل عنوان"); w.title=t; }
+    if(s!==w.sub){ stage({op:"case_text", id:w.id, field:"sub", ar:s}, "تعديل وصف"); w.sub=s; }
+    renderWorks();
+  };});
+  el.querySelectorAll("[data-wk-res]").forEach(function(b){ b.onclick = function(){
+    var w = data.works[+b.getAttribute("data-wk-res")];
+    var t = prompt("النتيجة:", w.result); if(t===null||t===w.result) return;
+    stage({op:"case_text", id:w.id, field:"result", ar:t}, "تعديل نتيجة"); w.result=t; renderWorks();
+  };});
+  el.querySelectorAll("[data-fact]").forEach(function(b){ b.onclick = function(){
+    var parts = b.getAttribute("data-fact").split(":"); var w = data.works[+parts[0]]; var fi = +parts[1];
+    var f = w.facts[fi];
+    var dt = prompt("البند:", f.dt); if(dt===null) return;
+    var dd = prompt("القيمة:", f.dd); if(dd===null) return;
+    stage({op:"case_text", id:w.id, field:"fact", index:fi, dt:dt, dd:dd}, "تعديل تفصيلة");
+    w.facts[fi] = {dt:dt, dd:dd}; renderWorks();
+  };});
+  el.querySelectorAll("[data-ph-del]").forEach(function(b){ b.onclick = function(){
+    var parts = b.getAttribute("data-ph-del").split("|"); var w = data.works[+parts[0]]; var src = parts[1];
+    if(!confirm("تمسح الصورة دي من «"+w.title+"»؟")) return;
+    stage({op:"photo_remove", case_id:w.id, src:src}, "حذف صورة");
+    w.photos = w.photos.filter(function(p){return p.src!==src;}); renderWorks();
+  };});
+  el.querySelectorAll("[data-ph-add]").forEach(function(b){ b.onclick = function(){
+    var wi = +b.getAttribute("data-ph-add");
+    var inp = document.createElement("input"); inp.type = "file"; inp.accept = ".jpg,.jpeg,.png,.webp";
+    inp.onchange = async function(){
+      var f = inp.files[0]; if(!f) return;
+      var alt = prompt("وصف الصورة (بيظهر لقارئ الشاشة ولو الصورة ما فتحتش):", ""); if(alt===null) return;
+      try {
+        busy = true;
+        var src = await uploadImage(f);
+        var w = data.works[wi];
+        stage({op:"photo_add", case_id:w.id, src:src, alt:alt||w.title}, "إضافة صورة");
+        w.photos.push({src:src, alt:alt||w.title}); renderWorks();
+      } catch(e){ alert("الرفع ما تمش: " + e.message); }
+      busy = false;
+    };
+    inp.click();
+  };});
+
+  var cat = $("wk-cat");
+  if (!cat.options.length){
+    (data.cats.length?data.cats:["identity"]).forEach(function(c){
+      var o = document.createElement("option"); o.value = c; o.textContent = c; cat.appendChild(o);
+    });
+  }
+}
+
+function renderTesti(){
+  var el = $("ts-list");
+  el.innerHTML = data.testimonials.map(function(t){
+    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(t.name)+'</strong><div class="hub-muted">'+esc(t.text.slice(0,120))+(t.text.length>120?"…":"")+'</div></div>'+
+      '<button class="dv-btn dv-btn-line" data-ts-del="'+esc(t.name)+'" type="button">امسح</button></div></div>';
+  }).join("");
+  el.querySelectorAll("[data-ts-del]").forEach(function(b){ b.onclick = function(){
+    var n = b.getAttribute("data-ts-del");
+    if(!confirm("تمسح رأي «"+n+"»؟")) return;
+    stage({op:"testi_remove", name:n}, "حذف رأي");
+    data.testimonials = data.testimonials.filter(function(t){return t.name!==n;}); renderTesti();
+  };});
+}
+
+function renderTexts(){
+  var el = $("tx-about");
+  el.innerHTML = data.about.map(function(p, i){
+    return '<div class="hub-card"><div class="hub-muted">فقرة '+(i+1)+'</div>'+
+      '<textarea class="dv-textarea" rows="3" id="tx-p'+i+'">'+esc(p.ar)+'</textarea>'+
+      '<div class="dv-btn-row"><button class="dv-btn dv-btn-line" data-tx="'+i+'" type="button">جهّز التعديل</button></div></div>';
+  }).join("");
+  el.querySelectorAll("[data-tx]").forEach(function(b){ b.onclick = function(){
+    var i = +b.getAttribute("data-tx");
+    var v = $("tx-p"+i).value.trim(); if(!v) return alert("الفقرة فاضية");
+    if(v === data.about[i].ar) return;
+    stage({op:"text", key:"about-"+(i+1), ar:v}, "تعديل نص «عني»");
+    data.about[i].ar = v;
+  };});
+
+  var nv = $("tx-novels");
+  nv.innerHTML = data.novels.map(function(n){
+    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(n.name)+'</strong><div class="hub-muted">'+esc(n.reveal)+'</div></div>'+
+      '<button class="dv-btn dv-btn-line" data-nv-del="'+esc(n.name)+'" type="button">امسح</button></div></div>';
+  }).join("");
+  nv.querySelectorAll("[data-nv-del]").forEach(function(b){ b.onclick = function(){
+    var n = b.getAttribute("data-nv-del");
+    if(!confirm("تمسح رواية «"+n+"» من الموقع؟")) return;
+    stage({op:"novel_remove", name:n}, "حذف رواية");
+    data.novels = data.novels.filter(function(x){return x.name!==n;}); renderTexts();
+  };});
+}
+
+function renderHistory(){
+  var el = $("hs-list");
+  el.innerHTML = '<div class="hub-muted">بيجيب السجل…</div>';
+  api("/api/site/history", {headers: hdrs()}).then(function(h){
+    el.innerHTML = h.commits.map(function(c){
+      var d = new Date(c.date).toLocaleString("ar-EG");
+      return '<div class="hub-card hub-hist"><div class="hub-row"><div><div>'+esc(c.message)+'</div><div class="hub-muted">'+d+' — '+c.sha.slice(0,7)+'</div></div>'+
+        '<button class="dv-btn dv-btn-line" data-hs="'+c.sha+'" type="button">استرجاع النسخة دي</button></div></div>';
+    }).join("") || '<div class="hub-card hub-muted">مفيش سجل لسه.</div>';
+    el.querySelectorAll("[data-hs]").forEach(function(b){ b.onclick = async function(){
+      var sha = b.getAttribute("data-hs");
+      if(!confirm("ترجّع محتوى الصفحة الرئيسية للنسخة دي؟ (بيتسجل كمان في السجل)")) return;
+      try {
+        var r = await api("/api/site/revert", {method:"POST", headers: hdrs(), body: JSON.stringify({sha: sha, base_sha: data.sha})});
+        note("اتنشر الاسترجاع", "المحتوى رجع للنسخة المختارة. هيظهر على الموقع خلال دقيقة تقريبًا.");
+        staged = []; renderStage(); await loadContent();
+      } catch(e){ if(e.message!=="conflict") alert("الاسترجاع ما تمش: "+e.message); }
+    };});
+  }).catch(function(){ el.innerHTML = '<div class="hub-card hub-muted">السجل مش متاح دلوقتي.</div>'; });
+}
+
+/* ---------- uploads ---------- */
+function uploadImage(file){
+  if (file.size > 25*1024*1024) return Promise.reject(new Error("الصورة أكبر من ٢٥ ميجا"));
+  return new Promise(function(res, rej){
+    var rd = new FileReader();
+    rd.onload = async function(){
+      var b64 = String(rd.result).split(",")[1];
+      try {
+        var d = await api("/api/site/upload", {method:"POST", headers: hdrs(), body: JSON.stringify({name: file.name, data_b64: b64})});
+        note("اترفعت الصورة", "الصورة على الموقع دلوقتي، وهتظهر في مكانها مع النشر الجاي.");
+        res(d.src);
+      } catch(e){ rej(e); }
+    };
+    rd.onerror = function(){ rej(new Error("قراءة الملف فشلت")); };
+    rd.readAsDataURL(file);
+  });
+}
+
+/* ---------- article template (preview replica of the worker template) ---------- */
+function articlePageHtml(o){
+  function e(s){return esc(s);}
+  var paras = String(o.body).split(/\n\s*\n/).filter(Boolean).map(function(p){
+    return "<p>"+e(p).replace(/\n/g,"<br>")+"</p>";
+  }).join("\n");
+  return "<!DOCTYPE html><html lang='ar' dir='rtl'><head><meta charset='utf-8'>"+
+    "<meta name='viewport' content='width=device-width, initial-scale=1'>"+
+    "<style>body{background:#0c0d10;color:#f2eee7;font-family:'Alexandria','Cairo',sans-serif;line-height:2;margin:0}"+
+    ".art-wrap{max-width:760px;margin:0 auto;padding:48px 22px 96px}"+
+    ".art-back{display:inline-block;margin-bottom:28px;color:inherit;opacity:.75;text-decoration:none}"+
+    ".art-date{opacity:.6;font-size:.9rem}.art-title{margin:.3em 0 1em;line-height:1.6}"+
+    ".art-body p{margin:0 0 1.2em}</style></head><body><div class='art-wrap'>"+
+    "<a class='art-back' href='#'>→ كل المقالات</a>"+
+    "<span class='art-date'>"+e(o.date_ar)+"</span>"+
+    "<h1 class='art-title'>"+e(o.title)+"</h1>"+
+    "<div class='art-body'>"+paras+"</div></div></body></html>";
+}
+
+/* ---------- events ---------- */
+$("hub-enter").onclick = async function(){
+  key = $("hub-key").value.trim();
+  if(!key) return gateErr("اكتب المفتاح الأول.");
+  $("hub-gate-err").hidden = true;
+  try {
+    await loadContent();
+    sessionStorage.setItem("hub_site_key", key);
+    $("hub-gate").hidden = true; $("hub-app").hidden = false;
+  } catch(e){
+    gateErr(e.message === "forbidden" ? "المفتاح ده غلط." : ("حصلت مشكلة: " + e.message));
+  }
+};
+$("hub-key").addEventListener("keydown", function(e){ if(e.key==="Enter") $("hub-enter").click(); });
+
+$("hub-tabs").addEventListener("click", function(e){
+  var b = e.target.closest(".hub-tab"); if(!b) return;
+  document.querySelectorAll(".hub-tab").forEach(function(x){x.classList.toggle("on", x===b);});
+  document.querySelectorAll(".hub-panel").forEach(function(p){ p.hidden = p.id !== "tab-"+b.getAttribute("data-tab"); });
+  if (b.getAttribute("data-tab")==="deliveries" && !$("dl-frame").src) $("dl-frame").src = "../deliver/admin.html";
+  if (b.getAttribute("data-tab")==="history") renderHistory();
+});
+
+$("ar-date").value = new Date().toLocaleDateString("ar-EG", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
+
+$("ar-preview").onclick = function(){
+  var o = {title: $("ar-title").value.trim()||"بدون عنوان", date_ar: $("ar-date").value.trim(), body: $("ar-body").value};
+  $("hub-prev-title").textContent = "معاينة المقال";
+  $("hub-prev-body").innerHTML = "<iframe></iframe>";
+  $("hub-prev-body").querySelector("iframe").srcdoc = articlePageHtml(o);
+  $("hub-prev").hidden = false;
+};
+$("hub-prev-close").onclick = function(){ $("hub-prev").hidden = true; $("hub-prev-body").innerHTML=""; };
+
+$("ar-add").onclick = function(){
+  var title = $("ar-title").value.trim(), excerpt = $("ar-excerpt").value.trim(),
+      body = $("ar-body").value.trim(), date_ar = $("ar-date").value.trim();
+  var slug = $("ar-slug").value.trim().toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+  if(!title || !body) return alert("العنوان ونص المقال مطلوبين.");
+  if(!slug) slug = "article-" + Date.now().toString(36);
+  if(data.articles.some(function(a){return a.slug===slug;})) return alert("الرابط ده مستخدم قبل كده، غيّره.");
+  stage({op:"article_add", slug:slug, title:title, excerpt:excerpt, date_ar:date_ar, body:body}, "مقال جديد");
+  data.articles.push({slug:slug, title:title, excerpt:excerpt, date_ar:date_ar});
+  $("ar-title").value=$("ar-slug").value=$("ar-excerpt").value=$("ar-body").value="";
+  renderArticles();
+};
+
+$("wk-add").onclick = function(){
+  var title = $("wk-title").value.trim(), sub = $("wk-sub").value.trim(), cat = $("wk-cat").value,
+      result = $("wk-result").value.trim();
+  if(!title) return alert("اسم العمل مطلوب.");
+  var facts = $("wk-facts").value.split("\n").map(function(l){
+    var p = l.split(":"); if(p.length<2) p = l.split("：");
+    if(p.length<2) return null;
+    return {dt: p[0].trim(), dd: p.slice(1).join(":").trim()};
+  }).filter(Boolean);
+  stage({op:"work_add", title:title, sub:sub, cat:cat, facts:facts, result:result}, "عمل جديد");
+  $("wk-title").value=$("wk-sub").value=$("wk-facts").value=$("wk-result").value="";
+  note("اتجهّز العمل", "هيظهر في القايمة بعد النشر، وبعدها تقدر تضيفله صور.");
+};
+
+$("ts-add").onclick = function(){
+  var name = $("ts-name").value.trim(), text = $("ts-text").value.trim();
+  if(!name || !text) return alert("الاسم ونص الرأي مطلوبين.");
+  stage({op:"testi_add", name:name, text:text, name_en:$("ts-name-en").value.trim(), text_en:$("ts-text-en").value.trim()}, "رأي جديد");
+  data.testimonials.push({name:name, text:text});
+  $("ts-name").value=$("ts-text").value=$("ts-name-en").value=$("ts-text-en").value="";
+  renderTesti();
+};
+
+$("nv-add").onclick = async function(){
+  var name = $("nv-name").value.trim(), reveal = $("nv-reveal").value.trim(), f = $("nv-img").files[0];
+  if(!name || !f) return alert("اسم الرواية وصورة الغلاف مطلوبين.");
+  try {
+    busy = true;
+    var src = await uploadImage(f);
+    stage({op:"novel_add", name:name, reveal:reveal||"قريبًا", img:src}, "رواية جديدة");
+    data.novels.push({name:name, reveal:reveal||"قريبًا", img:src});
+    $("nv-name").value=$("nv-reveal").value=""; $("nv-img").value="";
+    renderTexts();
+  } catch(e){ alert("الرفع ما تمش: "+e.message); }
+  busy = false;
+};
+
+$("hub-preview").onclick = function(){
+  $("hub-prev-title").textContent = "التعديلات المعلّقة";
+  $("hub-prev-body").innerHTML = '<div style="padding:16px">' + staged.map(function(o){
+    var map = {text:"تعديل نص", testi_add:"إضافة رأي", testi_remove:"حذف رأي", photo_add:"إضافة صورة", photo_remove:"حذف صورة",
+      novel_add:"إضافة رواية", novel_remove:"حذف رواية", work_add:"إضافة عمل", work_remove:"حذف عمل",
+      case_text:"تعديل نص عمل", article_add:"إضافة مقال", article_remove:"حذف مقال"};
+    return '<div class="hub-card">• '+(map[o.op]||o.op)+' — '+esc(o.name||o.title||o.slug||o.case_id||o.id||o.key||o.src||"")+'</div>';
+  }).join("") + '</div>';
+  $("hub-prev").hidden = false;
+};
+
+$("hub-discard").onclick = async function(){
+  if(!confirm("تلغي كل التعديلات المعلّقة وترجّع آخر نسخة منشورة؟")) return;
+  staged = []; renderStage(); await loadContent();
+  note("اتلغت", "كل التعديلات المعلّقة اتمسحت.");
+};
+
+$("hub-reload").onclick = async function(){
+  await loadContent();
+  $("hub-conflict").hidden = true;
+  note("اتحدّثت", "دي أحدث نسخة من الموقع. تعديلاتك المعلّقة لسه موجودة — راجعها وانشر تاني.");
+};
+
+$("hub-publish").onclick = async function(){
+  if(!staged.length || busy) return;
+  if(!confirm("تنشر "+staged.length+" تعديل على الموقع؟")) return;
+  busy = true;
+  try {
+    var r = await api("/api/site/save", {method:"POST", headers: hdrs(), body: JSON.stringify({base_sha: data.sha, ops: staged})});
+    staged = []; renderStage();
+    await loadContent();
+    note("اتنشر", "تعديلاتك اتحفظت وهتظهر على الموقع خلال دقيقة تقريبًا.");
+  } catch(e){
+    if(e.message !== "conflict") alert("النشر ما تمش: " + e.message);
+  }
+  busy = false;
+};
+})();
+</script>
+</body>
+</html>
