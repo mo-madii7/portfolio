@@ -324,6 +324,8 @@ window.pfSetupTestiClamp();
   function ticker(scroller, hoverTarget) {
     /* partners strip runs as a non-stop one-direction train: no hover pause, no manual drag/swipe */
     var train = scroller.classList.contains("pf-partners-grid") || scroller.classList.contains("pf-feat-strip");
+    /* services strip also runs non-stop like the train (owner request), keeping its own speed */
+    var nonstop = train || scroller.classList.contains("pf-sgrid");
     var spd = train ? 65 : SPEED; /* partners strip runs a bit faster per client request */
     var cards = Array.prototype.slice.call(scroller.children);
     if (cards.length < 2) return;
@@ -353,7 +355,7 @@ window.pfSetupTestiClamp();
       clearTimeout(idleTimer);
       idleTimer = setTimeout(function () { paused = false; }, 4000);
     }
-    if (!train) {
+    if (!nonstop) {
       ["pointerdown", "wheel", "touchstart"].forEach(function (ev) {
         scroller.addEventListener(ev, interact, { passive: true });
       });
@@ -382,13 +384,13 @@ window.pfSetupTestiClamp();
       last = t;
       var L = loopLen();
       if (L > 0 && scroller.clientWidth > 0 && scroller.scrollWidth - scroller.clientWidth < L + 2 && scroller.children.length < cards.length * 8) addSet();
-      var running = !reduceMotion && L > 0 && visible && (train || (!paused && !hovered)) && !document.hidden &&
+      var running = !reduceMotion && L > 0 && visible && (nonstop || (!paused && !hovered)) && !document.hidden &&
         !document.body.classList.contains("lb-lock") && !videoPlaying();
       if (running) {
         pos += spd * dt;
         if (pos >= L) pos -= L;
         scroller.scrollLeft = pos;
-      } else if (train) {
+      } else if (nonstop) {
         /* train strip ignores external scroll shifts and snaps back to its own position */
         if (L > 0) { pos = pos % L; scroller.scrollLeft = pos; }
       } else {
