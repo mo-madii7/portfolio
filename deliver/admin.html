@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التسليمات — خاص بمحمد</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deliver.css">
+</head>
+<body>
+<main class="dv-wrap">
+  <header class="dv-head">
+    <a class="dv-back" href="../">← الرئيسية</a>
+    <h1 class="dv-title">لوحة التسليمات</h1>
+    <p class="dv-sub">خاصة بيك إنت بس. مفتاح اللوحة ما بيتحفظش غير في الجلسة دي.</p>
+  </header>
+
+  <section id="da-gate">
+    <label class="dv-label" for="da-key">مفتاح اللوحة</label>
+    <input class="dv-input" id="da-key" type="password" dir="ltr" autocomplete="off">
+    <div class="dv-btn-row">
+      <button class="dv-btn dv-btn-gold" id="da-enter">دخول</button>
+    </div>
+    <div class="dv-callout dv-danger" id="da-gate-err" hidden>
+      <div class="dv-callout-title">مشكلة في الدخول</div>
+      <div class="dv-callout-body" id="da-gate-err-text"></div>
+    </div>
+  </section>
+
+  <div id="da-app" hidden>
+    <section>
+      <h2 class="dv-h2">تسليمة جديدة</h2>
+
+      <div class="da-field"><label class="dv-label" for="da-client">اسم العميل</label>
+        <input class="dv-input" id="da-client" type="text"></div>
+
+      <div class="da-field"><label class="dv-label" for="da-project">اسم التسليمة / المشروع</label>
+        <input class="dv-input" id="da-project" type="text"></div>
+
+      <div class="da-field"><label class="dv-label" for="da-expl">شرح الفكرة</label>
+        <textarea class="dv-textarea" id="da-expl" rows="4"
+          placeholder="اشتغلت إزاي، إيه اللي اتنفّذ من البريف وإيه اللي ما اتنفّذش وليه…"></textarea>
+        <p class="dv-hint">بيظهر للعميل في صفحة التسليم قبل ما يشوف التصميمات.</p></div>
+
+      <div class="da-field"><span class="dv-label">مدة الوصول</span>
+        <div class="dv-btn-row" id="da-hours">
+          <button type="button" class="dv-btn dv-btn-line" data-h="24">٢٤ ساعة</button>
+          <button type="button" class="dv-btn dv-btn-line" data-h="48">٤٨ ساعة</button>
+          <button type="button" class="dv-btn dv-btn-line" data-h="72">٣ أيام</button>
+          <button type="button" class="dv-btn dv-btn-line" data-h="168">أسبوع</button>
+        </div>
+        <p class="dv-hint">المدة دي لاستخدام الكود وتحميل الملفات. حذف الملفات نفسها بيتم يدوي من عندك (من هنا أو من حساب التخزين).</p></div>
+
+      <div class="da-field"><span class="dv-label">الملفات (JPG / PNG / PDF — لحد ٥٠ ميجا للملف)</span>
+        <div class="da-drop">
+          اسحب الملفات هنا أو اختارها من جهازك
+          <input id="da-files" type="file" multiple accept=".jpg,.jpeg,.png,.pdf">
+        </div></div>
+
+      <div class="dv-btn-row">
+        <button class="dv-btn dv-btn-gold" id="da-create">إنشاء التسليمة ورفع الملفات</button>
+      </div>
+      <p class="da-progress" id="da-progress"></p>
+      <div class="dv-callout dv-danger" id="da-create-err" hidden>
+        <div class="dv-callout-title">ناقص بيانات</div>
+        <div class="dv-callout-body" id="da-create-err-text"></div>
+      </div>
+    </section>
+
+    <section class="da-result" id="da-result" hidden>
+      <b class="da-row"><span class="da-mono" style="color:#f2ede4;letter-spacing:0">التسليمة اتعملت — ابعت للعميل:</span></b>
+      <div class="da-result-line"><span class="da-result-label">الكود</span>
+        <span class="da-mono" id="da-out-code"></span>
+        <button class="dv-btn dv-btn-line dv-btn-sm" id="da-copy-code">نسخ الكود</button></div>
+      <div class="da-result-line"><span class="da-result-label">الرابط</span>
+        <span class="da-mono" id="da-out-link" style="font-size:12px;letter-spacing:0"></span>
+        <button class="dv-btn dv-btn-line dv-btn-sm" id="da-copy-link">نسخ الرابط</button></div>
+      <p class="da-meta">الكود بيظهر مرة واحدة هنا بس. لو اتنسى، اعمل تسليمة جديدة.</p>
+    </section>
+
+    <hr class="da-hr">
+
+    <section>
+      <h2 class="dv-h2">التسليمات</h2>
+      <p class="dv-hint">«انتهى الوصول» معناها الكود وقف — الملفات لسه موجودة لحد ما تحذفها إنت.</p>
+      <div id="da-list" style="display:flex;flex-direction:column;gap:14px;margin-top:14px"></div>
+      <div class="dv-btn-row">
+        <button class="dv-btn dv-btn-line" id="da-refresh">تحديث القايمة</button>
+      </div>
+    </section>
+
+    <div class="dv-callout dv-note">
+      <div class="dv-callout-title">ملاحظة أمان</div>
+      <div class="dv-callout-body">كل تسليمة ليها كود طويل عشوائي مش قابل للتخمين، مع حد لمحاولات التخمين وإمكانية الحذف الفوري من هنا. الكود وسيلة وصول قابلة للمشاركة، مش حماية تشفيرية — ابعته للعميل بس.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var API = "https://portfolio-deliver.mohamad-madih-20.workers.dev";
+  var PAGE = "https://mo-madii7.github.io/portfolio/deliver/";
+  var $ = function (id) { return document.getElementById(id); };
+  var key = sessionStorage.getItem("da_key") || "";
+  var hours = 48;
+
+  // duration pill group
+  var hourBtns = Array.prototype.slice.call(document.querySelectorAll("#da-hours .dv-btn"));
+  function paintHours() {
+    hourBtns.forEach(function (b) {
+      var on = Number(b.getAttribute("data-h")) === hours;
+      b.className = "dv-btn " + (on ? "dv-btn-gold" : "dv-btn-line");
+    });
+  }
+  hourBtns.forEach(function (b) {
+    b.addEventListener("click", function () { hours = Number(b.getAttribute("data-h")); paintHours(); });
+  });
+  paintHours();
+
+  function headers(extra) {
+    var h = { "X-Admin-Key": key };
+    if (extra) for (var k in extra) h[k] = extra[k];
+    return h;
+  }
+
+  function gateError(msg) {
+    $("da-gate-err-text").textContent = msg;
+    $("da-gate-err").hidden = false;
+  }
+
+  function enter() {
+    key = $("da-key").value.trim();
+    if (!key) return;
+    $("da-gate-err").hidden = true;
+    fetch(API + "/api/admin/list", { headers: headers() }).then(function (r) {
+      if (r.status === 403) { gateError("المفتاح غلط."); return; }
+      sessionStorage.setItem("da_key", key);
+      $("da-gate").hidden = true;
+      $("da-app").hidden = false;
+      refresh();
+    }).catch(function () { gateError("في مشكلة في الاتصال."); });
+  }
+  $("da-enter").addEventListener("click", enter);
+  $("da-key").addEventListener("keydown", function (e) { if (e.key === "Enter") enter(); });
+  if (key) { $("da-key").value = key; enter(); }
+
+  function refresh() {
+    fetch(API + "/api/admin/list", { headers: headers() })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var list = $("da-list");
+        list.innerHTML = "";
+        if (!data.deliveries.length) {
+          list.innerHTML = '<p class="da-meta">مفيش تسليمات لسه.</p>';
+          return;
+        }
+        data.deliveries.forEach(function (d) {
+          var card = document.createElement("div");
+          card.className = "da-card";
+          var chip = d.access === "active" ? '<span class="da-chip da-chip-active">شغالة</span>'
+            : d.access === "expired" ? '<span class="da-chip da-chip-expired">انتهى الوصول — في انتظار الحذف</span>'
+            : '<span class="da-chip da-chip-deleted">اتحذفت</span>';
+          card.innerHTML =
+            '<div class="da-row"><b></b> ' + chip + '</div>' +
+            '<div class="da-meta"></div>' +
+            '<div class="da-meta da-count-line"></div>';
+          card.querySelector("b").textContent = d.project + " — " + d.client;
+          card.querySelector(".da-meta").textContent =
+            d.file_count + " ملفات · اتعملت " + new Date(d.created_at).toLocaleString("ar-EG") +
+            " · الوصول بيقف " + new Date(d.expires_at).toLocaleString("ar-EG");
+          if (d.access === "active") {
+            var line = card.querySelector(".da-count-line");
+            var left = new Date(d.expires_at).getTime() - Date.now();
+            var h = Math.floor(left / 3600000), m = Math.floor((left % 3600000) / 60000);
+            line.textContent = "باقي على قفل الوصول: " + h + " ساعة و " + m + " دقيقة";
+          }
+          if (d.access !== "deleted") {
+            var btn = document.createElement("button");
+            btn.className = "da-danger";
+            btn.textContent = "حذف الملفات نهائيًا";
+            btn.addEventListener("click", function () {
+              if (!confirm("هتتحذف ملفات التسليمة دي من التخزين نهائيًا. متأكد؟")) return;
+              btn.disabled = true;
+              fetch(API + "/api/admin/delete", {
+                method: "POST",
+                headers: headers({ "Content-Type": "application/json" }),
+                body: JSON.stringify({ id: d.id }),
+              }).then(function (r) { return r.json(); }).then(function (res) {
+                if (res.ok) refresh();
+                else { alert("في ملفات محصلهاش حذف: " + (res.failed_keys || []).length); refresh(); }
+              });
+            });
+            card.appendChild(btn);
+          }
+          list.appendChild(card);
+        });
+      });
+  }
+  $("da-refresh").addEventListener("click", refresh);
+
+  function createError(msg) {
+    $("da-create-err-text").textContent = msg;
+    $("da-create-err").hidden = false;
+  }
+
+  $("da-create").addEventListener("click", function () {
+    $("da-create-err").hidden = true;
+    var client = $("da-client").value.trim();
+    var project = $("da-project").value.trim();
+    var expl = $("da-expl").value.trim();
+    var files = $("da-files").files;
+    if (!client || !project || !expl) {
+      createError("اكتب اسم العميل واسم التسليمة وشرح الفكرة الأول."); return;
+    }
+    if (!files.length) { createError("اختار ملفات التسليمة الأول."); return; }
+    for (var i = 0; i < files.length; i++) {
+      var ok = /\.(jpe?g|png|pdf)$/i.test(files[i].name);
+      if (!ok || files[i].size > 50 * 1024 * 1024) {
+        createError("ملف مش مقبول: " + files[i].name + " (JPG/PNG/PDF بس، لحد ٥٠ ميجا)"); return;
+      }
+    }
+    var btn = $("da-create");
+    btn.disabled = true;
+    var prog = $("da-progress");
+    prog.textContent = "بيُنشئ التسليمة…";
+    fetch(API + "/api/admin/create", {
+      method: "POST",
+      headers: headers({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ client: client, project: project, explanation: expl, hours: hours }),
+    }).then(function (r) { return r.json(); }).then(function (created) {
+      if (!created.id) throw new Error(created.error || "create_failed");
+      var seq = Promise.resolve();
+      Array.prototype.forEach.call(files, function (f, idx) {
+        seq = seq.then(function () {
+          prog.textContent = "بيرفع " + (idx + 1) + "/" + files.length + ": " + f.name;
+          return fetch(API + "/api/admin/upload?id=" + encodeURIComponent(created.id) +
+            "&name=" + encodeURIComponent(f.name), {
+            method: "POST",
+            headers: headers({ "Content-Type": f.type || "application/octet-stream" }),
+            body: f,
+          }).then(function (r) { return r.json(); }).then(function (res) {
+            if (!res.ok) throw new Error("upload_failed: " + f.name);
+          });
+        });
+      });
+      return seq.then(function () { return created; });
+    }).then(function (created) {
+      prog.textContent = "";
+      $("da-result").hidden = false;
+      var link = PAGE + "?code=" + created.code;
+      $("da-out-code").textContent = created.code;
+      $("da-out-link").textContent = link;
+      $("da-copy-code").onclick = function () { navigator.clipboard.writeText(created.code); };
+      $("da-copy-link").onclick = function () { navigator.clipboard.writeText(link); };
+      refresh();
+    }).catch(function (e) {
+      createError("حصلت مشكلة: " + e.message);
+      prog.textContent = "";
+    }).finally(function () { btn.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
