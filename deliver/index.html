@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="deliver.css">
+<link rel="stylesheet" href="deliver.css?v=2">
 </head>
 <body>
 <main class="dv-wrap">
@@ -106,7 +106,15 @@
   <footer class="dv-foot">
     <p>الملفات بتتحمّل بنسختها الأصلية زي ما اتسلّمت، من غير ضغط ولا تعديل.</p>
   </footer>
+  <!-- in-page image preview -->
+  <div class="dv-lightbox" id="dv-lightbox" hidden>
+    <button class="dv-lb-close" id="dv-lb-close" aria-label="قفل المعاينة">✕</button>
+    <figure class="dv-lb-fig">
+      <img id="dv-lb-img" alt="">
+      <figcaption id="dv-lb-cap"></figcaption>
+    </figure>
+  </div>
 </main>
-<script src="deliver.js"></script>
+<script src="deliver.js?v=2"></script>
 </body>
 </html>
