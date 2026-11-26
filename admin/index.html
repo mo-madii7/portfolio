@@ -434,6 +434,9 @@ function renderTesti(){
     var nameEnI = el.querySelector('[data-ts-name-en="'+CSS.escape(n)+'"]');
     var textEnI = el.querySelector('[data-ts-text-en="'+CSS.escape(n)+'"]');
     if(!nn || !nt) return alert("الاسم والنص مطلوبين.");
+    /* If the Arabic changed but the English is still the old auto-translation, clear it so it re-translates. */
+    if (nt !== t.text && textEnI.value.trim() === (t.text_en||"").trim()) textEnI.value = "";
+    if (nn !== t.name && nameEnI.value.trim() === (t.name_en||"").trim()) nameEnI.value = "";
     busy = true;
     var failed = await autoFillEn(nn, nt, nameEnI, textEnI);
     busy = false;
