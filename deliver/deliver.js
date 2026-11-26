@@ -45,9 +45,11 @@
     countdownTimer = setInterval(update, 1000);
   }
 
+  var fileState = "0";
   function fileUrl(code, name, inline) {
     return API + "/api/file?code=" + encodeURIComponent(code) +
-      "&name=" + encodeURIComponent(name) + (inline ? "&inline=1" : "");
+      "&name=" + encodeURIComponent(name) + (inline ? "&inline=1" : "") +
+      "&s=" + fileState;
   }
 
   function renderRoom(code, data) {
@@ -55,6 +57,7 @@
     $("dv-client").textContent = "تسليمة خاصة بـ " + data.client;
     $("dv-explain").textContent = data.explanation;
     var locked = !data.downloads_enabled;
+    fileState = data.downloads_enabled ? "1" : "0";
     if (banner) banner.hidden = !locked;
 
     var facts = $("dv-facts");
