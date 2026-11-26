@@ -514,9 +514,6 @@ button{font:inherit;color:inherit}
       #000 92%,
       transparent);
 }
-.pf-wrapmarq:hover .pf-wrapmarq-track {
-  animation-play-state: paused;
-}
 @media (min-width: 721px) {
   body {
     background: #0b0a09;
