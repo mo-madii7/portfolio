@@ -257,7 +257,7 @@
     x.fillStyle = "#0b1b3d"; x.fillRect(0, 0, W, 250);
     x.fillStyle = "#f97316"; x.fillRect(0, 250, W, 8);
     txt(quote ? T("عرض سعر", "QUOTATION") : T("فاتورة", "INVOICE"), start, 150, 76, 700, "#ffffff");
-    txt("Mo.Madii", end, 118, 44, 700, "#fb923c", en ? "right" : "left");
+    txt("Mo.Madii7", end, 118, 44, 700, "#fb923c", en ? "right" : "left");
     txt(T("محمد مديح · مصمم جرافيك ومونتير", "Mohamad Madih · Graphic designer & video editor"), end, 168, 24, 400, "#cbd5e1", en ? "right" : "left");
     var y = 340, lab = "#64748b", ink = "#0b1b3d";
     function pair(l, v, Y, X, al) { txt(l, X, Y, 24, 400, lab, al); txt(v, X, Y + 42, 32, 600, ink, al); }
