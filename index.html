@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2026-11-26s">
-<script>(function(){var h=location.hash.slice(1),v="home";if(h==="works"||/^pf-case-/.test(h))v="works";else if(h==="services"||h==="pf-brief")v="services";else if(h==="videos"||h==="pf-vid")v="videos";else if(h==="about"||h==="pf-novels"||h==="pf-articles")v="about";document.documentElement.setAttribute("data-view",v)})();</script>
+<script>(function(){var h=location.hash.slice(1),v="home";if(h==="works"||/^pf-case-/.test(h))v="works";else if(h==="services"||h==="pf-brief"||h==="pf-receive")v="services";else if(h==="videos"||h==="pf-vid")v="videos";else if(h==="about"||h==="pf-novels"||h==="pf-articles")v="about";document.documentElement.setAttribute("data-view",v)})();</script>
 <noscript><style>.pf-rv{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 <script type="application/ld+json">
 {
@@ -189,6 +189,12 @@
 </form></div>
 </section>
 <!-- المونتاج: أعمال فيديو. لإضافة فيديو جديد انسخ كارت pf-vid-card داخل pf-vid-grid. -->
+<section class="pf-brief pf-receive" id="pf-receive">
+<span class="pf-contact-kicker" data-en="Your delivery">تسليمتك</span>
+<h2 class="pf-contact-title" data-en="Receive your project">استلم مشروعك</h2>
+<p class="pf-contact-sub" data-en="Enter the delivery code Mohamad sent you to read the idea notes and download your original files.">اكتب كود التسليم اللي وصلك من محمد، اقرأ شرح الفكرة، وحمّل ملفاتك الأصلية.</p>
+<div class="pf-casetoggle-wrap"><a class="pf-pill pf-pill-gold" href="deliver/" data-en="Collect your work">استلام الأعمال</a></div>
+</section>
 <section class="pf-vid" id="pf-vid">
 <span class="pf-contact-kicker" data-en="Video editing">مونتاج</span>
 <h2 class="pf-contact-title pf-vid-title" data-en="Video Work">أعمال المونتاج</h2>
@@ -309,7 +315,7 @@
 <style>button.pf-pill:not(.pf-pill-ink){background:transparent}button.pf-pill{cursor:pointer}.pf-pay{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:12px}#pf-pay-panel{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}#pf-pay-panel[hidden],#pf-wal[hidden]{display:none}#pf-wal{flex-basis:100%;display:flex;flex-direction:column;gap:8px}.pf-pay-row{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid currentColor;border-radius:12px}.pf-pay-row span{min-width:110px}.pf-pay-copy{font:inherit;cursor:pointer;padding:4px 12px;border-radius:999px;border:1px solid currentColor;background:none;color:inherit}</style>
 <script>(function(){function tg(b,p){b.addEventListener("click",function(){var o=p.hidden;p.hidden=!o;b.setAttribute("aria-expanded",o?"true":"false")})}var b=document.getElementById("pf-pay-btn"),p=document.getElementById("pf-pay-panel"),wb=document.getElementById("pf-wal-btn"),w=document.getElementById("pf-wal");tg(b,p);tg(wb,w);document.querySelectorAll(".pf-pay-copy").forEach(function(c){c.addEventListener("click",function(){var v=c.getAttribute("data-copy"),d=function(){var en=document.documentElement.lang==="en";c.textContent=en?"Copied":"تم النسخ";setTimeout(function(){c.textContent=document.documentElement.lang==="en"?"Copy":"نسخ"},1500)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(d,d)}else{var a=document.createElement("textarea");a.value=v;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();d()}})})})();</script>
 <div class="pf-contact-foot"><span data-en="Mobile &amp;amp; WhatsApp (primary): &lt;bdi&gt;0111 907 2800&lt;/bdi&gt; · also on WhatsApp: &lt;bdi&gt;0155 038 1752&lt;/bdi&gt;">موبايل وواتساب (الأساسي): <bdi>0111 907 2800</bdi> · واتساب كمان: <bdi>0155 038 1752</bdi></span></div></section><footer class="file-closing" data-en="© Mo.Madii7 2026 . All rights reserved"><bdi>© Mo.Madii7 2026</bdi> . كل الحقوق محفوظة</footer><footer class="pf-views" id="pf-views" hidden><span data-en="Page views">مشاهدات الصفحة</span>: <bdi id="pf-views-num"></bdi></footer></div></main>
-<script src="script.js?v=2026-11-26l" defer></script>
+<script src="script.js?v=2026-11-26m" defer></script>
 <script src="cv/cv-data.js?v=2026-11-25l" defer></script>
 <script data-goatcounter="https://mo-madih.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
