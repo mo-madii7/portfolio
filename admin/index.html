@@ -98,6 +98,7 @@ details.hub-en summary{cursor:pointer;opacity:.7;font-size:.85rem}
       <div class="dv-btn-row">
         <button class="dv-btn dv-btn-line" id="ar-preview" type="button">معاينة المقال</button>
         <button class="dv-btn dv-btn-gold" id="ar-add" type="button">جهّز المقال للنشر</button>
+        <button class="dv-btn dv-btn-line" id="ar-cancel" type="button" hidden>إلغاء التعديل</button>
       </div>
       <p class="dv-hint">«جهّز» بيضيفه للتعديلات المعلّقة فوق، والمقال ما يظهرش على الموقع غير بعد ما تدوس «انشر على الموقع». النشر بياخد دقيقة بالظبط تقريبًا عشان يظهر.</p>
     </section>
@@ -180,6 +181,7 @@ var API = "https://portfolio-deliver.mohamad-madih-20.workers.dev";
 var key = sessionStorage.getItem("hub_site_key") || "";
 var data = null;          // parsed site content (server state)
 var staged = [];          // pending ops
+var editingSlug = null;   // article being edited
 var busy = false;
 
 function $(id){return document.getElementById(id);}
@@ -224,9 +226,25 @@ function renderArticles(){
   } else {
     el.innerHTML = data.articles.map(function(a){
       return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(a.title)+'</strong><div class="hub-muted">'+esc(a.date_ar)+' — articles/'+esc(a.slug)+'.html</div></div>'+
-        '<button class="dv-btn dv-btn-line" data-ar-del="'+esc(a.slug)+'" type="button">امسح</button></div></div>';
+        '<span><button class="dv-btn dv-btn-line" data-ar-edit="'+esc(a.slug)+'" type="button">عدّل</button> '+
+        '<button class="dv-btn dv-btn-line" data-ar-del="'+esc(a.slug)+'" type="button">امسح</button></span></div></div>';
     }).join("");
   }
+  el.querySelectorAll("[data-ar-edit]").forEach(function(b){
+    b.onclick = async function(){
+      var slug = b.getAttribute("data-ar-edit");
+      try {
+        var a = await api("/api/site/article?slug="+encodeURIComponent(slug), {headers: hdrs()});
+        $("ar-title").value = a.title; $("ar-slug").value = a.slug; $("ar-slug").disabled = true;
+        $("ar-date").value = a.date_ar; $("ar-excerpt").value = a.excerpt; $("ar-body").value = a.body;
+        editingSlug = a.slug;
+        $("ar-add").textContent = "جهّز التعديل للنشر";
+        $("ar-cancel").hidden = false;
+        window.scrollTo(0, $("ar-title").getBoundingClientRect().top + window.scrollY - 120);
+        note("وضع التعديل", "بتعدّل على «"+a.title+"». الرابط ثابت عشان ما يتكسرش.");
+      } catch(e){ alert("مش قادر أجيب المقال: "+e.message); }
+    };
+  });
   el.querySelectorAll("[data-ar-del]").forEach(function(b){
     b.onclick = function(){
       if(!confirm("تمسح المقال ده من الموقع؟")) return;
@@ -323,8 +341,28 @@ function renderTesti(){
   var el = $("ts-list");
   el.innerHTML = data.testimonials.map(function(t){
     return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(t.name)+'</strong><div class="hub-muted">'+esc(t.text.slice(0,120))+(t.text.length>120?"…":"")+'</div></div>'+
-      '<button class="dv-btn dv-btn-line" data-ts-del="'+esc(t.name)+'" type="button">امسح</button></div></div>';
+      '<span><button class="dv-btn dv-btn-line" data-ts-edit="'+esc(t.name)+'" type="button">عدّل</button> '+
+      '<button class="dv-btn dv-btn-line" data-ts-del="'+esc(t.name)+'" type="button">امسح</button></span></div>'+
+      '<div class="hub-fields" data-ts-form="'+esc(t.name)+'" hidden>'+
+      '<input class="dv-input" data-ts-name="'+esc(t.name)+'" type="text" value="'+esc(t.name)+'">'+
+      '<textarea class="dv-textarea" data-ts-text="'+esc(t.name)+'" rows="3">'+esc(t.text)+'</textarea>'+
+      '<div class="dv-btn-row"><button class="dv-btn dv-btn-gold" data-ts-save="'+esc(t.name)+'" type="button">جهّز التعديل</button></div></div></div>';
   }).join("");
+  el.querySelectorAll("[data-ts-edit]").forEach(function(b){ b.onclick = function(){
+    var n = b.getAttribute("data-ts-edit");
+    var f = el.querySelector('[data-ts-form="'+CSS.escape(n)+'"]');
+    f.hidden = !f.hidden;
+  };});
+  el.querySelectorAll("[data-ts-save]").forEach(function(b){ b.onclick = function(){
+    var n = b.getAttribute("data-ts-save");
+    var t = data.testimonials.find(function(x){return x.name===n;});
+    var nn = el.querySelector('[data-ts-name="'+CSS.escape(n)+'"]').value.trim();
+    var nt = el.querySelector('[data-ts-text="'+CSS.escape(n)+'"]').value.trim();
+    if(!nn || !nt) return alert("الاسم والنص مطلوبين.");
+    if(nn===t.name && nt===t.text) return;
+    stage({op:"testi_edit", name:t.name, new_name:nn, text:nt}, "تعديل رأي");
+    t.name = nn; t.text = nt; renderTesti();
+  };});
   el.querySelectorAll("[data-ts-del]").forEach(function(b){ b.onclick = function(){
     var n = b.getAttribute("data-ts-del");
     if(!confirm("تمسح رأي «"+n+"»؟")) return;
@@ -453,16 +491,32 @@ $("ar-preview").onclick = function(){
 };
 $("hub-prev-close").onclick = function(){ $("hub-prev").hidden = true; $("hub-prev-body").innerHTML=""; };
 
+function resetArticleForm(){
+  editingSlug = null;
+  $("ar-add").textContent = "جهّز المقال للنشر";
+  $("ar-cancel").hidden = true;
+  $("ar-slug").disabled = false;
+  $("ar-title").value=$("ar-slug").value=$("ar-excerpt").value=$("ar-body").value="";
+}
+$("ar-cancel").onclick = function(){ resetArticleForm(); };
 $("ar-add").onclick = function(){
   var title = $("ar-title").value.trim(), excerpt = $("ar-excerpt").value.trim(),
       body = $("ar-body").value.trim(), date_ar = $("ar-date").value.trim();
-  var slug = $("ar-slug").value.trim().toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
   if(!title || !body) return alert("العنوان ونص المقال مطلوبين.");
+  if (editingSlug) {
+    stage({op:"article_edit", slug:editingSlug, title:title, excerpt:excerpt, date_ar:date_ar, body:body}, "تعديل مقال");
+    var a = data.articles.find(function(x){return x.slug===editingSlug;});
+    if(a){ a.title=title; a.excerpt=excerpt; a.date_ar=date_ar; }
+    resetArticleForm();
+    renderArticles();
+    return;
+  }
+  var slug = $("ar-slug").value.trim().toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
   if(!slug) slug = "article-" + Date.now().toString(36);
   if(data.articles.some(function(a){return a.slug===slug;})) return alert("الرابط ده مستخدم قبل كده، غيّره.");
   stage({op:"article_add", slug:slug, title:title, excerpt:excerpt, date_ar:date_ar, body:body}, "مقال جديد");
   data.articles.push({slug:slug, title:title, excerpt:excerpt, date_ar:date_ar});
-  $("ar-title").value=$("ar-slug").value=$("ar-excerpt").value=$("ar-body").value="";
+  resetArticleForm();
   renderArticles();
 };
 
