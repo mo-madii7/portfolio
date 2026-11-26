@@ -124,3 +124,20 @@ button{font:inherit;color:inherit}
 .dv-lb-fig figcaption{font-size:12.5px;color:rgba(242,237,228,.6);text-align:center;direction:ltr}
 .dv-lb-close{position:absolute;top:16px;inset-inline-end:16px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(242,237,228,.25);background:rgba(242,237,228,.06);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center}
 .dv-lb-close:hover{background:rgba(242,237,228,.14)}
+
+/* preview-mode banner + admin additions (v3) */
+.dv-preview-banner{border:1.5px solid rgb(254 219 12/.5);background:rgb(254 219 12/.08);color:#fedb0c;
+  border-radius:14px;padding:14px 18px;font-size:14px;line-height:1.9;margin-bottom:6px}
+.dv-preview-banner b{font-weight:800}
+.dv-pdf-locked{color:rgb(242 237 228/.6);cursor:default;font-weight:600;font-size:13px;text-align:center;padding:0 10px}
+.da-chip-dl{background:rgb(254 219 12/.14);color:#fedb0c}
+.da-chip-preview{background:rgb(255 122 24/.14);color:#ffb37a}
+.da-files{display:flex;flex-direction:column;gap:6px;border-top:1px solid rgb(242 237 228/.12);padding-top:10px}
+.da-file-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:rgb(242 237 228/.8)}
+.da-file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:right}
+.da-danger-sm{padding:4px 14px;font-size:12px;flex-shrink:0}
+.da-toggle{background:none;border:1.5px solid rgb(127 224 160/.5);color:#7fe0a0;border-radius:999px;
+  padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;align-self:flex-start}
+.da-toggle:hover{border-color:#7fe0a0}
+.da-add-lbl{cursor:pointer}
+.da-add-lbl.da-busy{opacity:.6;pointer-events:none}
