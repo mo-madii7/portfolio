@@ -114,7 +114,7 @@
   </div>
 </main>
 
-<script src="invoice-render.js?v=2"></script>
+<script src="invoice-render.js?v=3"></script>
 <script>
 (function () {
   "use strict";
@@ -341,7 +341,7 @@
     return fetch(API + "/api/admin/" + path, { method: "POST", headers: headers({ "Content-Type": "application/json" }), body: JSON.stringify(payload) }).then(function (r) { return r.json(); });
   }
   function docToInv(doc, draft) {
-    return { kind: doc.kind, invoice_no: doc.doc_no || (draft ? "DRAFT" : ""), issued_at: doc.issued_at || new Date().toISOString(), client: doc.client, project: doc.project || "", amount: doc.price, items: JSON.parse(doc.items) };
+    return { kind: doc.kind, invoice_no: doc.doc_no || (draft ? "DRAFT" : ""), issued_at: doc.issued_at || new Date().toISOString(), delivery_date: doc.created_at || new Date().toISOString(), client: doc.client, project: doc.project || "", amount: doc.price, items: JSON.parse(doc.items) };
   }
   function previewDoc(doc, lang, draft, mount) {
     window.MMInv.render(docToInv(doc, draft), lang).then(function (r) {

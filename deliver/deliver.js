@@ -180,19 +180,39 @@
       im.src = "../images/5UPEZOA6.png";
     });
   }
-  function drawStamp(x, cx, cy, img) {
-    var R = 120, col = "#c2410c";
-    x.save(); x.translate(cx, cy); x.scale(0.8, 0.8); x.rotate(-0.2); x.globalAlpha = 0.85;
-    x.strokeStyle = col; x.lineWidth = 7; x.beginPath(); x.arc(0, 0, R, 0, Math.PI * 2); x.stroke();
-    x.lineWidth = 2.5; x.beginPath(); x.arc(0, 0, R - 14, 0, Math.PI * 2); x.stroke();
-    if (img) {
-      x.globalCompositeOperation = "multiply";
-      x.drawImage(img, 225, 245, 345, 300, -78, -78, 156, 135);
-      x.globalCompositeOperation = "source-over";
+  var stampCache = null;
+  function inkStamp(img) {
+    if (stampCache) return stampCache;
+    var sw = 350, sh = 290, k = 2, w = sw * k, h = sh * k;
+    var o = document.createElement("canvas"); o.width = w; o.height = h;
+    var g = o.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, w, h);
+    g.drawImage(img, 225, 255, sw, sh, 0, 0, w, h);
+    var d = g.getImageData(0, 0, w, h), p = d.data, s = 7;
+    function rnd() { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }
+    var gw = 16, gh = 14, grid = [], i, j;
+    for (i = 0; i < gw * gh; i++) grid.push(rnd());
+    function blot(px, py) {
+      var fx = px / w * (gw - 1), fy = py / h * (gh - 1), ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy;
+      var a = grid[iy * gw + ix], b = grid[iy * gw + Math.min(ix + 1, gw - 1)], c = grid[Math.min(iy + 1, gh - 1) * gw + ix], e = grid[Math.min(iy + 1, gh - 1) * gw + Math.min(ix + 1, gw - 1)];
+      return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + e * tx) * ty;
     }
-    x.direction = "ltr"; x.textAlign = "center"; x.fillStyle = col; x.font = "700 24px Alexandria, Arial, sans-serif";
-    x.fillText("MO.MADII", 0, 82);
-    x.font = "600 15px Alexandria, Arial, sans-serif"; x.fillText("DESIGN \u00B7 VIDEO", 0, -92);
+    for (j = 0; j < h; j++) for (i = 0; i < w; i++) {
+      var n = (j * w + i) * 4, r = p[n], gg = p[n + 1], b2 = p[n + 2], mn = Math.min(r, gg, b2);
+      var a0 = Math.max(0, Math.min(1, (238 - mn) / 40));
+      var yellow = r > 200 && b2 < 140 && gg > 150;
+      if (yellow) { p[n] = 245; p[n + 1] = 176; p[n + 2] = 0; } else { p[n] = 214; p[n + 1] = 74; p[n + 2] = 8; }
+      var t = 0.72 + 0.28 * blot(i, j);
+      var f = rnd(), grain = f < 0.06 ? 0.15 : 0.85 + 0.15 * f;
+      p[n + 3] = Math.round(255 * a0 * t * grain);
+    }
+    g.putImageData(d, 0, 0);
+    stampCache = o; return o;
+  }
+  function drawStamp(x, cx, cy, img) {
+    if (!img) return;
+    var o = inkStamp(img);
+    x.save(); x.translate(cx, cy); x.rotate(-0.2); x.globalAlpha = 0.9;
+    x.drawImage(o, -115, -80, 230, 190);
     x.restore();
   }
   function invMsg(ar, en, bad) {
@@ -300,10 +320,10 @@
       });
       y += boxH + 50;
     }
-    drawStamp(x, en ? W - M - 140 : M + 140, y + 40, stamp);
+    drawStamp(x, en ? W - M - 140 : M + 140, y + 85, stamp);
     txt(T("للاستفسار: واتساب 01119072800", "Questions: WhatsApp 01119072800"), start, y, 26, 400, lab);
     txt(T("شكرًا لتعاملك معنا", "Thank you for your business"), start, y + 50, 26, 400, lab);
-    c._end = y + 140;
+    c._end = y + 190;
     return c;
   }
   function makeInvoice(code) {
