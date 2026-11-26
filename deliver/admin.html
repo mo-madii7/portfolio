@@ -54,6 +54,10 @@
         </div>
         <p class="dv-hint">المدة دي لاستخدام الكود وتحميل الملفات. الملفات وملاحظات العميل بتتحذف تلقائيًا في نفس لحظة انتهاء المدة (من غير أي مهلة زيادة). وتقدر تحذفها يدوي قبل كده من هنا.</p></div>
 
+      <div class="da-field"><label class="dv-label" for="da-price">سعر الفاتورة (جنيه) — اختياري</label>
+        <input class="dv-input" id="da-price" type="number" min="1" step="1" inputmode="numeric" dir="ltr" placeholder="مثال: 1500">
+        <p class="dv-hint">لو فاضي مفيش فاتورة. بعد الإنشاء تفعّل «الفاتورة جاهزة» من قايمة التسليمات عشان العميل يقدر يحمّلها.</p></div>
+
       <div class="da-field"><span class="dv-label">الملفات (JPG / PNG / PDF — لحد ٥٠ ميجا للملف)</span>
         <div class="da-drop">
           اسحب الملفات هنا أو اختارها من جهازك
@@ -358,6 +362,53 @@
               });
             });
             card.appendChild(tg);
+
+            // invoice: price + "ready" tick (client sees the invoice only after the tick)
+            var inv = document.createElement("div");
+            inv.className = "da-invoice";
+            inv.style.cssText = "margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:10px";
+            var invT = document.createElement("b");
+            invT.textContent = "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : "");
+            var prRow = document.createElement("div");
+            prRow.style.cssText = "display:flex;gap:8px;align-items:center;flex-wrap:wrap";
+            var prIn = document.createElement("input");
+            prIn.className = "dv-input"; prIn.type = "number"; prIn.min = "1"; prIn.step = "1"; prIn.dir = "ltr";
+            prIn.placeholder = "السعر بالجنيه"; prIn.style.maxWidth = "160px";
+            prIn.value = d.price || ""; prIn.disabled = !!d.invoice_no;
+            var prSave = document.createElement("button");
+            prSave.className = "da-toggle"; prSave.textContent = "حفظ السعر"; prSave.disabled = !!d.invoice_no;
+            prRow.appendChild(prIn); prRow.appendChild(prSave);
+            var tkLbl = document.createElement("label");
+            tkLbl.style.cssText = "display:flex;gap:8px;align-items:center;cursor:pointer";
+            var tk = document.createElement("input");
+            tk.type = "checkbox"; tk.checked = !!d.invoice_ready; tk.disabled = !d.price;
+            var tkTxt = document.createElement("span");
+            tkTxt.textContent = "الفاتورة جاهزة (العميل يقدر يحمّلها)";
+            tkLbl.appendChild(tk); tkLbl.appendChild(tkTxt);
+            var invHint = document.createElement("p");
+            invHint.className = "dv-hint";
+            invHint.textContent = d.invoice_no ? "اتصدرت برقم " + d.invoice_no + " ومبقاش ينفع تغيّر السعر." : (d.price ? "زرار الفاتورة هيظهر للعميل بعد ما تفعّل «جاهزة»." : "اكتب السعر الأول.");
+            function invPost(payload) {
+              return fetch(API + "/api/admin/set-invoice", {
+                method: "POST",
+                headers: headers({ "Content-Type": "application/json" }),
+                body: JSON.stringify(Object.assign({ id: d.id }, payload)),
+              }).then(function (r) { return r.json(); }).then(function (res) {
+                if (!res.ok) alert("حصلت مشكلة في الفاتورة: " + (res.error || "غير معروف"));
+                refresh();
+              });
+            }
+            prSave.addEventListener("click", function () {
+              prSave.disabled = true;
+              invPost({ price: prIn.value ? Number(prIn.value) : null });
+            });
+            tk.addEventListener("change", function () {
+              if (tk.checked && !confirm("العميل هيقدر يحمّل الفاتورة بمبلغ " + d.price + " جنيه. متأكد؟")) { tk.checked = false; return; }
+              tk.disabled = true;
+              invPost({ ready: tk.checked });
+            });
+            inv.appendChild(invT); inv.appendChild(prRow); inv.appendChild(tkLbl); inv.appendChild(invHint);
+            card.appendChild(inv);
           }
           if (d.access === "active") {
             var line = card.querySelector(".da-count-line");
@@ -417,7 +468,7 @@
     fetch(API + "/api/admin/create", {
       method: "POST",
       headers: headers({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ client: client, project: project, explanation: expl, hours: hours }),
+      body: JSON.stringify({ client: client, project: project, explanation: expl, hours: hours, price: ($("da-price").value || null) }),
     }).then(function (r) { return r.json(); }).then(function (created) {
       if (!created.id) throw new Error(created.error || "create_failed");
       var seq = Promise.resolve();
