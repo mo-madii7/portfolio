@@ -31,6 +31,8 @@
     '.pf-mrow{margin:16px 0 4px}',
     '.pf-mhl{outline:2px solid #f6c434;box-shadow:0 0 0 6px rgba(246,196,52,.18);transition:box-shadow .3s}',
     '.pf-scard[data-mk]{cursor:pointer}',
+    '@media(min-width:641px){.pf-mpanel{padding-inline:max(48px,calc((100% - 1240px)/2));box-sizing:border-box;margin:22px 0 30px}.pf-mgrid{grid-template-columns:repeat(2,1fr);gap:16px}.pf-mcard{padding:20px}.pf-mh{font-size:24px}.pf-mp{max-width:46em}}',
+    '@media(min-width:900px){.pf-mgrid.pf-mg4{grid-template-columns:repeat(4,1fr)}.pf-mgrid.pf-mg3{grid-template-columns:repeat(3,1fr)}}',
     '.pf-mbtn{padding:12px 18px;border-radius:999px;border:0;background:#f6c434;color:#17130a;font-weight:700;font-size:15px;font-family:inherit;text-decoration:none;display:inline-block}'
   ].join("\n");
   document.head.appendChild(css);
@@ -61,7 +63,7 @@
     if (kind === 1) {
       w.appendChild(mk("h2", "pf-mh", "الباقات", "Packages"));
       w.appendChild(mk("p", "pf-mp", "باقات جاهزة بسعر أوضح لو شغلك متكرر. لو عايز حاجة مختلفة اطلب عرض سعر.", "Ready-made packages with clearer pricing for recurring work. Need something different? Request a quote."));
-      var g2 = mk("div", "pf-mgrid");
+      var g2 = mk("div", "pf-mgrid pf-mg3");
   [
     ["باقة سوشيال ٨ تصميمات", "Social, 8 designs", "هوية موحدة وقوالب لحسابك كل شهر.", "A consistent look and templates for your account, monthly.", "1,500"],
     ["باقة سوشيال ١٢ تصميم", "Social, 12 designs", "للحسابات النشيطة.", "For active accounts.", "2,200"],
@@ -75,7 +77,7 @@
     } else {
       w.appendChild(mk("h2", "pf-mh", "الأسعار والطلبات", "Prices & requests"));
       w.appendChild(mk("p", "pf-mp", "أسعار البداية لكل خدمة. السعر النهائي بيتحدد حسب المطلوب.", "Starting prices for each service. The final price depends on what you need."));
-      var g3 = mk("div", "pf-mgrid");
+      var g3 = mk("div", "pf-mgrid pf-mg4");
   [
     ["هويات بصرية وشعارات", "Visual identities & logos", "1,500"],
     ["أغلفة كتب (إلكتروني)", "Book covers (e-book)", "250"],
