@@ -120,6 +120,8 @@
     });
 
     $("dv-download-all").hidden = locked;
+    var dlHint = $("dv-dl-hint");
+    if (dlHint) dlHint.hidden = locked;
     $("dv-download-all").onclick = function () {
       data.files.forEach(function (f, i) {
         setTimeout(function () {
