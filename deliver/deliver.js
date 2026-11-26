@@ -10,7 +10,16 @@
   var banner = $("dv-preview-banner");
   var codeInput = $("dv-code"), errBox = $("dv-entry-err"), errText = $("dv-entry-err-text");
   var countdownTimer = null;
+  var KEY = "pf-lang";
+  function isEn() { return document.documentElement.lang === "en"; }
+  function T(ar, en) { return isEn() ? en : ar; }
+  var lastRoom = null, lastErr = null;
 
+  var EN_ERR = {
+    "اكتب الكود الأول.": "Enter the code first.",
+    "محاولات كتير غلط. استنى شوية وجرب تاني.": "Too many wrong attempts. Wait a little and try again.",
+    "في مشكلة في الاتصال. جرب تاني بعد شوية.": "There is a connection problem. Try again in a moment."
+  };
   function show(which) {
     entry.hidden = which !== "entry";
     room.hidden = which !== "room";
@@ -20,14 +29,15 @@
   }
 
   function entryError(msg) {
-    errText.textContent = msg;
+    lastErr = msg;
+    errText.textContent = isEn() ? (EN_ERR[msg] || msg) : msg;
     errBox.hidden = false;
   }
 
   function fmtSize(bytes) {
-    if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + " ميجا";
-    if (bytes >= 1024) return Math.round(bytes / 1024) + " كيلو";
-    return bytes + " بايت";
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + T(" ميجا", " MB");
+    if (bytes >= 1024) return Math.round(bytes / 1024) + T(" كيلو", " KB");
+    return bytes + T(" بايت", " B");
   }
 
   function tick(expiresAt) {
@@ -53,8 +63,9 @@
   }
 
   function renderRoom(code, data) {
+    lastRoom = { code: code, data: data };
     $("dv-project").textContent = data.project;
-    $("dv-client").textContent = "تسليمة خاصة بـ " + data.client;
+    $("dv-client").textContent = T("تسليمة خاصة بـ ", "Delivery for ") + data.client;
     $("dv-explain").textContent = data.explanation;
     var locked = !data.downloads_enabled;
     fileState = data.downloads_enabled ? "1" : "0";
@@ -63,9 +74,9 @@
     var facts = $("dv-facts");
     facts.innerHTML = "";
     [
-      ["العميل", data.client],
-      ["المحتوى", data.files.length + (data.files.length === 1 ? " ملف" : " ملفات") + " — نسخ أصلية"],
-      ["إنشاء التسليمة", new Date(data.created_at).toLocaleString("ar-EG")],
+      [T("العميل", "Client"), data.client],
+      [T("المحتوى", "Contents"), data.files.length + (isEn() ? (data.files.length === 1 ? " file" : " files") : (data.files.length === 1 ? " ملف" : " ملفات")) + T(" — نسخ أصلية", " — original copies")],
+      [T("إنشاء التسليمة", "Delivery created"), new Date(data.created_at).toLocaleString(isEn() ? "en-GB" : "ar-EG")],
     ].forEach(function (row) {
       var div = document.createElement("div");
       var dt = document.createElement("dt"); dt.textContent = row[0];
@@ -84,7 +95,7 @@
         if (locked) {
           badge = document.createElement("div");
           badge.className = "dv-pdf dv-pdf-locked";
-          badge.textContent = "PDF — بيتاح بعد تفعيل التحميل";
+          badge.textContent = T("PDF — بيتاح بعد تفعيل التحميل", "PDF — available once downloads are enabled");
         } else {
           badge = document.createElement("a");
           badge.className = "dv-pdf";
@@ -109,13 +120,13 @@
       }
       var cap = document.createElement("figcaption");
       if (locked) {
-        cap.textContent = f.name + " (" + fmtSize(f.size) + ") — معاينة فقط";
+        cap.textContent = f.name + " (" + fmtSize(f.size) + ")" + T(" — معاينة فقط", " — preview only");
       } else {
         cap.textContent = f.name + " (" + fmtSize(f.size) + ") — ";
         var dl = document.createElement("a");
         dl.className = "dv-cell-dl";
         dl.href = fileUrl(code, f.name, false);
-        dl.textContent = "تحميل";
+        dl.textContent = T("تحميل", "Download");
         cap.appendChild(dl);
       }
       cell.appendChild(cap);
@@ -184,6 +195,31 @@
     codeInput.value = pre;
     openCode(pre);
   }
+  /* language toggle */
+  var statics = [].slice.call(document.querySelectorAll("[data-en]"));
+  statics.forEach(function (e) { e._ar = e.tagName === "TITLE" ? e.textContent : e.innerHTML; });
+  var langBtn = $("dv-lang");
+  function applyLang(l) {
+    var en = l === "en";
+    document.documentElement.lang = l;
+    document.documentElement.dir = en ? "ltr" : "rtl";
+    statics.forEach(function (e) {
+      var v = en ? e.getAttribute("data-en") : e._ar;
+      if (e.tagName === "TITLE") e.textContent = v; else e.innerHTML = v;
+    });
+    codeInput.placeholder = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX";
+    if (langBtn) langBtn.textContent = en ? "AR" : "EN";
+    $("dv-lb-close").setAttribute("aria-label", en ? "Close preview" : "قفل المعاينة");
+    if (lastErr && !errBox.hidden) errText.textContent = en ? (EN_ERR[lastErr] || lastErr) : lastErr;
+    if (lastRoom && !room.hidden) {
+      var sv = banner ? banner.hidden : true;
+      var cd = countdownTimer; if (cd) { clearInterval(cd); countdownTimer = null; }
+      renderRoom(lastRoom.code, lastRoom.data);
+    }
+    try { localStorage.setItem(KEY, l); } catch (x) {}
+  }
+  if (langBtn) langBtn.addEventListener("click", function () { applyLang(isEn() ? "ar" : "en"); });
+  try { if (localStorage.getItem(KEY) === "en") applyLang("en"); } catch (x) {}
   /* in-page image preview */
   function openPreview(url, name) {
     var lb = $("dv-lightbox"); if (!lb) return;
