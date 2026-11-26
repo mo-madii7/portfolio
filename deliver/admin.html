@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="deliver.css?v=2">
+<link rel="stylesheet" href="deliver.css?v=3">
 </head>
 <body>
 <main class="dv-wrap">
@@ -63,6 +63,7 @@
       <div class="dv-btn-row">
         <button class="dv-btn dv-btn-gold" id="da-create">إنشاء التسليمة ورفع الملفات</button>
       </div>
+      <p class="dv-hint">التسليمة الجديدة بتبدأ بوضع «معاينة فقط»: العميل يشوف الصور بعلامة مائية ومش يقدر يحمّل لحد ما تفعّل التحميل من القايمة تحت.</p>
       <p class="da-progress" id="da-progress"></p>
       <div class="dv-callout dv-danger" id="da-create-err" hidden>
         <div class="dv-callout-title">ناقص بيانات</div>
@@ -148,6 +149,67 @@
   $("da-key").addEventListener("keydown", function (e) { if (e.key === "Enter") enter(); });
   if (key) { $("da-key").value = key; enter(); }
 
+  // watermarked preview: downscale to max 1600px, tile diagonal "Mo.Madii7", JPEG q0.75
+  function makePreviewBlob(file) {
+    return new Promise(function (resolve, reject) {
+      if (!/^image\/(jpeg|png)$/i.test(file.type)) return resolve(null);
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+        var w = Math.max(1, Math.round(img.width * scale));
+        var h = Math.max(1, Math.round(img.height * scale));
+        var c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        var ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        var step = 300;
+        ctx.font = "600 " + Math.max(22, Math.round(w / 28)) + "px Arial, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(255,255,255,0.28)";
+        ctx.strokeStyle = "rgba(0,0,0,0.18)";
+        ctx.lineWidth = 1.5;
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        ctx.rotate(-Math.PI / 6);
+        var R = Math.sqrt(w * w + h * h) / 2;
+        for (var y = -R; y <= R; y += step) {
+          for (var x = -R; x <= R; x += step) {
+            ctx.fillText("Mo.Madii7", x, y);
+            ctx.strokeText("Mo.Madii7", x, y);
+          }
+        }
+        ctx.restore();
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error("preview_failed")); }, "image/jpeg", 0.75);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("preview_failed")); };
+      img.src = url;
+    });
+  }
+
+  function uploadOne(id, file) {
+    return fetch(API + "/api/admin/upload?id=" + encodeURIComponent(id) +
+      "&name=" + encodeURIComponent(file.name), {
+      method: "POST",
+      headers: headers({ "Content-Type": file.type || "application/octet-stream" }),
+      body: file,
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (!res.ok) throw new Error("upload_failed: " + file.name);
+      return makePreviewBlob(file).then(function (blob) {
+        if (!blob) return;
+        return fetch(API + "/api/admin/upload?id=" + encodeURIComponent(id) +
+          "&name=" + encodeURIComponent(file.name) + "&preview=1", {
+          method: "POST",
+          headers: headers({ "Content-Type": "image/jpeg" }),
+          body: blob,
+        }).then(function (r) { return r.json(); }).then(function (pr) {
+          if (!pr.ok) throw new Error("preview_upload_failed: " + file.name);
+        });
+      });
+    });
+  }
+
   function refresh() {
     fetch(API + "/api/admin/list", { headers: headers() })
       .then(function (r) { return r.json(); })
@@ -164,14 +226,114 @@
           var chip = d.access === "active" ? '<span class="da-chip da-chip-active">شغالة</span>'
             : d.access === "expired" ? '<span class="da-chip da-chip-expired">انتهى الوصول — في انتظار الحذف</span>'
             : '<span class="da-chip da-chip-deleted">اتحذفت</span>';
+          var stageChip = d.downloads_enabled
+            ? '<span class="da-chip da-chip-dl">التحميل مفعّل</span>'
+            : '<span class="da-chip da-chip-preview">معاينة فقط</span>';
           card.innerHTML =
-            '<div class="da-row"><b></b> ' + chip + '</div>' +
+            '<div class="da-row"><b></b> ' + chip + ' ' + stageChip + '</div>' +
             '<div class="da-meta"></div>' +
             '<div class="da-meta da-count-line"></div>';
           card.querySelector("b").textContent = d.project + " — " + d.client;
           card.querySelector(".da-meta").textContent =
             d.file_count + " ملفات · اتعملت " + new Date(d.created_at).toLocaleString("ar-EG") +
             " · الوصول بيقف " + new Date(d.expires_at).toLocaleString("ar-EG");
+
+          // per-file list with remove + add-files
+          if (d.files && d.files.length) {
+            var fl = document.createElement("div");
+            fl.className = "da-files";
+            d.files.forEach(function (f) {
+              var row = document.createElement("div");
+              row.className = "da-file-row";
+              var nm = document.createElement("span");
+              nm.className = "da-file-name";
+              nm.textContent = f.name + (f.has_preview ? "" : " (من غير معاينة)");
+              row.appendChild(nm);
+              if (d.access !== "deleted") {
+                var rm = document.createElement("button");
+                rm.className = "da-danger da-danger-sm";
+                rm.textContent = "إزالة";
+                rm.addEventListener("click", function () {
+                  if (!confirm("إزالة الملف «" + f.name + "» من التسليمة نهائيًا؟")) return;
+                  rm.disabled = true;
+                  fetch(API + "/api/admin/remove-file", {
+                    method: "POST",
+                    headers: headers({ "Content-Type": "application/json" }),
+                    body: JSON.stringify({ id: d.id, name: f.name }),
+                  }).then(function (r) { return r.json(); }).then(function (res) {
+                    if (!res.ok) alert("حصلت مشكلة في الإزالة: " + (res.error || "غير معروف"));
+                    refresh();
+                  });
+                });
+                row.appendChild(rm);
+              }
+              fl.appendChild(row);
+            });
+            card.appendChild(fl);
+          }
+          if (d.access !== "deleted") {
+            var addRow = document.createElement("div");
+            addRow.className = "dv-btn-row";
+            var addLbl = document.createElement("label");
+            addLbl.className = "dv-btn dv-btn-line dv-btn-sm da-add-lbl";
+            addLbl.textContent = "إضافة ملفات";
+            var addIn = document.createElement("input");
+            addIn.type = "file";
+            addIn.multiple = true;
+            addIn.accept = ".jpg,.jpeg,.png,.pdf";
+            addIn.hidden = true;
+            addIn.addEventListener("change", function () {
+              var fs = addIn.files;
+              if (!fs.length) return;
+              for (var i = 0; i < fs.length; i++) {
+                if (!/\.(jpe?g|png|pdf)$/i.test(fs[i].name) || fs[i].size > 50 * 1024 * 1024) {
+                  alert("ملف مش مقبول: " + fs[i].name); addIn.value = ""; return;
+                }
+              }
+              addLbl.classList.add("da-busy");
+              addLbl.textContent = "بيرفع…";
+              var seq = Promise.resolve();
+              Array.prototype.forEach.call(fs, function (f, idx) {
+                seq = seq.then(function () {
+                  addLbl.textContent = "بيرفع " + (idx + 1) + "/" + fs.length + ": " + f.name;
+                  return uploadOne(d.id, f);
+                });
+              });
+              seq.then(function () {
+                addLbl.classList.remove("da-busy");
+                addLbl.textContent = "إضافة ملفات";
+                addIn.value = "";
+                refresh();
+              }).catch(function (e) {
+                addLbl.classList.remove("da-busy");
+                addLbl.textContent = "إضافة ملفات";
+                alert("حصلت مشكلة في الرفع: " + e.message);
+                refresh();
+              });
+            });
+            addLbl.appendChild(addIn);
+            addRow.appendChild(addLbl);
+            card.appendChild(addRow);
+
+            // downloads toggle
+            var tg = document.createElement("button");
+            tg.className = "da-toggle";
+            tg.textContent = d.downloads_enabled ? "إيقاف التحميل (معاينة فقط)" : "تفعيل التحميل";
+            tg.addEventListener("click", function () {
+              if (d.downloads_enabled &&
+                  !confirm("العميل هيلاقي معاينة بعلامة مائية بس، ومش هيقدر يحمّل لحد ما تفعّل تاني. متأكد؟")) return;
+              tg.disabled = true;
+              fetch(API + "/api/admin/set-downloads", {
+                method: "POST",
+                headers: headers({ "Content-Type": "application/json" }),
+                body: JSON.stringify({ id: d.id, enabled: !d.downloads_enabled }),
+              }).then(function (r) { return r.json(); }).then(function (res) {
+                if (!res.ok) alert("حصلت مشكلة في التبديل: " + (res.error || "غير معروف"));
+                refresh();
+              });
+            });
+            card.appendChild(tg);
+          }
           if (d.access === "active") {
             var line = card.querySelector(".da-count-line");
             var left = new Date(d.expires_at).getTime() - Date.now();
@@ -237,14 +399,7 @@
       Array.prototype.forEach.call(files, function (f, idx) {
         seq = seq.then(function () {
           prog.textContent = "بيرفع " + (idx + 1) + "/" + files.length + ": " + f.name;
-          return fetch(API + "/api/admin/upload?id=" + encodeURIComponent(created.id) +
-            "&name=" + encodeURIComponent(f.name), {
-            method: "POST",
-            headers: headers({ "Content-Type": f.type || "application/octet-stream" }),
-            body: f,
-          }).then(function (r) { return r.json(); }).then(function (res) {
-            if (!res.ok) throw new Error("upload_failed: " + f.name);
-          });
+          return uploadOne(created.id, f);
         });
       });
       return seq.then(function () { return created; });
