@@ -164,15 +164,37 @@
 
 
   /* ---------- invoice (PDF built in the browser from delivery data) ---------- */
-  var PAY = {
-    instapay: ["InstaPay", "InstaPay", "ipn.eg/S/moomadih.202/instapay/6M0zSZ"],
-    fawry: ["فوري", "Fawry", ""],
-    vodafone: ["Vodafone Cash", "Vodafone Cash", "01099033963"],
-    etisalat: ["Etisalat Cash", "Etisalat Cash", "01119072800"],
-    we: ["WE Pay", "WE Pay", "01515190759"],
-    bank: ["تحويل بنكي", "Bank transfer", ""],
-    cash: ["نقدًا", "Cash", ""]
-  };
+  var PAY = [
+    ["InstaPay", "ipn.eg/S/moomadih.202/instapay/6M0zSZ"],
+    ["Vodafone Cash", "01099033963"],
+    ["Etisalat Cash", "01119072800"],
+    ["WE Pay", "01515190759"]
+  ];
+  var stampImg = null;
+  function loadStamp() {
+    return new Promise(function (res) {
+      if (stampImg) return res(stampImg);
+      var im = new Image();
+      im.onload = function () { stampImg = im; res(im); };
+      im.onerror = function () { res(null); };
+      im.src = "../images/5UPEZOA6.png";
+    });
+  }
+  function drawStamp(x, cx, cy, img) {
+    var R = 120, col = "#c2410c";
+    x.save(); x.translate(cx, cy); x.rotate(-0.2); x.globalAlpha = 0.85;
+    x.strokeStyle = col; x.lineWidth = 7; x.beginPath(); x.arc(0, 0, R, 0, Math.PI * 2); x.stroke();
+    x.lineWidth = 2.5; x.beginPath(); x.arc(0, 0, R - 14, 0, Math.PI * 2); x.stroke();
+    if (img) {
+      x.globalCompositeOperation = "multiply";
+      x.drawImage(img, 225, 245, 345, 300, -78, -78, 156, 135);
+      x.globalCompositeOperation = "source-over";
+    }
+    x.direction = "ltr"; x.textAlign = "center"; x.fillStyle = col; x.font = "700 24px Alexandria, Arial, sans-serif";
+    x.fillText("MO.MADII", 0, 82);
+    x.font = "600 15px Alexandria, Arial, sans-serif"; x.fillText("DESIGN \u00B7 VIDEO", 0, -92);
+    x.restore();
+  }
   function invMsg(ar, en, bad) {
     var p = $("dv-invoice-msg"); if (!p) return;
     p.hidden = false; p.style.color = bad ? "#ffb1a3" : "";
@@ -196,7 +218,7 @@
     parts.forEach(function (b) { out.set(b, p); p += b.length; });
     return new Blob([out], { type: "application/pdf" });
   }
-  function drawInvoice(inv) {
+  function drawInvoice(inv, stamp) {
     var en = isEn(), W = 1240, H = 1754, M = 90;
     var c = document.createElement("canvas"); c.width = W; c.height = H;
     var x = c.getContext("2d");
@@ -248,7 +270,7 @@
       if (cur) lines.push(cur);
       lines = lines.slice(0, 2);
       lines.forEach(function (l, i) { txt(l, start, y + 56 + i * 42, 30, 500, ink); });
-      txt(nf(it.price), end, y + 56, 30, 600, ink, en ? "right" : "left");
+      txt(nf(it.price), end, y + 56, 30, 600, it.price < 0 ? "#15803d" : ink, en ? "right" : "left");
       y += 30 + lines.length * 42 + 22;
       x.fillStyle = "#eef2f7"; x.fillRect(M, y, W - 2 * M, 2);
       y += 6;
@@ -259,20 +281,18 @@
     txt(T("الإجمالي المستحق", "Total due"), start, y, 34, 600, ink);
     txt(nf(inv.amount) + " " + T("ج.م", "EGP"), end, y, 52, 700, "#c2410c", en ? "right" : "left");
     y += 120;
-    var ms = (inv.methods || []).filter(function (k) { return PAY[k]; });
-    var boxH = 110 + ms.length * 52;
+    var boxH = 110 + PAY.length * 52;
     x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, boxH);
-    txt(ms.length > 1 ? T("طرق الدفع", "Payment methods") : T("طريقة الدفع", "Payment method"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
-    ms.forEach(function (k, i) {
-      var p = PAY[k], yy = y + 120 + i * 52;
-      txt(en ? p[1] : p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
-      if (p[2]) {
-        x.direction = "ltr";
-        txt(p[2], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
-        x.direction = en ? "ltr" : "rtl";
-      }
+    txt(T("طرق الدفع", "Payment methods"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
+    PAY.forEach(function (p, i) {
+      var yy = y + 120 + i * 52;
+      txt(p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
+      x.direction = "ltr";
+      txt(p[1], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
+      x.direction = en ? "ltr" : "rtl";
     });
     y += boxH + 70;
+    drawStamp(x, en ? W - M - 140 : M + 140, y + 30, stamp);
     y += 400;
     txt(T("للاستفسار: واتساب 01119072800", "Questions: WhatsApp 01119072800"), start, y, 26, 400, lab);
     txt(T("شكرًا لتعاملك معنا", "Thank you for your business"), start, y + 50, 26, 400, lab);
@@ -289,8 +309,9 @@
       return r.json();
     }).then(function (inv) {
       if (!inv) return;
-      return Promise.resolve(document.fonts && document.fonts.load("600 30px Alexandria", "فاتورة Invoice")).catch(function () {}).then(function () {
-        var cv = drawInvoice(inv);
+      return Promise.all([Promise.resolve(document.fonts && document.fonts.load("600 30px Alexandria", "فاتورة Invoice")).catch(function () {}), loadStamp()]).then(function (r) {
+        var st = r[1];
+        var cv = drawInvoice(inv, st);
         return new Promise(function (res) { cv.toBlob(res, "image/jpeg", 0.92); }).then(function (jb) { return jb.arrayBuffer(); }).then(function (ab) {
           var blob = jpegPdf(new Uint8Array(ab), cv.width, cv.height);
           var a = document.createElement("a");

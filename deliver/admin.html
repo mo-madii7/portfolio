@@ -218,97 +218,103 @@
     ["مونتاج فيديو", [["ريل بسيط (قص + كابشن + ترتيب)","Simple reel"],["ريل احترافي (إيقاع + مؤثرات + ترجمة)","Professional reel"],["فيديو إعلاني 30 - 60 ثانية","Ad video, 30-60 seconds"],["حلقة يوتيوب 8 - 30 دقيقة","YouTube episode, 8-30 minutes"],["فعالية / مناسبة (ملخص)","Event recap video"],["باقة شهرية 8 ريلز","Monthly package, 8 reels"]]],
     ["تصوير فيديو", [["تصوير فيديو","Video shooting"]]]
   ];
-  var PAYM = [["instapay","InstaPay"],["fawry","فوري (Fawry)"],["vodafone","Vodafone Cash"],["etisalat","Etisalat Cash"],["we","WE Pay"],["bank","تحويل بنكي"],["cash","نقدًا"]];
   function buildInvoiceBlock(d) {
     var locked = !!d.invoice_no;
     var items0 = []; try { items0 = d.invoice_items ? JSON.parse(d.invoice_items) : []; } catch (e) {}
-    var meth0 = []; try { meth0 = d.invoice_methods ? JSON.parse(d.invoice_methods) : []; } catch (e) {}
     var inv = document.createElement("div");
     inv.className = "da-invoice";
     inv.style.cssText = "margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:10px";
-    var t = document.createElement("b"); t.textContent = "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : "");
-    var auto = document.createElement("p"); auto.className = "dv-hint";
-    auto.textContent = "العميل: " + d.client + " · المشروع: " + d.project + " · الرقم والتاريخ تلقائي.";
-    var linesBox = document.createElement("div"); linesBox.style.cssText = "display:flex;flex-direction:column;gap:8px";
-    var total = document.createElement("div"); total.style.cssText = "font-weight:700";
+    function el(tag, txt, css) { var e = document.createElement(tag); if (txt) e.textContent = txt; if (css) e.style.cssText = css; return e; }
+    var t = el("b", "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : ""));
+    var auto = el("p", "العميل: " + d.client + " · المشروع: " + d.project + " · الرقم والتاريخ تلقائي. المبالغ إنت اللي بتكتبها.");
+    auto.className = "dv-hint";
+    var total = el("div", "", "font-weight:700");
+    var checks = [];
     function upd() {
-      var sum = 0; linesBox.querySelectorAll("input[data-p]").forEach(function (i) { sum += Math.round(Number(i.value) || 0); });
-      total.textContent = "الإجمالي: " + sum.toLocaleString("en-US") + " جنيه";
+      var sum = 0;
+      checks.forEach(function (c) { if (c.cb.checked) sum += Math.round(Number(c.pr.value) || 0); });
+      cust.querySelectorAll("[data-cu]").forEach(function (r) { sum += r._amount(); });
+      total.textContent = "الإجمالي: " + sum.toLocaleString("en-US") + " جنيه" + (sum <= 0 ? " (لازم يكون أكبر من صفر)" : "");
     }
-    function addLine(it) {
-      var row = document.createElement("div");
-      row.style.cssText = "display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px";
-      var sel = document.createElement("select"); sel.className = "dv-input"; sel.disabled = locked;
-      var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "اختار الخدمة…"; sel.appendChild(o0);
-      SERVICES.forEach(function (g, gi) {
-        var og = document.createElement("optgroup"); og.label = g[0];
-        g[1].forEach(function (s, si) { var o = document.createElement("option"); o.value = gi + "-" + si; o.textContent = s[0]; og.appendChild(o); });
-        sel.appendChild(og);
+    // service checklist
+    var listT = el("span", "اختار الخدمات (علّم واكتب السعر)"); listT.className = "dv-label";
+    var list = el("div", "", "display:flex;flex-direction:column;gap:6px");
+    var found = {};
+    items0.forEach(function (it) { found[it.name] = it; });
+    var usedNames = {};
+    SERVICES.forEach(function (g) {
+      var det = el("details", "", "border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 10px");
+      var sm = el("summary", g[0], "cursor:pointer;font-weight:600");
+      det.appendChild(sm);
+      g[1].forEach(function (sv) {
+        var row = el("div", "", "display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0");
+        var lb = el("label", "", "display:flex;gap:8px;align-items:center;flex:1 1 200px;cursor:pointer");
+        var cb = document.createElement("input"); cb.type = "checkbox"; cb.disabled = locked;
+        lb.appendChild(cb); lb.appendChild(el("span", sv[0]));
+        var pr = document.createElement("input"); pr.className = "dv-input"; pr.type = "number"; pr.step = "1"; pr.dir = "ltr"; pr.placeholder = "السعر"; pr.style.cssText = "max-width:120px;display:none"; pr.disabled = locked;
+        var it = found[sv[0]];
+        if (it && !usedNames[sv[0]]) { usedNames[sv[0]] = 1; cb.checked = true; pr.value = it.price; pr.style.display = ""; det.open = true; }
+        cb.addEventListener("change", function () { pr.style.display = cb.checked ? "" : "none"; upd(); });
+        pr.addEventListener("input", upd);
+        row.appendChild(lb); row.appendChild(pr); det.appendChild(row);
+        checks.push({ cb: cb, pr: pr, name: sv[0], en: sv[1] });
       });
-      var oc = document.createElement("option"); oc.value = "custom"; oc.textContent = "بند مخصص (اكتبه بنفسك)"; sel.appendChild(oc);
-      var cu = document.createElement("input"); cu.className = "dv-input"; cu.type = "text"; cu.maxLength = 120; cu.placeholder = "اسم البند"; cu.disabled = locked; cu.style.display = "none";
-      var pr = document.createElement("input"); pr.className = "dv-input"; pr.type = "number"; pr.min = "1"; pr.step = "1"; pr.dir = "ltr"; pr.placeholder = "السعر (جنيه)"; pr.setAttribute("data-p", "1"); pr.disabled = locked;
-      var rm = document.createElement("button"); rm.type = "button"; rm.className = "da-toggle"; rm.textContent = "إزالة البند"; rm.disabled = locked;
-      row._get = function () {
-        var v = sel.value, name = "", en = "";
-        if (v === "custom") name = cu.value.trim();
-        else if (v) { var p = v.split("-"); name = SERVICES[p[0]][1][p[1]][0]; en = SERVICES[p[0]][1][p[1]][1]; }
-        return { name: name, name_en: en, price: pr.value };
-      };
-      sel.addEventListener("change", function () { cu.style.display = sel.value === "custom" ? "" : "none"; });
+      list.appendChild(det);
+    });
+    // custom lines and discounts
+    var custT = el("span", "بنود مخصصة وخصومات"); custT.className = "dv-label";
+    var cust = el("div", "", "display:flex;flex-direction:column;gap:8px");
+    function addCustom(it, isDisc) {
+      var row = el("div", "", "display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px");
+      row.setAttribute("data-cu", "1");
+      var nm = document.createElement("input"); nm.className = "dv-input"; nm.type = "text"; nm.maxLength = 120; nm.placeholder = isDisc ? "اسم الخصم" : "اسم البند"; nm.style.cssText = "flex:1 1 180px"; nm.disabled = locked;
+      var pr = document.createElement("input"); pr.className = "dv-input"; pr.type = "number"; pr.step = "1"; pr.dir = "ltr"; pr.placeholder = isDisc ? "قيمة الخصم (موجبة)" : "السعر"; pr.style.cssText = "max-width:150px"; pr.disabled = locked;
+      var rm = el("button", "إزالة"); rm.type = "button"; rm.className = "da-toggle"; rm.disabled = locked;
+      row._disc = !!isDisc;
+      row._amount = function () { var v = Math.round(Number(pr.value) || 0); return row._disc ? -Math.abs(v) : v; };
+      row._get = function () { return { name: nm.value.trim(), price: pr.value === "" ? 0 : row._amount() }; };
+      if (it) { nm.value = it.name; pr.value = isDisc ? Math.abs(it.price) : it.price; }
       pr.addEventListener("input", upd);
       rm.addEventListener("click", function () { row.remove(); upd(); });
-      row.appendChild(sel); row.appendChild(cu); row.appendChild(pr); row.appendChild(rm);
-      if (it) {
-        var found = null;
-        SERVICES.forEach(function (g, gi) { g[1].forEach(function (s, si) { if (s[0] === it.name) found = gi + "-" + si; }); });
-        if (found) sel.value = found; else { sel.value = "custom"; cu.value = it.name; cu.style.display = ""; }
-        pr.value = it.price;
-      }
-      linesBox.appendChild(row);
+      row.appendChild(nm); row.appendChild(pr); row.appendChild(rm);
+      cust.appendChild(row);
     }
-    (items0.length ? items0 : [null]).forEach(addLine);
-    var add = document.createElement("button"); add.type = "button"; add.className = "da-toggle"; add.textContent = "+ إضافة بند"; add.disabled = locked;
-    add.addEventListener("click", function () { addLine(null); upd(); });
-    var mt = document.createElement("span"); mt.className = "dv-label"; mt.textContent = "طريقة الدفع (اختار اللي العميل دفع بيها)";
-    var mbox = document.createElement("div"); mbox.style.cssText = "display:flex;flex-wrap:wrap;gap:8px 14px";
-    PAYM.forEach(function (m) {
-      var l = document.createElement("label"); l.style.cssText = "display:flex;gap:6px;align-items:center;cursor:pointer";
-      var c = document.createElement("input"); c.type = "checkbox"; c.value = m[0]; c.checked = meth0.indexOf(m[0]) !== -1;
-      var sp = document.createElement("span"); sp.textContent = m[1];
-      l.appendChild(c); l.appendChild(sp); mbox.appendChild(l);
-    });
-    var save = document.createElement("button"); save.type = "button"; save.className = "da-toggle"; save.textContent = "حفظ الفاتورة";
-    var tkLbl = document.createElement("label"); tkLbl.style.cssText = "display:flex;gap:8px;align-items:center;cursor:pointer";
-    var tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = !!d.invoice_ready; tk.disabled = !(d.price && meth0.length);
-    var tkTxt = document.createElement("span"); tkTxt.textContent = "الفاتورة جاهزة (العميل يقدر يحمّلها)";
-    tkLbl.appendChild(tk); tkLbl.appendChild(tkTxt);
-    var hint = document.createElement("p"); hint.className = "dv-hint";
-    hint.textContent = d.invoice_no ? "اتصدرت برقم " + d.invoice_no + ": البنود والأسعار اتقفلت، وتقدر تغيّر طريقة الدفع بس." : (d.price && meth0.length ? "زرار الفاتورة هيظهر للعميل بعد ما تفعّل «جاهزة»." : "اختار الخدمات واكتب الأسعار وطريقة الدفع واحفظ، وبعدين فعّل «جاهزة».");
+    items0.forEach(function (it) { if (!usedNames[it.name] || !checks.some(function (c) { return c.name === it.name; })) { if (!checks.some(function (c) { return c.name === it.name; })) addCustom(it, it.price < 0); } });
+    var btns = el("div", "", "display:flex;gap:8px;flex-wrap:wrap");
+    var add = el("button", "+ بند مخصص"); add.type = "button"; add.className = "da-toggle"; add.disabled = locked;
+    var addD = el("button", "+ خصم"); addD.type = "button"; addD.className = "da-toggle"; addD.disabled = locked;
+    add.addEventListener("click", function () { addCustom(null, false); });
+    addD.addEventListener("click", function () { addCustom({ name: "خصم", price: 0 }, true); });
+    btns.appendChild(add); btns.appendChild(addD);
+    var save = el("button", "حفظ الفاتورة"); save.type = "button"; save.className = "da-toggle"; save.disabled = locked;
+    var tkLbl = el("label", "", "display:flex;gap:8px;align-items:center;cursor:pointer");
+    var tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = !!d.invoice_ready; tk.disabled = !d.price;
+    tkLbl.appendChild(tk); tkLbl.appendChild(el("span", "الفاتورة جاهزة (العميل يقدر يحمّلها)"));
+    var hint = el("p", d.invoice_no ? "اتصدرت برقم " + d.invoice_no + " والبنود والأسعار اتقفلت." : (d.price ? "زرار الفاتورة هيظهر للعميل بعد ما تفعّل «جاهزة»." : "علّم الخدمات واكتب الأسعار، احفظ، وبعدين فعّل «جاهزة»."));
+    hint.className = "dv-hint";
     function post(payload) {
       return fetch(API + "/api/admin/set-invoice", { method: "POST", headers: headers({ "Content-Type": "application/json" }), body: JSON.stringify(Object.assign({ id: d.id }, payload)) })
         .then(function (r) { return r.json(); }).then(function (res) { if (!res.ok) alert("حصلت مشكلة في الفاتورة: " + (res.error || "غير معروف")); refresh(); });
     }
     save.addEventListener("click", function () {
-      var items = [], bad = false;
-      linesBox.querySelectorAll("div").forEach(function (r) { if (r._get) { var g = r._get(); if (!g.name && !g.price) return; if (!g.name || !(Number(g.price) > 0)) bad = true; items.push(g); } });
-      if (bad || !items.length) { alert("كل بند محتاج خدمة وسعر."); return; }
-      var ms = []; mbox.querySelectorAll("input:checked").forEach(function (c) { ms.push(c.value); });
-      if (!ms.length) { alert("اختار طريقة دفع واحدة على الأقل."); return; }
-      save.disabled = true;
-      post({ items: locked ? undefined : items.map(function (i) { return { name: i.name, name_en: i.name_en, price: Number(i.price) }; }), methods: ms });
+      var out = [], bad = false;
+      checks.forEach(function (c) { if (c.cb.checked) { var p = Math.round(Number(c.pr.value)); if (!p) bad = true; else out.push({ name: c.name, name_en: c.en, price: p }); } });
+      cust.querySelectorAll("[data-cu]").forEach(function (r) { var g = r._get(); if (!g.name && !g.price) return; if (!g.name || !g.price) bad = true; else out.push(g); });
+      if (bad || !out.length) { alert("كل بند محتاج اسم ومبلغ (مش صفر)."); return; }
+      var sum = out.reduce(function (a, b) { return a + b.price; }, 0);
+      if (sum <= 0) { alert("الإجمالي لازم يكون أكبر من صفر."); return; }
+      save.disabled = true; post({ items: out });
     });
     tk.addEventListener("change", function () {
       if (tk.checked && !confirm("العميل هيقدر يحمّل الفاتورة بمبلغ " + d.price + " جنيه. متأكد؟")) { tk.checked = false; return; }
       tk.disabled = true; post({ ready: tk.checked });
     });
-    inv.appendChild(t); inv.appendChild(auto); inv.appendChild(linesBox); inv.appendChild(add); inv.appendChild(total);
-    inv.appendChild(mt); inv.appendChild(mbox); inv.appendChild(save); inv.appendChild(tkLbl); inv.appendChild(hint);
+    [t, auto, listT, list, custT, cust, btns, total, save, tkLbl, hint].forEach(function (e) { inv.appendChild(e); });
     upd();
     return inv;
   }
 
-  function refresh() {
+    function refresh() {
     fetch(API + "/api/admin/list", { headers: headers() })
       .then(function (r) { return r.json(); })
       .then(function (data) {
