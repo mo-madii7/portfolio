@@ -10,6 +10,7 @@
     ["Etisalat Cash", "01119072800"],
     ["WE Pay", "01515190759"]
   ];
+  var STAMP_URL = (function () { try { var cs = document.currentScript; return new URL("../images/5UPEZOA6.png", cs.src).href; } catch (e) { return "../images/5UPEZOA6.png"; } })();
   var stampImg = null;
   function loadStamp() {
     return new Promise(function (res) {
@@ -17,7 +18,7 @@
       var im = new Image();
       im.onload = function () { stampImg = im; res(im); };
       im.onerror = function () { res(null); };
-      im.src = "../images/5UPEZOA6.png";
+      im.src = STAMP_URL;
     });
   }
   var stampCache = null;
@@ -111,7 +112,9 @@
       pair(T("المشروع", "Project"), pj, y, start);
     })();
     if (quote && inv.delivery_date) { pair(T("تاريخ التسليم", "Delivery date"), df(inv.delivery_date), y, end, en ? "right" : "left"); if (!inv.project) y += 110; }
-    y += inv.project ? 150 : 40;
+    var hasCode = !quote && !!inv.invoice_code;
+    if (hasCode) pair(T("كود الاسترجاع", "Access code"), inv.invoice_code, y, end, en ? "right" : "left");
+    y += (inv.project || hasCode) ? 150 : 40;
     x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 70);
     txt(T("الخدمة", "Service"), start, y + 46, 26, 600, ink);
     txt(T("المبلغ (جنيه مصري)", "Amount (EGP)"), end, y + 46, 26, 600, ink, en ? "right" : "left");

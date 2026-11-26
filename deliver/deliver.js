@@ -275,7 +275,9 @@
       if (pj !== inv.project) pj += "…";
       pair(T("المشروع", "Project"), pj, y, start);
     })();
-    y += inv.project ? 150 : 40;
+    var hasCode = !quote && !!inv.invoice_code;
+    if (hasCode) pair(T("كود الاسترجاع", "Access code"), inv.invoice_code, y, end, en ? "right" : "left");
+    y += (inv.project || hasCode) ? 150 : 40;
     x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 70);
     txt(T("الخدمة", "Service"), start, y + 46, 26, 600, ink);
     txt(T("المبلغ (جنيه مصري)", "Amount (EGP)"), end, y + 46, 26, 600, ink, en ? "right" : "left");
