@@ -54,11 +54,7 @@
         </div>
         <p class="dv-hint">المدة دي لاستخدام الكود وتحميل الملفات. الملفات وملاحظات العميل بتتحذف تلقائيًا في نفس لحظة انتهاء المدة (من غير أي مهلة زيادة). وتقدر تحذفها يدوي قبل كده من هنا.</p></div>
 
-      <div class="da-field"><label class="dv-label" for="da-price">سعر الفاتورة (جنيه) — اختياري</label>
-        <input class="dv-input" id="da-price" type="number" min="1" step="1" inputmode="numeric" dir="ltr" placeholder="مثال: 1500">
-        <p class="dv-hint">لو فاضي مفيش فاتورة. بعد الإنشاء تفعّل «الفاتورة جاهزة» من قايمة التسليمات عشان العميل يقدر يحمّلها.</p></div>
-
-      <div class="da-field"><span class="dv-label">الملفات (JPG / PNG / PDF — لحد ٥٠ ميجا للملف)</span>
+<div class="da-field"><span class="dv-label">الملفات (JPG / PNG / PDF — لحد ٥٠ ميجا للملف)</span>
         <div class="da-drop">
           اسحب الملفات هنا أو اختارها من جهازك
           <input id="da-files" type="file" multiple accept=".jpg,.jpeg,.png,.pdf">
@@ -214,6 +210,104 @@
     });
   }
 
+    var SERVICES = [
+    ["هوية بصرية وشعارات", [["شعار فقط - أساسي","Logo only - basic"],["شعار فقط - قياسي","Logo only - standard"],["شعار + إرشادات مختصرة","Logo + brief guidelines"],["هوية كاملة (شعار + كارت + ورق مراسلات + سوشيال)","Full visual identity"]]],
+    ["غلاف كتاب", [["غلاف إلكتروني (وجه فقط)","E-book cover (front only)"],["غلاف طباعة كامل (وجه + كعب + ظهر)","Full print cover"],["غلاف بعمل فني مخصص / تركيب صور معقد","Custom artwork cover"]]],
+    ["تصميمات سوشيال ميديا", [["بوست أو ستوري واحد","Single post or story"],["باقة شهرية 8 تصميمات","Monthly package, 8 designs"],["باقة شهرية 12 تصميم","Monthly package, 12 designs"],["باقة شهرية 20 تصميم + ستوريز","Monthly package, 20 designs + stories"],["غلاف صفحة / حملة إعلانية (فيسبوك)","Page cover / ad campaign (Facebook)"]]],
+    ["مطبوعات", [["كارت شخصي","Business card"],["فلاير / بوستر (وجه وظهر)","Flyer / poster (two sides)"],["رول أب / بنر / يافطة","Roll-up / banner / signage"],["بروفايل شركة 8 - 12 صفحة","Company profile, 8-12 pages"]]],
+    ["مونتاج فيديو", [["ريل بسيط (قص + كابشن + ترتيب)","Simple reel"],["ريل احترافي (إيقاع + مؤثرات + ترجمة)","Professional reel"],["فيديو إعلاني 30 - 60 ثانية","Ad video, 30-60 seconds"],["حلقة يوتيوب 8 - 30 دقيقة","YouTube episode, 8-30 minutes"],["فعالية / مناسبة (ملخص)","Event recap video"],["باقة شهرية 8 ريلز","Monthly package, 8 reels"]]],
+    ["تصوير فيديو", [["تصوير فيديو","Video shooting"]]]
+  ];
+  var PAYM = [["instapay","InstaPay"],["fawry","فوري (Fawry)"],["vodafone","Vodafone Cash"],["etisalat","Etisalat Cash"],["we","WE Pay"],["bank","تحويل بنكي"],["cash","نقدًا"]];
+  function buildInvoiceBlock(d) {
+    var locked = !!d.invoice_no;
+    var items0 = []; try { items0 = d.invoice_items ? JSON.parse(d.invoice_items) : []; } catch (e) {}
+    var meth0 = []; try { meth0 = d.invoice_methods ? JSON.parse(d.invoice_methods) : []; } catch (e) {}
+    var inv = document.createElement("div");
+    inv.className = "da-invoice";
+    inv.style.cssText = "margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:10px";
+    var t = document.createElement("b"); t.textContent = "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : "");
+    var auto = document.createElement("p"); auto.className = "dv-hint";
+    auto.textContent = "العميل: " + d.client + " · المشروع: " + d.project + " · الرقم والتاريخ تلقائي.";
+    var linesBox = document.createElement("div"); linesBox.style.cssText = "display:flex;flex-direction:column;gap:8px";
+    var total = document.createElement("div"); total.style.cssText = "font-weight:700";
+    function upd() {
+      var sum = 0; linesBox.querySelectorAll("input[data-p]").forEach(function (i) { sum += Math.round(Number(i.value) || 0); });
+      total.textContent = "الإجمالي: " + sum.toLocaleString("en-US") + " جنيه";
+    }
+    function addLine(it) {
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px";
+      var sel = document.createElement("select"); sel.className = "dv-input"; sel.disabled = locked;
+      var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "اختار الخدمة…"; sel.appendChild(o0);
+      SERVICES.forEach(function (g, gi) {
+        var og = document.createElement("optgroup"); og.label = g[0];
+        g[1].forEach(function (s, si) { var o = document.createElement("option"); o.value = gi + "-" + si; o.textContent = s[0]; og.appendChild(o); });
+        sel.appendChild(og);
+      });
+      var oc = document.createElement("option"); oc.value = "custom"; oc.textContent = "بند مخصص (اكتبه بنفسك)"; sel.appendChild(oc);
+      var cu = document.createElement("input"); cu.className = "dv-input"; cu.type = "text"; cu.maxLength = 120; cu.placeholder = "اسم البند"; cu.disabled = locked; cu.style.display = "none";
+      var pr = document.createElement("input"); pr.className = "dv-input"; pr.type = "number"; pr.min = "1"; pr.step = "1"; pr.dir = "ltr"; pr.placeholder = "السعر (جنيه)"; pr.setAttribute("data-p", "1"); pr.disabled = locked;
+      var rm = document.createElement("button"); rm.type = "button"; rm.className = "da-toggle"; rm.textContent = "إزالة البند"; rm.disabled = locked;
+      row._get = function () {
+        var v = sel.value, name = "", en = "";
+        if (v === "custom") name = cu.value.trim();
+        else if (v) { var p = v.split("-"); name = SERVICES[p[0]][1][p[1]][0]; en = SERVICES[p[0]][1][p[1]][1]; }
+        return { name: name, name_en: en, price: pr.value };
+      };
+      sel.addEventListener("change", function () { cu.style.display = sel.value === "custom" ? "" : "none"; });
+      pr.addEventListener("input", upd);
+      rm.addEventListener("click", function () { row.remove(); upd(); });
+      row.appendChild(sel); row.appendChild(cu); row.appendChild(pr); row.appendChild(rm);
+      if (it) {
+        var found = null;
+        SERVICES.forEach(function (g, gi) { g[1].forEach(function (s, si) { if (s[0] === it.name) found = gi + "-" + si; }); });
+        if (found) sel.value = found; else { sel.value = "custom"; cu.value = it.name; cu.style.display = ""; }
+        pr.value = it.price;
+      }
+      linesBox.appendChild(row);
+    }
+    (items0.length ? items0 : [null]).forEach(addLine);
+    var add = document.createElement("button"); add.type = "button"; add.className = "da-toggle"; add.textContent = "+ إضافة بند"; add.disabled = locked;
+    add.addEventListener("click", function () { addLine(null); upd(); });
+    var mt = document.createElement("span"); mt.className = "dv-label"; mt.textContent = "طريقة الدفع (اختار اللي العميل دفع بيها)";
+    var mbox = document.createElement("div"); mbox.style.cssText = "display:flex;flex-wrap:wrap;gap:8px 14px";
+    PAYM.forEach(function (m) {
+      var l = document.createElement("label"); l.style.cssText = "display:flex;gap:6px;align-items:center;cursor:pointer";
+      var c = document.createElement("input"); c.type = "checkbox"; c.value = m[0]; c.checked = meth0.indexOf(m[0]) !== -1;
+      var sp = document.createElement("span"); sp.textContent = m[1];
+      l.appendChild(c); l.appendChild(sp); mbox.appendChild(l);
+    });
+    var save = document.createElement("button"); save.type = "button"; save.className = "da-toggle"; save.textContent = "حفظ الفاتورة";
+    var tkLbl = document.createElement("label"); tkLbl.style.cssText = "display:flex;gap:8px;align-items:center;cursor:pointer";
+    var tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = !!d.invoice_ready; tk.disabled = !(d.price && meth0.length);
+    var tkTxt = document.createElement("span"); tkTxt.textContent = "الفاتورة جاهزة (العميل يقدر يحمّلها)";
+    tkLbl.appendChild(tk); tkLbl.appendChild(tkTxt);
+    var hint = document.createElement("p"); hint.className = "dv-hint";
+    hint.textContent = d.invoice_no ? "اتصدرت برقم " + d.invoice_no + ": البنود والأسعار اتقفلت، وتقدر تغيّر طريقة الدفع بس." : (d.price && meth0.length ? "زرار الفاتورة هيظهر للعميل بعد ما تفعّل «جاهزة»." : "اختار الخدمات واكتب الأسعار وطريقة الدفع واحفظ، وبعدين فعّل «جاهزة».");
+    function post(payload) {
+      return fetch(API + "/api/admin/set-invoice", { method: "POST", headers: headers({ "Content-Type": "application/json" }), body: JSON.stringify(Object.assign({ id: d.id }, payload)) })
+        .then(function (r) { return r.json(); }).then(function (res) { if (!res.ok) alert("حصلت مشكلة في الفاتورة: " + (res.error || "غير معروف")); refresh(); });
+    }
+    save.addEventListener("click", function () {
+      var items = [], bad = false;
+      linesBox.querySelectorAll("div").forEach(function (r) { if (r._get) { var g = r._get(); if (!g.name && !g.price) return; if (!g.name || !(Number(g.price) > 0)) bad = true; items.push(g); } });
+      if (bad || !items.length) { alert("كل بند محتاج خدمة وسعر."); return; }
+      var ms = []; mbox.querySelectorAll("input:checked").forEach(function (c) { ms.push(c.value); });
+      if (!ms.length) { alert("اختار طريقة دفع واحدة على الأقل."); return; }
+      save.disabled = true;
+      post({ items: locked ? undefined : items.map(function (i) { return { name: i.name, name_en: i.name_en, price: Number(i.price) }; }), methods: ms });
+    });
+    tk.addEventListener("change", function () {
+      if (tk.checked && !confirm("العميل هيقدر يحمّل الفاتورة بمبلغ " + d.price + " جنيه. متأكد؟")) { tk.checked = false; return; }
+      tk.disabled = true; post({ ready: tk.checked });
+    });
+    inv.appendChild(t); inv.appendChild(auto); inv.appendChild(linesBox); inv.appendChild(add); inv.appendChild(total);
+    inv.appendChild(mt); inv.appendChild(mbox); inv.appendChild(save); inv.appendChild(tkLbl); inv.appendChild(hint);
+    upd();
+    return inv;
+  }
+
   function refresh() {
     fetch(API + "/api/admin/list", { headers: headers() })
       .then(function (r) { return r.json(); })
@@ -363,52 +457,8 @@
             });
             card.appendChild(tg);
 
-            // invoice: price + "ready" tick (client sees the invoice only after the tick)
-            var inv = document.createElement("div");
-            inv.className = "da-invoice";
-            inv.style.cssText = "margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:10px";
-            var invT = document.createElement("b");
-            invT.textContent = "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : "");
-            var prRow = document.createElement("div");
-            prRow.style.cssText = "display:flex;gap:8px;align-items:center;flex-wrap:wrap";
-            var prIn = document.createElement("input");
-            prIn.className = "dv-input"; prIn.type = "number"; prIn.min = "1"; prIn.step = "1"; prIn.dir = "ltr";
-            prIn.placeholder = "السعر بالجنيه"; prIn.style.maxWidth = "160px";
-            prIn.value = d.price || ""; prIn.disabled = !!d.invoice_no;
-            var prSave = document.createElement("button");
-            prSave.className = "da-toggle"; prSave.textContent = "حفظ السعر"; prSave.disabled = !!d.invoice_no;
-            prRow.appendChild(prIn); prRow.appendChild(prSave);
-            var tkLbl = document.createElement("label");
-            tkLbl.style.cssText = "display:flex;gap:8px;align-items:center;cursor:pointer";
-            var tk = document.createElement("input");
-            tk.type = "checkbox"; tk.checked = !!d.invoice_ready; tk.disabled = !d.price;
-            var tkTxt = document.createElement("span");
-            tkTxt.textContent = "الفاتورة جاهزة (العميل يقدر يحمّلها)";
-            tkLbl.appendChild(tk); tkLbl.appendChild(tkTxt);
-            var invHint = document.createElement("p");
-            invHint.className = "dv-hint";
-            invHint.textContent = d.invoice_no ? "اتصدرت برقم " + d.invoice_no + " ومبقاش ينفع تغيّر السعر." : (d.price ? "زرار الفاتورة هيظهر للعميل بعد ما تفعّل «جاهزة»." : "اكتب السعر الأول.");
-            function invPost(payload) {
-              return fetch(API + "/api/admin/set-invoice", {
-                method: "POST",
-                headers: headers({ "Content-Type": "application/json" }),
-                body: JSON.stringify(Object.assign({ id: d.id }, payload)),
-              }).then(function (r) { return r.json(); }).then(function (res) {
-                if (!res.ok) alert("حصلت مشكلة في الفاتورة: " + (res.error || "غير معروف"));
-                refresh();
-              });
-            }
-            prSave.addEventListener("click", function () {
-              prSave.disabled = true;
-              invPost({ price: prIn.value ? Number(prIn.value) : null });
-            });
-            tk.addEventListener("change", function () {
-              if (tk.checked && !confirm("العميل هيقدر يحمّل الفاتورة بمبلغ " + d.price + " جنيه. متأكد؟")) { tk.checked = false; return; }
-              tk.disabled = true;
-              invPost({ ready: tk.checked });
-            });
-            inv.appendChild(invT); inv.appendChild(prRow); inv.appendChild(tkLbl); inv.appendChild(invHint);
-            card.appendChild(inv);
+            // invoice: services + prices + payment method(s) + "ready" tick
+            card.appendChild(buildInvoiceBlock(d));
           }
           if (d.access === "active") {
             var line = card.querySelector(".da-count-line");
@@ -468,7 +518,7 @@
     fetch(API + "/api/admin/create", {
       method: "POST",
       headers: headers({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ client: client, project: project, explanation: expl, hours: hours, price: ($("da-price").value || null) }),
+      body: JSON.stringify({ client: client, project: project, explanation: expl, hours: hours }),
     }).then(function (r) { return r.json(); }).then(function (created) {
       if (!created.id) throw new Error(created.error || "create_failed");
       var seq = Promise.resolve();

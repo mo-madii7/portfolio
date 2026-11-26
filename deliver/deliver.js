@@ -164,12 +164,15 @@
 
 
   /* ---------- invoice (PDF built in the browser from delivery data) ---------- */
-  var PAY = [
-    ["InstaPay", "ipn.eg/S/moomadih.202/instapay/6M0zSZ"],
-    ["Vodafone Cash", "01099033963"],
-    ["Etisalat Cash", "01119072800"],
-    ["WE Pay", "01515190759"]
-  ];
+  var PAY = {
+    instapay: ["InstaPay", "InstaPay", "ipn.eg/S/moomadih.202/instapay/6M0zSZ"],
+    fawry: ["فوري", "Fawry", ""],
+    vodafone: ["Vodafone Cash", "Vodafone Cash", "01099033963"],
+    etisalat: ["Etisalat Cash", "Etisalat Cash", "01119072800"],
+    we: ["WE Pay", "WE Pay", "01515190759"],
+    bank: ["تحويل بنكي", "Bank transfer", ""],
+    cash: ["نقدًا", "Cash", ""]
+  };
   function invMsg(ar, en, bad) {
     var p = $("dv-invoice-msg"); if (!p) return;
     p.hidden = false; p.style.color = bad ? "#ffb1a3" : "";
@@ -221,35 +224,55 @@
     y += 130;
     pair(T("العميل", "Billed to"), inv.client, y, start);
     pair(T("تاريخ التسليم", "Delivery date"), df(inv.delivery_date), y, end, en ? "right" : "left");
+    y += 130;
+    (function () {
+      var pj = inv.project || "", mw = W - 2 * M;
+      x.font = "600 32px " + FONT;
+      while (pj.length > 4 && x.measureText(pj).width > mw) pj = pj.slice(0, -2);
+      if (pj !== inv.project) pj += "…";
+      pair(T("المشروع", "Project"), pj, y, start);
+    })();
     y += 150;
     x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 70);
-    txt(T("البند", "Item"), start, y + 46, 26, 600, ink);
+    txt(T("الخدمة", "Service"), start, y + 46, 26, 600, ink);
     txt(T("المبلغ (جنيه مصري)", "Amount (EGP)"), end, y + 46, 26, 600, ink, en ? "right" : "left");
     y += 70;
-    var proj = inv.project, lines = [], cur = "";
+    var items = (inv.items && inv.items.length) ? inv.items : [{ name: inv.project, price: inv.amount }];
     x.font = "500 30px " + FONT;
-    proj.split(" ").forEach(function (w) {
-      var t = cur ? cur + " " + w : w;
-      if (x.measureText(t).width > 700 && cur) { lines.push(cur); cur = w; } else cur = t;
+    items.slice(0, 12).forEach(function (it) {
+      var nm = (en && it.name_en) ? it.name_en : it.name, lines = [], cur = "";
+      nm.split(" ").forEach(function (w) {
+        var t = cur ? cur + " " + w : w;
+        if (x.measureText(t).width > 700 && cur) { lines.push(cur); cur = w; } else cur = t;
+      });
+      if (cur) lines.push(cur);
+      lines = lines.slice(0, 2);
+      lines.forEach(function (l, i) { txt(l, start, y + 56 + i * 42, 30, 500, ink); });
+      txt(nf(it.price), end, y + 56, 30, 600, ink, en ? "right" : "left");
+      y += 30 + lines.length * 42 + 22;
+      x.fillStyle = "#eef2f7"; x.fillRect(M, y, W - 2 * M, 2);
+      y += 6;
     });
-    if (cur) lines.push(cur);
-    lines.slice(0, 3).forEach(function (l, i) { txt(l, start, y + 60 + i * 44, 30, 500, ink); });
-    txt(nf(inv.amount), end, y + 60, 32, 600, ink, en ? "right" : "left");
-    y += 60 + Math.min(lines.length, 3) * 44 + 40;
+    y += 20;
     x.fillStyle = "#e2e8f0"; x.fillRect(M, y, W - 2 * M, 3);
     y += 90;
     txt(T("الإجمالي المستحق", "Total due"), start, y, 34, 600, ink);
     txt(nf(inv.amount) + " " + T("ج.م", "EGP"), end, y, 52, 700, "#c2410c", en ? "right" : "left");
     y += 120;
-    x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, 330);
-    txt(T("طرق الدفع", "Payment methods"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
-    PAY.forEach(function (p, i) {
-      var yy = y + 120 + i * 52;
-      txt(p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
-      x.direction = "ltr";
-      txt(p[1], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
-      x.direction = en ? "ltr" : "rtl";
+    var ms = (inv.methods || []).filter(function (k) { return PAY[k]; });
+    var boxH = 110 + ms.length * 52;
+    x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, boxH);
+    txt(ms.length > 1 ? T("طرق الدفع", "Payment methods") : T("طريقة الدفع", "Payment method"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
+    ms.forEach(function (k, i) {
+      var p = PAY[k], yy = y + 120 + i * 52;
+      txt(en ? p[1] : p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
+      if (p[2]) {
+        x.direction = "ltr";
+        txt(p[2], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
+        x.direction = en ? "ltr" : "rtl";
+      }
     });
+    y += boxH + 70;
     y += 400;
     txt(T("للاستفسار: واتساب 01119072800", "Questions: WhatsApp 01119072800"), start, y, 26, 400, lab);
     txt(T("شكرًا لتعاملك معنا", "Thank you for your business"), start, y + 50, 26, 400, lab);
