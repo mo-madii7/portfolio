@@ -487,7 +487,7 @@ window.pfSetupTestiClamp();
   var root = document.documentElement;
   function viewFor(h) {
     if (h === "works" || /^pf-case-/.test(h)) return "works";
-    if (h === "services" || h === "pf-brief") return "services";
+    if (h === "services" || h === "pf-brief" || h === "pf-receive") return "services";
     if (h === "videos" || h === "pf-vid") return "videos";
     if (h === "about" || h === "pf-novels" || h === "pf-articles") return "about";
     return "home";
@@ -921,7 +921,7 @@ window.pfSetupTestiClamp();
   document.querySelectorAll(".pf-novel").forEach(function (n) { push("novel", "#pf-novels", n.querySelector(".pf-novel-name"), null); });
   document.querySelectorAll(".pf-scard").forEach(function (c) { push("service", "#services", c.querySelector(".pf-scard-name"), c.querySelector(".pf-scard-detail")); });
   document.querySelectorAll(".pf-vid-card").forEach(function (v) { push("video", "#videos", v.querySelector(".pf-vid-client"), v.querySelector(".pf-vid-kind")); });
-  [["#pf-novels"], ["#pf-about"], ["#pf-testi"], ["#pf-partners"], ["#pf-contact"], ["#pf-articles"], ["#pf-brief"]].forEach(function (p) {
+  [["#pf-novels"], ["#pf-about"], ["#pf-testi"], ["#pf-partners"], ["#pf-contact"], ["#pf-articles"], ["#pf-brief"], ["#pf-receive"]].forEach(function (p) {
     var sec = document.querySelector(p[0]); if (!sec) return;
     push("section", p[0], sec.querySelector(".pf-contact-title, .pf-contact-kicker, h2, h3"), null);
   });
