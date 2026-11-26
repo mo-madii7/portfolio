@@ -86,6 +86,12 @@
         img.src = fileUrl(code, f.name, true);
         img.alt = f.name;
         img.loading = "lazy";
+        img.tabIndex = 0;
+        img.setAttribute("role", "button");
+        img.addEventListener("click", function () { openPreview(fileUrl(code, f.name, true), f.name); });
+        img.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPreview(fileUrl(code, f.name, true), f.name); }
+        });
         cell.appendChild(img);
       }
       var cap = document.createElement("figcaption");
@@ -159,3 +165,27 @@
     openCode(pre);
   }
 })();
+
+  /* in-page image preview */
+  function openPreview(url, name) {
+    var lb = $("dv-lightbox"); if (!lb) return;
+    $("dv-lb-img").src = url;
+    $("dv-lb-img").alt = name;
+    $("dv-lb-cap").textContent = name;
+    lb.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function closePreview() {
+    var lb = $("dv-lightbox"); if (!lb || lb.hidden) return;
+    lb.hidden = true;
+    $("dv-lb-img").removeAttribute("src");
+    document.body.style.overflow = "";
+  }
+  (function () {
+    var lbEl = $("dv-lightbox");
+    if (!lbEl) return;
+    $("dv-lb-close").addEventListener("click", closePreview);
+    $("dv-lb-img").addEventListener("click", closePreview);
+    lbEl.addEventListener("click", function (e) { if (e.target === lbEl) closePreview(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePreview(); });
+  })();
