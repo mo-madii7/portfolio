@@ -52,7 +52,7 @@
           <button type="button" class="dv-btn dv-btn-line" data-h="72">٣ أيام</button>
           <button type="button" class="dv-btn dv-btn-line" data-h="168">أسبوع</button>
         </div>
-        <p class="dv-hint">المدة دي لاستخدام الكود وتحميل الملفات. حذف الملفات نفسها بيتم يدوي من عندك (من هنا أو من حساب التخزين).</p></div>
+        <p class="dv-hint">المدة دي لاستخدام الكود وتحميل الملفات. الملفات وملاحظات العميل بتتحذف تلقائيًا في نفس لحظة انتهاء المدة (من غير أي مهلة زيادة). وتقدر تحذفها يدوي قبل كده من هنا.</p></div>
 
       <div class="da-field"><span class="dv-label">الملفات (JPG / PNG / PDF — لحد ٥٠ ميجا للملف)</span>
         <div class="da-drop">
@@ -86,7 +86,7 @@
 
     <section>
       <h2 class="dv-h2">التسليمات</h2>
-      <p class="dv-hint">«انتهى الوصول» معناها الكود وقف — الملفات لسه موجودة لحد ما تحذفها إنت.</p>
+      <p class="dv-hint">الملفات والملاحظات بتتحذف تلقائيًا لما المدة تخلص، وبتتمسح من هنا كمان. لو ظهرت «انتهى الوصول» فمعناها إن الحذف جاي في أقل من دقيقة.</p>
       <div id="da-list" style="display:flex;flex-direction:column;gap:14px;margin-top:14px"></div>
       <div class="dv-btn-row">
         <button class="dv-btn dv-btn-line" id="da-refresh">تحديث القايمة</button>
@@ -224,7 +224,7 @@
           var card = document.createElement("div");
           card.className = "da-card";
           var chip = d.access === "active" ? '<span class="da-chip da-chip-active">شغالة</span>'
-            : d.access === "expired" ? '<span class="da-chip da-chip-expired">انتهى الوصول — في انتظار الحذف</span>'
+            : d.access === "expired" ? '<span class="da-chip da-chip-expired">انتهى الوصول — بيتحذف تلقائيًا</span>'
             : '<span class="da-chip da-chip-deleted">اتحذفت</span>';
           var stageChip = d.downloads_enabled
             ? '<span class="da-chip da-chip-dl">التحميل مفعّل</span>'
@@ -270,6 +270,31 @@
               fl.appendChild(row);
             });
             card.appendChild(fl);
+          }
+          if (d.notes && d.notes.length) {
+            var nb = document.createElement("div");
+            nb.className = "da-files";
+            var nt = document.createElement("div");
+            nt.className = "da-meta";
+            nt.textContent = "ملاحظات العميل (" + d.notes.length + ")";
+            nb.appendChild(nt);
+            var KL = { note: "ملاحظة", revision: "طلب تعديل", approval: "موافقة" };
+            d.notes.forEach(function (n) {
+              var nr = document.createElement("div");
+              nr.className = "da-file-row";
+              nr.style.flexDirection = "column";
+              nr.style.alignItems = "stretch";
+              var m = document.createElement("span");
+              m.className = "da-meta";
+              m.textContent = (KL[n.kind] || "ملاحظة") + (n.name ? " · " + n.name : "") + " · " + new Date(n.created_at).toLocaleString("ar-EG");
+              var t = document.createElement("span");
+              t.style.whiteSpace = "pre-wrap";
+              t.style.wordBreak = "break-word";
+              t.textContent = n.body;
+              nr.appendChild(m); nr.appendChild(t);
+              nb.appendChild(nr);
+            });
+            card.appendChild(nb);
           }
           if (d.access !== "deleted") {
             var addRow = document.createElement("div");
@@ -421,3 +446,4 @@
 </script>
 </body>
 </html>
+
