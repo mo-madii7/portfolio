@@ -207,9 +207,9 @@
     push("%PDF-1.4\n");
     obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
     obj(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-    obj(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+    obj(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 " + (595.28 * h / w).toFixed(2) + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
     off[4] = len; push("4 0 obj\n<< /Type /XObject /Subtype /Image /Width " + w + " /Height " + h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + jpegBytes.length + " >>\nstream\n"); push(jpegBytes); push("\nendstream\nendobj\n");
-    var cs = "q 595.28 0 0 841.89 0 0 cm /Im0 Do Q";
+    var cs = "q 595.28 0 0 " + (595.28 * h / w).toFixed(2) + " 0 0 cm /Im0 Do Q";
     obj(5, "<< /Length " + cs.length + " >>\nstream\n" + cs + "\nendstream");
     var xref = len; push("xref\n0 6\n0000000000 65535 f \n");
     for (var i = 1; i <= 5; i++) push(String(off[i]).padStart(10, "0") + " 00000 n \n");
@@ -218,8 +218,8 @@
     parts.forEach(function (b) { out.set(b, p); p += b.length; });
     return new Blob([out], { type: "application/pdf" });
   }
-  function drawInvoice(inv, stamp) {
-    var en = isEn(), W = 1240, H = 1754, M = 90;
+  function drawInvoice(inv, stamp, H) {
+    var en = isEn(), W = 1240, M = 90; H = H || 1754;
     var c = document.createElement("canvas"); c.width = W; c.height = H;
     var x = c.getContext("2d");
     x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
@@ -296,6 +296,7 @@
     y += 400;
     txt(T("للاستفسار: واتساب 01119072800", "Questions: WhatsApp 01119072800"), start, y, 26, 400, lab);
     txt(T("شكرًا لتعاملك معنا", "Thank you for your business"), start, y + 50, 26, 400, lab);
+    c._end = y + 190;
     return c;
   }
   function makeInvoice(code) {
@@ -311,7 +312,8 @@
       if (!inv) return;
       return Promise.all([Promise.resolve(document.fonts && document.fonts.load("600 30px Alexandria", "فاتورة Invoice")).catch(function () {}), loadStamp()]).then(function (r) {
         var st = r[1];
-        var cv = drawInvoice(inv, st);
+        var dry = drawInvoice(inv, st, 6000);
+        var cv = drawInvoice(inv, st, Math.max(1754, dry._end));
         return new Promise(function (res) { cv.toBlob(res, "image/jpeg", 0.92); }).then(function (jb) { return jb.arrayBuffer(); }).then(function (ab) {
           var blob = jpegPdf(new Uint8Array(ab), cv.width, cv.height);
           var a = document.createElement("a");
