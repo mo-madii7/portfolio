@@ -84,6 +84,20 @@
 
     <hr class="da-hr">
 
+    <section id="dc-form">
+      <h2 class="dv-h2">فاتورة مستقلة / عرض سعر</h2>
+      <p class="dv-hint">مش مربوطة بصفحة تسليم. بتراجع المسودة وتعاينها، وبعدين تصدرها وتحمّل الـPDF وتبعتها للعميل بنفسك. العميل مبيشوفش حاجة غير لما إنت تبعتها.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <select class="dv-input" id="dc-kind"><option value="invoice">فاتورة</option><option value="quote">عرض سعر</option></select>
+        <input class="dv-input" id="dc-client" type="text" maxlength="120" placeholder="اسم العميل">
+        <input class="dv-input" id="dc-project" type="text" maxlength="160" placeholder="اسم المشروع (اختياري)">
+        <div id="dc-picker" style="display:flex;flex-direction:column;gap:10px"></div>
+        <button class="dv-btn dv-btn-line" id="dc-save" type="button">حفظ كمسودة</button>
+      </div>
+      <h3 class="dv-h2" style="font-size:16px;margin-top:18px">الفواتير وعروض الأسعار</h3>
+      <div id="dc-list" style="display:flex;flex-direction:column;gap:12px;margin-top:10px"></div>
+    </section>
+
     <section>
       <h2 class="dv-h2">التسليمات</h2>
       <p class="dv-hint">الملفات والملاحظات بتتحذف تلقائيًا لما المدة تخلص، وبتتمسح من هنا كمان. لو ظهرت «انتهى الوصول» فمعناها إن الحذف جاي في أقل من دقيقة.</p>
@@ -100,6 +114,7 @@
   </div>
 </main>
 
+<script src="invoice-render.js?v=1"></script>
 <script>
 (function () {
   "use strict";
@@ -218,34 +233,25 @@
     ["مونتاج فيديو", [["ريل بسيط (قص + كابشن + ترتيب)","Simple reel"],["ريل احترافي (إيقاع + مؤثرات + ترجمة)","Professional reel"],["فيديو إعلاني 30 - 60 ثانية","Ad video, 30-60 seconds"],["حلقة يوتيوب 8 - 30 دقيقة","YouTube episode, 8-30 minutes"],["فعالية / مناسبة (ملخص)","Event recap video"],["باقة شهرية 8 ريلز","Monthly package, 8 reels"]]],
     ["تصوير فيديو", [["تصوير فيديو","Video shooting"]]]
   ];
-  function buildInvoiceBlock(d) {
-    var locked = !!d.invoice_no;
-    var items0 = []; try { items0 = d.invoice_items ? JSON.parse(d.invoice_items) : []; } catch (e) {}
-    var inv = document.createElement("div");
-    inv.className = "da-invoice";
-    inv.style.cssText = "margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:10px";
-    function el(tag, txt, css) { var e = document.createElement(tag); if (txt) e.textContent = txt; if (css) e.style.cssText = css; return e; }
-    var t = el("b", "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : ""));
-    var auto = el("p", "العميل: " + d.client + " · المشروع: " + d.project + " · الرقم والتاريخ تلقائي. المبالغ إنت اللي بتكتبها.");
-    auto.className = "dv-hint";
+  function el(tag, txt, css) { var e = document.createElement(tag); if (txt) e.textContent = txt; if (css) e.style.cssText = css; return e; }
+  // services checklist + custom lines + discounts, shared by delivery invoices and standalone docs
+  function buildPicker(items0, locked) {
+    var checks = [], found = {}, usedNames = {};
+    items0.forEach(function (it) { found[it.name] = it; });
     var total = el("div", "", "font-weight:700");
-    var checks = [];
-    function upd() {
+    var cust = el("div", "", "display:flex;flex-direction:column;gap:8px");
+    function sumNow() {
       var sum = 0;
       checks.forEach(function (c) { if (c.cb.checked) sum += Math.round(Number(c.pr.value) || 0); });
       cust.querySelectorAll("[data-cu]").forEach(function (r) { sum += r._amount(); });
-      total.textContent = "الإجمالي: " + sum.toLocaleString("en-US") + " جنيه" + (sum <= 0 ? " (لازم يكون أكبر من صفر)" : "");
+      return sum;
     }
-    // service checklist
+    function upd() { var sum = sumNow(); total.textContent = "الإجمالي: " + sum.toLocaleString("en-US") + " جنيه" + (sum <= 0 ? " (لازم يكون أكبر من صفر)" : ""); }
     var listT = el("span", "اختار الخدمات (علّم واكتب السعر)"); listT.className = "dv-label";
     var list = el("div", "", "display:flex;flex-direction:column;gap:6px");
-    var found = {};
-    items0.forEach(function (it) { found[it.name] = it; });
-    var usedNames = {};
     SERVICES.forEach(function (g) {
       var det = el("details", "", "border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 10px");
-      var sm = el("summary", g[0], "cursor:pointer;font-weight:600");
-      det.appendChild(sm);
+      det.appendChild(el("summary", g[0], "cursor:pointer;font-weight:600"));
       g[1].forEach(function (sv) {
         var row = el("div", "", "display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0");
         var lb = el("label", "", "display:flex;gap:8px;align-items:center;flex:1 1 200px;cursor:pointer");
@@ -261,9 +267,7 @@
       });
       list.appendChild(det);
     });
-    // custom lines and discounts
     var custT = el("span", "بنود مخصصة وخصومات"); custT.className = "dv-label";
-    var cust = el("div", "", "display:flex;flex-direction:column;gap:8px");
     function addCustom(it, isDisc) {
       var row = el("div", "", "display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px");
       row.setAttribute("data-cu", "1");
@@ -279,13 +283,34 @@
       row.appendChild(nm); row.appendChild(pr); row.appendChild(rm);
       cust.appendChild(row);
     }
-    items0.forEach(function (it) { if (!usedNames[it.name] || !checks.some(function (c) { return c.name === it.name; })) { if (!checks.some(function (c) { return c.name === it.name; })) addCustom(it, it.price < 0); } });
+    items0.forEach(function (it) { if (!checks.some(function (c) { return c.name === it.name; })) addCustom(it, it.price < 0); });
     var btns = el("div", "", "display:flex;gap:8px;flex-wrap:wrap");
     var add = el("button", "+ بند مخصص"); add.type = "button"; add.className = "da-toggle"; add.disabled = locked;
     var addD = el("button", "+ خصم"); addD.type = "button"; addD.className = "da-toggle"; addD.disabled = locked;
     add.addEventListener("click", function () { addCustom(null, false); });
     addD.addEventListener("click", function () { addCustom({ name: "خصم", price: 0 }, true); });
     btns.appendChild(add); btns.appendChild(addD);
+    upd();
+    return {
+      nodes: [listT, list, custT, cust, btns, total],
+      get: function () {
+        var out = [], bad = false;
+        checks.forEach(function (c) { if (c.cb.checked) { var p = Math.round(Number(c.pr.value)); if (!p) bad = true; else out.push({ name: c.name, name_en: c.en, price: p }); } });
+        cust.querySelectorAll("[data-cu]").forEach(function (r) { var g = r._get(); if (!g.name && !g.price) return; if (!g.name || !g.price) bad = true; else out.push(g); });
+        var sum = out.reduce(function (a, b) { return a + b.price; }, 0);
+        return { items: out, bad: bad || !out.length, sum: sum };
+      }
+    };
+  }
+  function buildInvoiceBlock(d) {
+    var locked = !!d.invoice_no;
+    var items0 = []; try { items0 = d.invoice_items ? JSON.parse(d.invoice_items) : []; } catch (e) {}
+    var inv = el("div", "", "margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:10px");
+    inv.className = "da-invoice";
+    var t = el("b", "الفاتورة" + (d.invoice_no ? " — " + d.invoice_no : ""));
+    var auto = el("p", "العميل: " + d.client + " · المشروع: " + d.project + " · الرقم والتاريخ تلقائي. المبالغ إنت اللي بتكتبها.");
+    auto.className = "dv-hint";
+    var pk = buildPicker(items0, locked);
     var save = el("button", "حفظ الفاتورة"); save.type = "button"; save.className = "da-toggle"; save.disabled = locked;
     var tkLbl = el("label", "", "display:flex;gap:8px;align-items:center;cursor:pointer");
     var tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = !!d.invoice_ready; tk.disabled = !d.price;
@@ -297,24 +322,97 @@
         .then(function (r) { return r.json(); }).then(function (res) { if (!res.ok) alert("حصلت مشكلة في الفاتورة: " + (res.error || "غير معروف")); refresh(); });
     }
     save.addEventListener("click", function () {
-      var out = [], bad = false;
-      checks.forEach(function (c) { if (c.cb.checked) { var p = Math.round(Number(c.pr.value)); if (!p) bad = true; else out.push({ name: c.name, name_en: c.en, price: p }); } });
-      cust.querySelectorAll("[data-cu]").forEach(function (r) { var g = r._get(); if (!g.name && !g.price) return; if (!g.name || !g.price) bad = true; else out.push(g); });
-      if (bad || !out.length) { alert("كل بند محتاج اسم ومبلغ (مش صفر)."); return; }
-      var sum = out.reduce(function (a, b) { return a + b.price; }, 0);
-      if (sum <= 0) { alert("الإجمالي لازم يكون أكبر من صفر."); return; }
-      save.disabled = true; post({ items: out });
+      var g = pk.get();
+      if (g.bad) { alert("كل بند محتاج اسم ومبلغ (مش صفر)."); return; }
+      if (g.sum <= 0) { alert("الإجمالي لازم يكون أكبر من صفر."); return; }
+      save.disabled = true; post({ items: g.items });
     });
     tk.addEventListener("change", function () {
       if (tk.checked && !confirm("العميل هيقدر يحمّل الفاتورة بمبلغ " + d.price + " جنيه. متأكد؟")) { tk.checked = false; return; }
       tk.disabled = true; post({ ready: tk.checked });
     });
-    [t, auto, listT, list, custT, cust, btns, total, save, tkLbl, hint].forEach(function (e) { inv.appendChild(e); });
-    upd();
+    [t, auto].concat(pk.nodes).concat([save, tkLbl, hint]).forEach(function (e) { inv.appendChild(e); });
     return inv;
   }
 
-    function refresh() {
+  /* ---------- standalone invoices and quotes ---------- */
+  var docEditId = null, docPk = null;
+  function docPost(path, payload) {
+    return fetch(API + "/api/admin/" + path, { method: "POST", headers: headers({ "Content-Type": "application/json" }), body: JSON.stringify(payload) }).then(function (r) { return r.json(); });
+  }
+  function docToInv(doc, draft) {
+    return { kind: doc.kind, invoice_no: doc.doc_no || (draft ? "DRAFT" : ""), issued_at: doc.issued_at || new Date().toISOString(), client: doc.client, project: doc.project || "", amount: doc.price, items: JSON.parse(doc.items) };
+  }
+  function previewDoc(doc, lang, draft, mount) {
+    window.MMInv.render(docToInv(doc, draft), lang).then(function (r) {
+      mount.innerHTML = "";
+      var im = document.createElement("img"); im.src = r.canvas.toDataURL("image/jpeg", 0.8); im.style.cssText = "width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.2)";
+      mount.appendChild(im);
+    });
+  }
+  function downloadDoc(doc, lang) {
+    window.MMInv.render(docToInv(doc, false), lang).then(function (r) {
+      var a = document.createElement("a"); a.href = URL.createObjectURL(r.blob); a.download = doc.doc_no + (lang === "en" ? "-en" : "") + ".pdf";
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+    });
+  }
+  function renderDocs() {
+    var box = $("dc-list"); if (!box) return;
+    fetch(API + "/api/admin/docs", { headers: headers() }).then(function (r) { return r.json(); }).then(function (res) {
+      box.innerHTML = "";
+      (res.docs || []).forEach(function (doc) {
+        var c = el("div", "", "padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:8px");
+        c.appendChild(el("b", (doc.kind === "quote" ? "عرض سعر" : "فاتورة") + " · " + (doc.doc_no || "مسودة") + " · " + doc.client));
+        c.appendChild(el("p", "الإجمالي " + doc.price.toLocaleString("en-US") + " جنيه" + (doc.project ? " · " + doc.project : "") + (doc.source_id ? " · محوّلة من عرض سعر" : ""), "margin:0;opacity:.8"));
+        var row = el("div", "", "display:flex;gap:8px;flex-wrap:wrap");
+        function b(t, f) { var x = el("button", t); x.type = "button"; x.className = "da-toggle"; x.addEventListener("click", f); row.appendChild(x); }
+        var pv = el("div");
+        b("معاينة", function () { previewDoc(doc, "ar", !doc.doc_no, pv); });
+        if (!doc.doc_no) {
+          b("تعديل", function () { loadDocEditor(doc); window.scrollTo({ top: $("dc-form").getBoundingClientRect().top + window.scrollY - 20, behavior: "smooth" }); });
+          b("إصدار + PDF عربي", function () { issueAndDownload(doc, "ar"); });
+          b("إصدار + PDF English", function () { issueAndDownload(doc, "en"); });
+          b("حذف المسودة", function () { if (!confirm("حذف المسودة؟")) return; docPost("doc-delete", { id: doc.id }).then(renderDocs); });
+        } else {
+          b("PDF عربي", function () { downloadDoc(doc, "ar"); });
+          b("PDF English", function () { downloadDoc(doc, "en"); });
+          if (doc.kind === "quote") b("حوّل لفاتورة", function () { if (!confirm("هتتعمل مسودة فاتورة من العرض ده. تراجعها وتصدرها بعدين.")) return; docPost("doc-convert", { id: doc.id }).then(function (r) { if (!r.ok) alert("مشكلة: " + (r.error || "")); renderDocs(); }); });
+        }
+        c.appendChild(row); c.appendChild(pv); box.appendChild(c);
+      });
+      if (!(res.docs || []).length) box.appendChild(el("p", "مفيش فواتير أو عروض لسه.", "opacity:.7"));
+    });
+  }
+  function issueAndDownload(doc, lang) {
+    if (!confirm("هيتخصص رقم رسمي للمستند وبعدها البنود والأسعار بتتقفل. متأكد؟")) return;
+    docPost("doc-issue", { id: doc.id }).then(function (r) { if (!r.ok) { alert("مشكلة: " + (r.error || "")); return; } downloadDoc(r.doc, lang); renderDocs(); });
+  }
+  function loadDocEditor(doc) {
+    docEditId = doc ? doc.id : null;
+    $("dc-kind").value = doc ? doc.kind : "invoice";
+    $("dc-client").value = doc ? doc.client : "";
+    $("dc-project").value = doc ? (doc.project || "") : "";
+    docPk = buildPicker(doc ? JSON.parse(doc.items) : [], false);
+    var m = $("dc-picker"); m.innerHTML = ""; docPk.nodes.forEach(function (n) { m.appendChild(n); });
+    $("dc-save").textContent = docEditId ? "حفظ التعديل" : "حفظ كمسودة";
+  }
+  function initDocs() {
+    if (!$("dc-form") || initDocs.done) return; initDocs.done = true;
+    loadDocEditor(null);
+    $("dc-save").addEventListener("click", function () {
+      var g = docPk.get(), client = $("dc-client").value.trim();
+      if (!client) { alert("اكتب اسم العميل."); return; }
+      if (g.bad || g.sum <= 0) { alert("كل بند محتاج اسم ومبلغ، والإجمالي أكبر من صفر."); return; }
+      docPost("doc-save", { id: docEditId || undefined, kind: $("dc-kind").value, client: client, project: $("dc-project").value.trim(), items: g.items }).then(function (r) {
+        if (!r.ok) { alert("مشكلة: " + (r.error || "")); return; }
+        loadDocEditor(null); renderDocs();
+      });
+    });
+    renderDocs();
+  }
+
+      function refresh() {
+    initDocs();
     fetch(API + "/api/admin/list", { headers: headers() })
       .then(function (r) { return r.json(); })
       .then(function (data) {

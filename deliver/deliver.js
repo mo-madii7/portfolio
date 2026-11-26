@@ -219,7 +219,7 @@
     return new Blob([out], { type: "application/pdf" });
   }
   function drawInvoice(inv, stamp, H) {
-    var en = isEn(), W = 1240, M = 90; H = H || 1754;
+    var en = isEn(), W = 1240, M = 90, quote = inv.kind === "quote"; H = H || 1754;
     var c = document.createElement("canvas"); c.width = W; c.height = H;
     var x = c.getContext("2d");
     x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
@@ -236,25 +236,26 @@
     var other = function (al) { return al === "left" ? "right" : "left"; };
     x.fillStyle = "#0b1b3d"; x.fillRect(0, 0, W, 250);
     x.fillStyle = "#f97316"; x.fillRect(0, 250, W, 8);
-    txt(T("فاتورة", "INVOICE"), start, 150, 76, 700, "#ffffff");
+    txt(quote ? T("عرض سعر", "QUOTATION") : T("فاتورة", "INVOICE"), start, 150, 76, 700, "#ffffff");
     txt("Mo.Madii", end, 118, 44, 700, "#fb923c", en ? "right" : "left");
     txt(T("محمد مديح · مصمم جرافيك ومونتير", "Mohamad Madih · Graphic designer & video editor"), end, 168, 24, 400, "#cbd5e1", en ? "right" : "left");
     var y = 340, lab = "#64748b", ink = "#0b1b3d";
     function pair(l, v, Y, X, al) { txt(l, X, Y, 24, 400, lab, al); txt(v, X, Y + 42, 32, 600, ink, al); }
-    pair(T("رقم الفاتورة", "Invoice no."), inv.invoice_no, y, start);
-    pair(T("تاريخ الإصدار", "Issue date"), df(inv.issued_at), y, end, en ? "right" : "left");
+    pair(quote ? T("رقم العرض", "Quote no.") : T("رقم الفاتورة", "Invoice no."), inv.invoice_no, y, start);
+    pair(quote ? T("تاريخ العرض", "Quote date") : T("تاريخ الإصدار", "Issue date"), df(inv.issued_at), y, end, en ? "right" : "left");
     y += 130;
     pair(T("العميل", "Billed to"), inv.client, y, start);
-    pair(T("تاريخ التسليم", "Delivery date"), df(inv.delivery_date), y, end, en ? "right" : "left");
+    if (quote) pair(T("صالح حتى", "Valid until"), df(new Date(new Date(inv.issued_at).getTime() + 14 * 86400000)), y, end, en ? "right" : "left");
+    else if (inv.delivery_date) pair(T("تاريخ التسليم", "Delivery date"), df(inv.delivery_date), y, end, en ? "right" : "left");
     y += 130;
-    (function () {
+    if (inv.project) (function () {
       var pj = inv.project || "", mw = W - 2 * M;
       x.font = "600 32px " + FONT;
       while (pj.length > 4 && x.measureText(pj).width > mw) pj = pj.slice(0, -2);
       if (pj !== inv.project) pj += "…";
       pair(T("المشروع", "Project"), pj, y, start);
     })();
-    y += 150;
+    y += inv.project ? 150 : 40;
     x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 70);
     txt(T("الخدمة", "Service"), start, y + 46, 26, 600, ink);
     txt(T("المبلغ (جنيه مصري)", "Amount (EGP)"), end, y + 46, 26, 600, ink, en ? "right" : "left");
@@ -270,7 +271,7 @@
       if (cur) lines.push(cur);
       lines = lines.slice(0, 2);
       lines.forEach(function (l, i) { txt(l, start, y + 56 + i * 42, 30, 500, ink); });
-      txt(nf(it.price), end, y + 56, 30, 600, it.price < 0 ? "#15803d" : ink, en ? "right" : "left");
+      x.direction = "ltr"; txt((it.price < 0 ? "\u2212" : "") + nf(Math.abs(it.price)), end, y + 56, 30, 600, it.price < 0 ? "#15803d" : ink, en ? "right" : "left"); x.direction = en ? "ltr" : "rtl";
       y += 30 + lines.length * 42 + 22;
       x.fillStyle = "#eef2f7"; x.fillRect(M, y, W - 2 * M, 2);
       y += 6;
@@ -278,22 +279,28 @@
     y += 20;
     x.fillStyle = "#e2e8f0"; x.fillRect(M, y, W - 2 * M, 3);
     y += 90;
-    txt(T("الإجمالي المستحق", "Total due"), start, y, 34, 600, ink);
+    txt(quote ? T("الإجمالي", "Total") : T("الإجمالي المستحق", "Total due"), start, y, 34, 600, ink);
     txt(nf(inv.amount) + " " + T("ج.م", "EGP"), end, y, 52, 700, "#c2410c", en ? "right" : "left");
     y += 120;
-    var boxH = 110 + PAY.length * 52;
-    x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, boxH);
-    txt(T("طرق الدفع", "Payment methods"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
-    PAY.forEach(function (p, i) {
-      var yy = y + 120 + i * 52;
-      txt(p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
-      x.direction = "ltr";
-      txt(p[1], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
-      x.direction = en ? "ltr" : "rtl";
-    });
-    y += boxH + 70;
+    if (quote) {
+      x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 130);
+      txt(T("هذا عرض سعر وليس فاتورة.", "This is a quotation, not an invoice."), start + (en ? 30 : -30), y + 52, 26, 600, ink);
+      txt(T("الأسعار للبنود المذكورة فقط وصالحة لمدة ١٤ يومًا من تاريخ العرض.", "Prices apply to the listed items only and are valid for 14 days from the quote date."), start + (en ? 30 : -30), y + 98, 22, 400, lab);
+      y += 130 + 70;
+    } else {
+      var boxH = 110 + PAY.length * 52;
+      x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, boxH);
+      txt(T("طرق الدفع", "Payment methods"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
+      PAY.forEach(function (p, i) {
+        var yy = y + 120 + i * 52;
+        txt(p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
+        x.direction = "ltr";
+        txt(p[1], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
+        x.direction = en ? "ltr" : "rtl";
+      });
+      y += boxH + 70;
+    }
     drawStamp(x, en ? W - M - 140 : M + 140, y + 30, stamp);
-    y += 400;
     txt(T("للاستفسار: واتساب 01119072800", "Questions: WhatsApp 01119072800"), start, y, 26, 400, lab);
     txt(T("شكرًا لتعاملك معنا", "Thank you for your business"), start, y + 50, 26, 400, lab);
     c._end = y + 190;
