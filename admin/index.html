@@ -29,6 +29,8 @@
 .hub-prev iframe{width:100%;height:70vh;border:0;background:#0c0d10;border-radius:10px}
 .hub-prev .hub-row{padding:8px}
 details.hub-en summary{cursor:pointer;opacity:.7;font-size:.85rem}
+.hub-enmiss{display:inline-block;background:#5a1f1f;color:#ffd9d9;border:1px solid #a55;border-radius:999px;font-size:.75rem;padding:1px 10px;margin-inline-start:8px;vertical-align:middle}
+.hub-trstat{font-size:.85rem;color:#c9a24b;margin-top:6px}
 </style>
 </head>
 <body>
@@ -128,12 +130,18 @@ details.hub-en summary{cursor:pointer;opacity:.7;font-size:.85rem}
       <div class="hub-fields">
         <div><label class="dv-label" for="ts-name">اسم العميل</label><input class="dv-input" id="ts-name" type="text"></div>
         <div><label class="dv-label" for="ts-text">نص الرأي</label><textarea class="dv-textarea" id="ts-text" rows="3"></textarea></div>
-        <details class="hub-en"><summary>الترجمة الإنجليزية (اختياري — للزرار الإنجليزي في الموقع)</summary>
+        <details class="hub-en" id="ts-en-box"><summary>الترجمة الإنجليزية (بتتملى تلقائيًا — تقدر تراجعها وتعدّلها)</summary>
           <div class="hub-fields">
             <input class="dv-input" id="ts-name-en" type="text" dir="ltr" placeholder="Client name in English">
             <textarea class="dv-textarea" id="ts-text-en" rows="3" dir="ltr" placeholder="English text"></textarea>
+            <div class="dv-btn-row" style="margin:0"><button class="dv-btn dv-btn-line" id="ts-retrans" type="button">↻ ترجم تلقائيًا من الأول</button></div>
           </div>
         </details>
+        <div class="hub-trstat" id="ts-tr-status" hidden></div>
+        <div class="dv-callout dv-danger" id="ts-en-warn" hidden>
+          <div class="dv-callout-title">الإنجليزي ناقص</div>
+          <div class="dv-callout-body">الرأي هيتجهّز بالعربي بس، وهيبقى فاضي لما الزائر يدوس EN في الموقع. وسّع «الترجمة الإنجليزية» فوق ودوس «ترجم تلقائيًا من الأول» أو اكتب الترجمة بنفسك.</div>
+        </div>
       </div>
       <div class="dv-btn-row"><button class="dv-btn dv-btn-gold" id="ts-add" type="button">جهّز الرأي للنشر</button></div>
     </section>
@@ -340,12 +348,17 @@ function renderWorks(){
 function renderTesti(){
   var el = $("ts-list");
   el.innerHTML = data.testimonials.map(function(t){
-    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(t.name)+'</strong><div class="hub-muted">'+esc(t.text.slice(0,120))+(t.text.length>120?"…":"")+'</div></div>'+
+    var miss = (t.text_en||"").trim() ? "" : '<span class="hub-enmiss">الإنجليزي ناقص</span>';
+    return '<div class="hub-card"><div class="hub-row"><div><strong>'+esc(t.name)+'</strong>'+miss+'<div class="hub-muted">'+esc(t.text.slice(0,120))+(t.text.length>120?"…":"")+'</div></div>'+
       '<span><button class="dv-btn dv-btn-line" data-ts-edit="'+esc(t.name)+'" type="button">عدّل</button> '+
       '<button class="dv-btn dv-btn-line" data-ts-del="'+esc(t.name)+'" type="button">امسح</button></span></div>'+
       '<div class="hub-fields" data-ts-form="'+esc(t.name)+'" hidden>'+
       '<input class="dv-input" data-ts-name="'+esc(t.name)+'" type="text" value="'+esc(t.name)+'">'+
       '<textarea class="dv-textarea" data-ts-text="'+esc(t.name)+'" rows="3">'+esc(t.text)+'</textarea>'+
+      '<div class="hub-muted">الترجمة الإنجليزية (بتظهر لما الزائر يدوس EN في الموقع)</div>'+
+      '<input class="dv-input" data-ts-name-en="'+esc(t.name)+'" type="text" dir="ltr" placeholder="Client name in English" value="'+esc(t.name_en||"")+'">'+
+      '<textarea class="dv-textarea" data-ts-text-en="'+esc(t.name)+'" rows="3" dir="ltr" placeholder="English text">'+esc(t.text_en||"")+'</textarea>'+
+      '<div class="dv-btn-row" style="margin:0"><button class="dv-btn dv-btn-line" data-ts-retrans="'+esc(t.name)+'" type="button">↻ ترجم تلقائيًا من الأول</button></div>'+
       '<div class="dv-btn-row"><button class="dv-btn dv-btn-gold" data-ts-save="'+esc(t.name)+'" type="button">جهّز التعديل</button></div></div></div>';
   }).join("");
   el.querySelectorAll("[data-ts-edit]").forEach(function(b){ b.onclick = function(){
@@ -353,15 +366,40 @@ function renderTesti(){
     var f = el.querySelector('[data-ts-form="'+CSS.escape(n)+'"]');
     f.hidden = !f.hidden;
   };});
-  el.querySelectorAll("[data-ts-save]").forEach(function(b){ b.onclick = function(){
+  el.querySelectorAll("[data-ts-retrans]").forEach(function(b){ b.onclick = async function(){
+    if (busy) return;
+    var n = b.getAttribute("data-ts-retrans");
+    var nameI = el.querySelector('[data-ts-name="'+CSS.escape(n)+'"]');
+    var textI = el.querySelector('[data-ts-text="'+CSS.escape(n)+'"]');
+    var nameEnI = el.querySelector('[data-ts-name-en="'+CSS.escape(n)+'"]');
+    var textEnI = el.querySelector('[data-ts-text-en="'+CSS.escape(n)+'"]');
+    busy = true; b.textContent = "بترجم…";
+    try {
+      if (nameI.value.trim()) nameEnI.value = await translateEn(nameI.value);
+      if (textI.value.trim()) textEnI.value = await translateEn(textI.value);
+      note("اترجمت", "راجع الترجمة الإنجليزية وعدّلها لو حابب، وبعدها دوس «جهّز التعديل».");
+    } catch(e){ alert("الترجمة ما كملتش: "+e.message+" — جرّب تاني أو اكتبها بنفسك."); }
+    b.textContent = "↻ ترجم تلقائيًا من الأول"; busy = false;
+  };});
+  el.querySelectorAll("[data-ts-save]").forEach(function(b){ b.onclick = async function(){
+    if (busy) return;
     var n = b.getAttribute("data-ts-save");
     var t = data.testimonials.find(function(x){return x.name===n;});
     var nn = el.querySelector('[data-ts-name="'+CSS.escape(n)+'"]').value.trim();
     var nt = el.querySelector('[data-ts-text="'+CSS.escape(n)+'"]').value.trim();
+    var nameEnI = el.querySelector('[data-ts-name-en="'+CSS.escape(n)+'"]');
+    var textEnI = el.querySelector('[data-ts-text-en="'+CSS.escape(n)+'"]');
     if(!nn || !nt) return alert("الاسم والنص مطلوبين.");
-    if(nn===t.name && nt===t.text) return;
-    stage({op:"testi_edit", name:t.name, new_name:nn, text:nt}, "تعديل رأي");
-    t.name = nn; t.text = nt; renderTesti();
+    busy = true;
+    var failed = await autoFillEn(nn, nt, nameEnI, textEnI);
+    busy = false;
+    var nen = nameEnI.value.trim(), tet = textEnI.value.trim();
+    if (failed){
+      if(!confirm("الترجمة التلقائية ما كملتش — ممكن حصة اليوم تكون خلصت أو النت فصل.\n\nتجهّز التعديل كده؟ (الإنجليزي الناقص هيظهر فاضي في نسخة EN لحد ما تكمله بعدين)")) return;
+    }
+    if(nn===t.name && nt===t.text && nen===(t.name_en||"") && tet===(t.text_en||"")) return;
+    stage({op:"testi_edit", name:t.name, new_name:nn, text:nt, name_en:nen, text_en:tet}, "تعديل رأي");
+    t.name = nn; t.text = nt; t.name_en = nen; t.text_en = tet; renderTesti();
   };});
   el.querySelectorAll("[data-ts-del]").forEach(function(b){ b.onclick = function(){
     var n = b.getAttribute("data-ts-del");
@@ -436,6 +474,60 @@ function uploadImage(file){
     rd.onerror = function(){ rej(new Error("قراءة الملف فشلت")); };
     rd.readAsDataURL(file);
   });
+}
+
+/* ---------- auto translation: MyMemory (free, no key) ---------- */
+var MM_EMAIL = "mohamad.madih.20@gmail.com";
+function mmBytes(s){ var b=0; for(var i=0;i<s.length;i++){ var c=s.charCodeAt(i); b += c<128?1:(c<2048?2:(c<65536?3:4)); } return b; }
+function mmChunks(text){
+  var sents = text.match(/[^.!؟?…\n]+[.!؟?…\n]*\s*/g) || [text];
+  var chunks=[], cur="";
+  sents.forEach(function(s){
+    while (mmBytes(s) > 340){
+      if (cur){ chunks.push(cur); cur=""; }
+      var cut="", i=0;
+      while (i<s.length && mmBytes(cut+s.charAt(i))<=340){ cut+=s.charAt(i); i++; }
+      chunks.push(cut); s = s.slice(i);
+    }
+    if (mmBytes(cur+s) > 340){ if(cur) chunks.push(cur); cur = s; }
+    else cur += s;
+  });
+  if (cur) chunks.push(cur);
+  return chunks.filter(function(c){ return c.trim(); });
+}
+async function translateEn(ar){
+  ar = String(ar==null?"":ar).trim();
+  if (!ar) return "";
+  if (!/[\u0600-\u06FF]/.test(ar)) return ar;
+  var chunks = mmChunks(ar), out = [];
+  for (var i=0;i<chunks.length;i++){
+    var url = "https://api.mymemory.translated.net/get?q="+encodeURIComponent(chunks[i])+"&langpair=ar|en&de="+encodeURIComponent(MM_EMAIL);
+    var r = await fetch(url);
+    if (!r.ok) throw new Error("http_"+r.status);
+    var d = await r.json();
+    if (!d || d.responseStatus!==200 || !d.responseData || typeof d.responseData.translatedText!=="string") throw new Error("translate_failed");
+    var t = d.responseData.translatedText;
+    if (/MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(t)) throw new Error("translate_failed");
+    out.push(t);
+    if (i<chunks.length-1) await new Promise(function(res){ setTimeout(res,300); });
+  }
+  return out.join(" ").replace(/[ \t]+/g," ").trim();
+}
+function trStatus(msg){
+  var el = $("ts-tr-status");
+  if (!msg){ el.hidden = true; el.textContent=""; return; }
+  el.hidden = false; el.textContent = msg;
+}
+/* Fills empty English fields by translating the Arabic ones. Returns true if the API failed midway. */
+async function autoFillEn(arName, arText, nameEnEl, textEnEl){
+  var failed = false;
+  if (nameEnEl && !nameEnEl.value.trim() && arName.trim()){
+    try { nameEnEl.value = await translateEn(arName); } catch(e){ failed = true; }
+  }
+  if (textEnEl && !textEnEl.value.trim() && arText.trim()){
+    try { textEnEl.value = await translateEn(arText); } catch(e){ failed = true; }
+  }
+  return failed;
 }
 
 /* ---------- article template (preview replica of the worker template) ---------- */
@@ -534,11 +626,42 @@ $("wk-add").onclick = function(){
   note("اتجهّز العمل", "هيظهر في القايمة بعد النشر، وبعدها تقدر تضيفله صور.");
 };
 
-$("ts-add").onclick = function(){
+$("ts-retrans").onclick = async function(){
+  if (busy) return;
+  var name = $("ts-name").value.trim(), text = $("ts-text").value.trim();
+  if(!name && !text) return alert("اكتب الاسم ونص الرأي الأول.");
+  busy = true; trStatus("بترجم تلقائيًا…");
+  var failed = false;
+  try {
+    if (name) $("ts-name-en").value = await translateEn(name);
+    if (text) $("ts-text-en").value = await translateEn(text);
+  } catch(e){ failed = true; }
+  busy = false;
+  if (failed) trStatus("الترجمة ما كملتش — جرّب تاني أو اكتبها بنفسك.");
+  else { trStatus(""); $("ts-en-box").open = true; $("ts-en-warn").hidden = true; note("اترجمت", "راجع الترجمة الإنجليزية وعدّلها لو حابب، وبعدها دوس «جهّز الرأي للنشر»."); }
+};
+$("ts-add").onclick = async function(){
+  if (busy) return;
   var name = $("ts-name").value.trim(), text = $("ts-text").value.trim();
   if(!name || !text) return alert("الاسم ونص الرأي مطلوبين.");
-  stage({op:"testi_add", name:name, text:text, name_en:$("ts-name-en").value.trim(), text_en:$("ts-text-en").value.trim()}, "رأي جديد");
-  data.testimonials.push({name:name, text:text});
+  busy = true;
+  var needTr = !$("ts-name-en").value.trim() || !$("ts-text-en").value.trim();
+  if (needTr) trStatus("بترجم تلقائيًا…");
+  var failed = await autoFillEn(name, text, $("ts-name-en"), $("ts-text-en"));
+  trStatus("");
+  busy = false;
+  var nameEn = $("ts-name-en").value.trim(), textEn = $("ts-text-en").value.trim();
+  if (failed){
+    $("ts-en-warn").hidden = false; $("ts-en-box").open = true;
+    if(!confirm("الترجمة التلقائية ما كملتش — ممكن حصة اليوم تكون خلصت أو النت فصل.\n\nتجهّز الرأي بالعربي بس؟ (هيبقى فاضي في نسخة EN لحد ما تضيف الترجمة بعدين من زر «عدّل»)")) return;
+  } else if(!nameEn || !textEn){
+    $("ts-en-warn").hidden = false; $("ts-en-box").open = true;
+    if(!confirm("تحذير: الإنجليزي فاضي، والرأي هيظهر فاضي في نسخة EN.\n\nمتأكد إنك عايز تجهّزه كده؟")) return;
+  } else {
+    $("ts-en-warn").hidden = true;
+  }
+  stage({op:"testi_add", name:name, text:text, name_en:nameEn, text_en:textEn}, "رأي جديد");
+  data.testimonials.push({name:name, text:text, name_en:nameEn, text_en:textEn});
   $("ts-name").value=$("ts-text").value=$("ts-name-en").value=$("ts-text-en").value="";
   renderTesti();
 };
