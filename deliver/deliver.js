@@ -149,9 +149,88 @@
       });
     };
 
+    renderNotes(data.notes || []);
     tick(data.expires_at);
     show("room");
   }
+
+
+  /* notes and revisions */
+  var KIND_L = { note: ["ملاحظة", "Note"], revision: ["طلب تعديل", "Revision request"], approval: ["موافقة", "Approval"] };
+  var notesCache = [];
+  function renderNotes(list) {
+    notesCache = list.slice();
+    if (lastRoom) lastRoom.data.notes = notesCache;
+    var box = $("dv-notes-list");
+    box.innerHTML = "";
+    notesCache.forEach(function (n) {
+      var it = document.createElement("div");
+      it.className = "dv-note-item";
+      it.setAttribute("data-k", n.kind);
+      var m = document.createElement("div");
+      m.className = "dv-note-meta";
+      var kl = KIND_L[n.kind] || KIND_L.note;
+      m.textContent = T(kl[0], kl[1]) + (n.name ? " · " + n.name : "") + " · " +
+        new Date(n.created_at).toLocaleString(isEn() ? "en-GB" : "ar-EG");
+      var t = document.createElement("div");
+      t.className = "dv-note-text";
+      t.textContent = n.body;
+      it.appendChild(m); it.appendChild(t);
+      box.appendChild(it);
+    });
+  }
+  function noteMsg(ar, en, bad) {
+    var p = $("dv-note-msg");
+    p.hidden = false;
+    p.style.color = bad ? "#ffb1a3" : "";
+    p.setAttribute("data-ar", ar); p.setAttribute("data-en-t", en);
+    p.textContent = T(ar, en);
+  }
+  var noteForm = $("dv-notes-form");
+  if (noteForm) noteForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!lastRoom) return;
+    var body = $("dv-note-body").value.trim();
+    var name = $("dv-note-name").value.trim();
+    var kind = $("dv-note-kind").value;
+    if (!body) { noteMsg("اكتب رسالتك الأول.", "Write your message first.", true); return; }
+    var btn = $("dv-note-send");
+    btn.disabled = true;
+    fetch(API + "/api/note", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: lastRoom.code, kind: kind, name: name, body: body })
+    }).then(function (r) {
+      if (r.status === 410) { show("expired"); return null; }
+      if (r.status === 429) { noteMsg("ملاحظات كتير. كلم محمد مباشرة.", "Too many notes. Contact Mohamad directly.", true); return null; }
+      if (!r.ok) throw new Error("bad");
+      return r.json();
+    }).then(function (res) {
+      if (!res) return;
+      notesCache.push({ kind: res.kind, name: res.name, body: res.body, created_at: res.created_at });
+      renderNotes(notesCache);
+      $("dv-note-body").value = "";
+      noteMsg("اتبعتت. شكرًا، محمد هيشوفها.", "Sent. Thank you, Mohamad will see it.", false);
+      try {
+        fetch("https://formsubmit.co/ajax/mohamad.madih.20@gmail.com", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            _subject: "ملاحظة جديدة على تسليمة: " + res.project,
+            _template: "table",
+            _captcha: "false",
+            "العميل": res.client,
+            "المشروع": res.project,
+            "النوع": (KIND_L[res.kind] || KIND_L.note)[0],
+            "الاسم": res.name || "-",
+            "الرسالة": res.body
+          })
+        }).catch(function () {});
+      } catch (x) {}
+    }).catch(function () {
+      noteMsg("حصلت مشكلة في الإرسال. جرب تاني.", "Could not send. Try again.", true);
+    }).finally(function () { btn.disabled = false; });
+  });
 
   function openCode(code) {
     errBox.hidden = true;
@@ -210,6 +289,8 @@
     codeInput.placeholder = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX";
     if (langBtn) langBtn.textContent = en ? "AR" : "EN";
     $("dv-lb-close").setAttribute("aria-label", en ? "Close preview" : "قفل المعاينة");
+    var nm = $("dv-note-msg");
+    if (nm && !nm.hidden && nm.getAttribute("data-ar")) nm.textContent = en ? nm.getAttribute("data-en-t") : nm.getAttribute("data-ar");
     if (lastErr && !errBox.hidden) errText.textContent = en ? (EN_ERR[lastErr] || lastErr) : lastErr;
     if (lastRoom && !room.hidden) {
       var sv = banner ? banner.hidden : true;
@@ -244,3 +325,4 @@
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePreview(); });
   })();
 })();
+
