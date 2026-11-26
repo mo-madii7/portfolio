@@ -22,7 +22,7 @@
   }
   function drawStamp(x, cx, cy, img) {
     var R = 120, col = "#c2410c";
-    x.save(); x.translate(cx, cy); x.rotate(-0.2); x.globalAlpha = 0.85;
+    x.save(); x.translate(cx, cy); x.scale(0.8, 0.8); x.rotate(-0.2); x.globalAlpha = 0.85;
     x.strokeStyle = col; x.lineWidth = 7; x.beginPath(); x.arc(0, 0, R, 0, Math.PI * 2); x.stroke();
     x.lineWidth = 2.5; x.beginPath(); x.arc(0, 0, R - 14, 0, Math.PI * 2); x.stroke();
     if (img) {
@@ -105,40 +105,40 @@
       });
       if (cur) lines.push(cur);
       lines = lines.slice(0, 2);
-      lines.forEach(function (l, i) { txt(l, start, y + 56 + i * 42, 30, 500, ink); });
-      x.direction = "ltr"; txt((it.price < 0 ? "\u2212" : "") + nf(Math.abs(it.price)), end, y + 56, 30, 600, it.price < 0 ? "#15803d" : ink, en ? "right" : "left"); x.direction = en ? "ltr" : "rtl";
-      y += 30 + lines.length * 42 + 22;
+      lines.forEach(function (l, i) { txt(l, start, y + 46 + i * 40, 30, 500, ink); });
+      x.direction = "ltr"; txt((it.price < 0 ? "\u2212" : "") + nf(Math.abs(it.price)), end, y + 46, 30, 600, it.price < 0 ? "#15803d" : ink, en ? "right" : "left"); x.direction = en ? "ltr" : "rtl";
+      y += 20 + lines.length * 40 + 14;
       x.fillStyle = "#eef2f7"; x.fillRect(M, y, W - 2 * M, 2);
       y += 6;
     });
     y += 20;
     x.fillStyle = "#e2e8f0"; x.fillRect(M, y, W - 2 * M, 3);
-    y += 90;
+    y += 66;
     txt(quote ? T("الإجمالي", "Total") : T("الإجمالي المستحق", "Total due"), start, y, 34, 600, ink);
     txt(nf(inv.amount) + " " + T("ج.م", "EGP"), end, y, 52, 700, "#c2410c", en ? "right" : "left");
-    y += 120;
+    y += 80;
     if (quote) {
       x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 130);
       txt(T("هذا عرض سعر وليس فاتورة.", "This is a quotation, not an invoice."), start + (en ? 30 : -30), y + 52, 26, 600, ink);
       txt(T("الأسعار للبنود المذكورة فقط وصالحة لمدة ١٤ يومًا من تاريخ العرض.", "Prices apply to the listed items only and are valid for 14 days from the quote date."), start + (en ? 30 : -30), y + 98, 22, 400, lab);
       y += 130 + 70;
     } else {
-      var boxH = 110 + PAY.length * 52;
+      var boxH = 100 + PAY.length * 44;
       x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, boxH);
       txt(T("طرق الدفع", "Payment methods"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
       PAY.forEach(function (p, i) {
-        var yy = y + 120 + i * 52;
+        var yy = y + 108 + i * 44;
         txt(p[0], start + (en ? 30 : -30), yy, 26, 500, ink);
         x.direction = "ltr";
         txt(p[1], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
         x.direction = en ? "ltr" : "rtl";
       });
-      y += boxH + 70;
+      y += boxH + 50;
     }
-    drawStamp(x, en ? W - M - 140 : M + 140, y + 30, stamp);
+    drawStamp(x, en ? W - M - 140 : M + 140, y + 40, stamp);
     txt(T("للاستفسار: واتساب 01119072800", "Questions: WhatsApp 01119072800"), start, y, 26, 400, lab);
     txt(T("شكرًا لتعاملك معنا", "Thank you for your business"), start, y + 50, 26, 400, lab);
-    c._end = y + 190;
+    c._end = y + 140;
     return c;
   }
 
