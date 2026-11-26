@@ -7,6 +7,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var entry = $("dv-entry"), room = $("dv-room"), expired = $("dv-expired"), wrong = $("dv-wrong");
+  var banner = $("dv-preview-banner");
   var codeInput = $("dv-code"), errBox = $("dv-entry-err"), errText = $("dv-entry-err-text");
   var countdownTimer = null;
 
@@ -53,6 +54,8 @@
     $("dv-project").textContent = data.project;
     $("dv-client").textContent = "تسليمة خاصة بـ " + data.client;
     $("dv-explain").textContent = data.explanation;
+    var locked = !data.downloads_enabled;
+    if (banner) banner.hidden = !locked;
 
     var facts = $("dv-facts");
     facts.innerHTML = "";
@@ -74,12 +77,19 @@
       var cell = document.createElement("figure");
       cell.className = "dv-cell";
       if (f.mime === "application/pdf") {
-        var badge = document.createElement("a");
-        badge.className = "dv-pdf";
-        badge.href = fileUrl(code, f.name, true);
-        badge.target = "_blank";
-        badge.rel = "noopener";
-        badge.textContent = "PDF";
+        var badge;
+        if (locked) {
+          badge = document.createElement("div");
+          badge.className = "dv-pdf dv-pdf-locked";
+          badge.textContent = "PDF — بيتاح بعد تفعيل التحميل";
+        } else {
+          badge = document.createElement("a");
+          badge.className = "dv-pdf";
+          badge.href = fileUrl(code, f.name, true);
+          badge.target = "_blank";
+          badge.rel = "noopener";
+          badge.textContent = "PDF";
+        }
         cell.appendChild(badge);
       } else {
         var img = document.createElement("img");
@@ -95,16 +105,21 @@
         cell.appendChild(img);
       }
       var cap = document.createElement("figcaption");
-      cap.textContent = f.name + " (" + fmtSize(f.size) + ") — ";
-      var dl = document.createElement("a");
-      dl.className = "dv-cell-dl";
-      dl.href = fileUrl(code, f.name, false);
-      dl.textContent = "تحميل";
-      cap.appendChild(dl);
+      if (locked) {
+        cap.textContent = f.name + " (" + fmtSize(f.size) + ") — معاينة فقط";
+      } else {
+        cap.textContent = f.name + " (" + fmtSize(f.size) + ") — ";
+        var dl = document.createElement("a");
+        dl.className = "dv-cell-dl";
+        dl.href = fileUrl(code, f.name, false);
+        dl.textContent = "تحميل";
+        cap.appendChild(dl);
+      }
       cell.appendChild(cap);
       grid.appendChild(cell);
     });
 
+    $("dv-download-all").hidden = locked;
     $("dv-download-all").onclick = function () {
       data.files.forEach(function (f, i) {
         setTimeout(function () {
