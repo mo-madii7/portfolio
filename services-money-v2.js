@@ -117,12 +117,14 @@
     } else {
       w.appendChild(mk("h2", "pf-mh", "الأسعار والطلبات", "Prices & requests"));
       w.appendChild(mk("p", "pf-mp", "أسعار البداية لكل خدمة. السعر النهائي بيتحدد حسب المطلوب.", "Starting prices for each service. The final price depends on what you need."));
-      group(w, "الهوية والأغلفة", "Identity & covers", [
-        ["هويات بصرية وشعارات", "Visual identities & logos", "1,500", "id"],
+      group(w, "هويات بصرية وشعارات", "Visual identities & logos", [
+        ["هويات بصرية وشعارات", "Visual identities & logos", "1,500", "id"]
+      ], 0);
+      group(w, "أغلفة كتب", "Book covers", [
         ["أغلفة كتب (إلكتروني)", "Book covers (e-book)", "250", "bk"],
         ["أغلفة كتب (طباعة)", "Book covers (print)", "450", "bk"],
         ["غلاف بعمل فني مخصص", "Custom artwork cover", "700", "bk"]
-      ], 0);
+      ], 1);
       group(w, "مطبوعات", "Print", [
         ["كارت شخصي", "Business card", "350", "pr"],
         ["فلاير", "Flyer", "300", "pr"],
@@ -138,25 +140,25 @@
         ["مج أو هدية دعائية", "Mug or promo gift", "300", "pr"],
         ["كارت دعوة", "Invitation card", "250", "pr"],
         ["شهادة", "Certificate", "250", "pr"]
-      ], 1);
+      ], 2);
       group(w, "سوشيال ميديا", "Social media", [
         ["بوست واحد", "Single post", "250", "so"],
         ["كاروسيل", "Carousel", "450", "so"],
         ["غلاف وصورة بروفايل", "Cover & profile picture", "250", "so"],
         ["بنر إعلاني للويب", "Web banner", "250", "so"],
         ["قالب سوشيال", "Social template", "400", "so"]
-      ], 2);
+      ], 3);
       group(w, "مونتاج فيديو", "Video editing", [
         ["ريل بسيط", "Simple reel", "450", "ve"],
         ["مونتاج يوتيوب", "YouTube editing", "600", "ve"]
-      ], 3);
+      ], 4);
       group(w, "بريزنتيشن وإنفوجرافيك", "Presentation & infographic", [
         ["عرض تقديمي", "Presentation", "700", ""],
-        ["إنفوجرافيك", "Infographic", "500", ""]
-      ], 4);
-      group(w, "تصوير فيديو", "Video shooting", [
-        ["تصوير فيديو", "Video shooting", "3,500", "vs"]
+        ["إنفوجرافيك", "Infographic", "500", "pg"]
       ], 5);
+      group(w, "تصوير", "Shooting", [
+        ["تصوير فيديو", "Video shooting", "3,500", "vs"]
+      ], 6);
       w.appendChild(mk("p", "pf-mnote", "تصوير الفيديو بيختلف سعره حسب المعدات المطلوبة.", "Video shooting varies with the equipment required."));
     }
     w.appendChild(quoteBtn());
@@ -177,7 +179,7 @@
     panel.querySelectorAll("[data-en]").forEach(function (el) { el.innerHTML = el.getAttribute("data-en"); });
   }
   /* tap a service card: open Prices & requests and highlight its price card(s). Ticker itself untouched. */
-  var MAP = [["هويات بصرية", "id"], ["أغلفة كتب", "bk"], ["سوشيال", "so"], ["مطبوعات", "pr"], ["مونتاج", "ve"], ["تصوير", "vs"]];
+  var MAP = [["هويات بصرية", "id"], ["أغلفة كتب", "bk"], ["سوشيال", "so"], ["مطبوعات", "pr"], ["مونتاج", "ve"], ["بريزنتيشن", "pg"], ["تصوير", "vs"]];
   function keyOf(card) {
     var n = card.querySelector(".pf-scard-name"); var t = n ? (n.getAttribute("data-ar") || n.textContent) : "";
     for (var i = 0; i < MAP.length; i++) if (t.indexOf(MAP[i][0]) > -1) return MAP[i][1];

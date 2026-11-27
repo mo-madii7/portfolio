@@ -865,11 +865,11 @@ button{font:inherit;color:inherit}
 .lb{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgb(8 7 6/.94);backdrop-filter:blur(6px);padding:24px}
 .lb.open{display:flex}
 .lb img{max-width:min(94vw,1400px);max-height:88vh;object-fit:contain;border-radius:10px;box-shadow:0 30px 80px rgb(0 0 0/.6)}
-.lb button{all:unset;position:absolute;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgb(242 237 228/.12);color:#f2ede4;font-size:22px;cursor:pointer;transition:background .2s}
+.lb button{all:unset;position:absolute;z-index:2;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgb(8 7 6/.6);color:#fff;font-size:22px;cursor:pointer;transition:background .2s;box-shadow:0 4px 16px rgb(0 0 0/.5);border:1px solid rgb(255 255 255/.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .lb button:hover,.lb button:focus-visible{background:rgb(255 122 24/.7)}
-.lb-close{top:18px;inset-inline-end:18px}
-.lb-prev{inset-inline-start:16px;top:50%;transform:translateY(-50%)}
-.lb-next{inset-inline-end:16px;top:50%;transform:translateY(-50%)}
+.lb .lb-close{top:18px;inset-inline-end:18px;inset-inline-start:auto}
+.lb .lb-prev{inset-inline-start:16px;inset-inline-end:auto;top:50%;bottom:auto;transform:translateY(-50%)}
+.lb .lb-next{inset-inline-end:16px;inset-inline-start:auto;top:50%;bottom:auto;transform:translateY(-50%)}
 .lb-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:13px;color:rgb(242 237 228/.7)}
 .lb-single .lb-prev,.lb-single .lb-next,.lb-single .lb-count{display:none}
 body.lb-lock{overflow:hidden}
