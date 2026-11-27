@@ -443,7 +443,7 @@ window.pfSetupTestiClamp();
   if (window.pfSetupTestiClamp) window.pfSetupTestiClamp();
 })();
 
-/* ---- 9. Brief budget slider (EGP, 0 to 500,000). Unset until the visitor touches it ---- */
+/* ---- 9. Brief budget slider (EGP, 0 to 25,000). Unset until the visitor touches it ---- */
 (function () {
   var r = document.getElementById("bf-budget");
   if (!r) return;
@@ -451,7 +451,7 @@ window.pfSetupTestiClamp();
   var val = document.getElementById("bf-budget-val");
   var out = document.getElementById("bf-budget-out");
   var open = document.getElementById("bf-budget-open");
-  var MAX = 500000, cur = 0, touched = false;
+  var MAX = 25000, cur = 0, touched = false;
   function fmt(n) { return Number(n).toLocaleString("en-US"); }
   function render() {
     var en = document.documentElement.lang === "en";
