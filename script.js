@@ -34,7 +34,7 @@
   function show(i) {
     index = (i + group.length) % group.length;
     var img = group[index].querySelector("img");
-    big.src = img.currentSrc || img.src;
+    big.src = (img.dataset && img.dataset.full) || img.currentSrc || img.src;
     big.alt = img.alt || "";
     count.textContent = (index + 1) + " / " + group.length;
   }
@@ -435,11 +435,19 @@ window.pfSetupTestiClamp();
       var a = document.createElement("a");
       a.className = "pf-feat-card" + e[4];
       a.href = e[0];
+      var PF_IMG_W = {"images/3WY6PZNG.jpg":1200,"images/X5UN6OZS.jpg":1200,"images/KRPZPZEP.jpg":1200,"images/JTHA57T2.jpg":1200,"images/OPT2CES4.jpg":1600,"images/IPDBP5VW.jpg":1600};
+      var pic = document.createElement("picture");
+      var so = document.createElement("source");
+      so.type = "image/webp";
+      var base = e[1].replace(/\.(jpg|jpeg|png)$/i, "");
+      so.srcset = base + "-480.webp 480w, " + base + "-960.webp 960w, " + base + ".webp " + (PF_IMG_W[e[1]] || 1200) + "w";
+      so.sizes = "(max-width:480px) 150px, 210px";
       var im = document.createElement("img");
       im.src = e[1]; im.alt = e[2]; im.loading = "lazy";
+      pic.appendChild(so); pic.appendChild(im);
       var sp = document.createElement("span");
       sp.setAttribute("data-en", e[3]); sp.textContent = e[2];
-      a.appendChild(im); a.appendChild(sp);
+      a.appendChild(pic); a.appendChild(sp);
       fs.appendChild(a);
     });
     ticker(fs, fs);
