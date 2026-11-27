@@ -233,6 +233,7 @@ window.pfSetupTestiClamp();
     f.submit();
   }
 
+  var pfT0 = Date.now();
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var en = document.documentElement.lang === "en";
@@ -244,6 +245,10 @@ window.pfSetupTestiClamp();
     }
     status.textContent = m.sending; status.className = "pf-bf-status";
     var data = new FormData(form);
+    if ((data.get("_honey") || "") !== "" || Date.now() - pfT0 < 4000) {
+      status.textContent = m.ok; status.className = "pf-bf-status ok"; form.reset(); syncCat();
+      return;
+    }
     data.append("_template", "table");
     data.append("_captcha", "false");
     data.append("_subject", (en ? "New brief: " : "بريف جديد من الموقع: ") + sel.options[sel.selectedIndex].text + " — " + (data.get("الاسم") || ""));
@@ -1012,4 +1017,15 @@ window.pfSetupTestiClamp();
   input.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
   document.addEventListener("click", function (e) { if (root.classList.contains("pf-search-open") && !box.contains(e.target) && e.target !== btn && !btn.contains(e.target)) close(); });
   box.addEventListener("click", function (e) { if (e.target.closest(".pf-gsearch-item")) close(); });
+})();
+
+/* Light deterrent: no right-click menu or drag-save on images only (weak by design, stops casual saving). */
+(function () {
+  try {
+    var st = document.createElement("style");
+    st.textContent = "img{-webkit-user-drag:none;-webkit-touch-callout:none}";
+    document.head.appendChild(st);
+    document.addEventListener("contextmenu", function (e) { if (e.target && e.target.tagName === "IMG") e.preventDefault(); });
+    document.addEventListener("dragstart", function (e) { if (e.target && e.target.tagName === "IMG") e.preventDefault(); });
+  } catch (e) {}
 })();
