@@ -1029,3 +1029,40 @@ window.pfSetupTestiClamp();
     document.addEventListener("dragstart", function (e) { if (e.target && e.target.tagName === "IMG") e.preventDefault(); });
   } catch (e) {}
 })();
+
+/* ---- Late language sync: elements built after the language block, and the WhatsApp prefilled texts ---- */
+(function () {
+  var WA = [
+    ["حابب أحدد معاك ميعاد", "Hi Mohamad, I'd like to book a time to talk about my project."],
+    ["حابب أطلب فاتورة", "Hi Mohamad, I'd like to request an invoice for the service we agreed on. Could you send me the details?"]
+  ];
+  function isEn() { return document.documentElement.lang === "en"; }
+  function lateText() {
+    var en = isEn();
+    document.querySelectorAll("[data-en]:not([data-ar])").forEach(function (el) {
+      el.setAttribute("data-ar", el.innerHTML);
+      if (en) el.innerHTML = el.getAttribute("data-en");
+    });
+  }
+  function waLinks() {
+    var en = isEn();
+    document.querySelectorAll('a[href*="wa.me/"][href*="text="]').forEach(function (a) {
+      var h = a.getAttribute("href"), i = h.indexOf("text="), base = h.slice(0, i + 5), cur;
+      if (!a.hasAttribute("data-wa-ar")) a.setAttribute("data-wa-ar", h.slice(i + 5));
+      try { cur = decodeURIComponent(a.getAttribute("data-wa-ar")); } catch (e) { return; }
+      for (var k = 0; k < WA.length; k++) {
+        if (cur.indexOf(WA[k][0]) > -1) {
+          a.setAttribute("href", base + (en ? encodeURIComponent(WA[k][1]) : a.getAttribute("data-wa-ar")));
+          break;
+        }
+      }
+    });
+  }
+  function run() { lateText(); waLinks(); }
+  run();
+  [300, 1200, 3000].forEach(function (t) { setTimeout(run, t); });
+  try {
+    new MutationObserver(waLinks).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+    new MutationObserver(function () { lateText(); }).observe(document.body, { childList: true, subtree: true });
+  } catch (e) {}
+})();
