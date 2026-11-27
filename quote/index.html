@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="Request a quote — Mohamad Madih">اطلب عرض سعر — Mohamad Madih</title>
+<meta name="description" content="اطلب عرض سعر لخدمتك واستلمه PDF فورًا.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../deliver/deliver.css?v=5">
+<style>
+.qt-row{display:grid;grid-template-columns:1fr;gap:0 14px}
+@media(min-width:640px){.qt-row{grid-template-columns:1fr 1fr}}
+select.dv-input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23f2ede4' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-inline-end:38px}
+[dir=rtl] select.dv-input{background-position:left 14px center}
+.qt-check{display:flex;gap:10px;align-items:flex-start;margin-top:18px;cursor:pointer;font-size:14px}
+.qt-check input{width:20px;height:20px;margin-top:3px;accent-color:#fedb0c}
+.qt-total{font-size:clamp(26px,7vw,34px);font-weight:800;color:#fedb0c}
+.qt-lines{display:flex;flex-direction:column;margin:10px 0}
+.qt-lines>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgb(242 237 228/.16)}
+.qt-hp{position:absolute;inset-inline-start:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+</style>
+</head>
+<body>
+<button type="button" class="dv-langbtn" id="dv-lang" aria-label="Language">EN</button>
+<main class="dv-wrap">
+  <header class="dv-head">
+    <a class="dv-back" href="../" data-en="← Home">← الرئيسية</a>
+    <h1 class="dv-title" data-en="Request a quote">اطلب عرض سعر</h1>
+    <p class="dv-sub" data-en="Choose the service and tell me what you need. For standard requests you get your quote as a PDF right away. Bigger or special requests I review personally and get back to you.">اختار الخدمة وقولي محتاج إيه. الطلبات العادية بتستلم عرض السعر PDF فورًا. الطلبات الأكبر أو الخاصة براجعها بنفسي وأرد عليك.</p>
+  </header>
+
+  <form id="qt-form" novalidate>
+    <div class="qt-row">
+      <div>
+        <label class="dv-label" for="qt-name" data-en="Your name">اسمك</label>
+        <input class="dv-input" id="qt-name" autocomplete="name" maxlength="80" required>
+      </div>
+      <div>
+        <label class="dv-label" for="qt-contact" data-en="WhatsApp number or email">رقم واتساب أو إيميل</label>
+        <input class="dv-input" id="qt-contact" dir="ltr" autocomplete="off" maxlength="80" required>
+      </div>
+    </div>
+    <div class="qt-row">
+      <div>
+        <label class="dv-label" for="qt-service" data-en="Service">الخدمة</label>
+        <select class="dv-input" id="qt-service"></select>
+      </div>
+      <div>
+        <label class="dv-label" for="qt-type" data-en="Type">النوع</label>
+        <select class="dv-input" id="qt-type"></select>
+      </div>
+    </div>
+    <p class="dv-hint" id="qt-from"></p>
+    <div class="qt-row">
+      <div id="qt-qty-wrap">
+        <label class="dv-label" for="qt-qty" data-en="Quantity">الكمية</label>
+        <input class="dv-input" id="qt-qty" type="number" inputmode="numeric" min="1" max="100" value="1" dir="ltr">
+      </div>
+    </div>
+    <label class="dv-label" for="qt-need" data-en="What do you need? (one line)">محتاج إيه بالظبط؟ (سطر واحد)</label>
+    <input class="dv-input" id="qt-need" maxlength="160" required>
+    <label class="dv-label" for="qt-notes" data-en="Notes (optional)">ملاحظات (اختياري)</label>
+    <textarea class="dv-textarea" id="qt-notes" maxlength="800"></textarea>
+    <label class="qt-check"><input type="checkbox" id="qt-urgent"><span id="qt-urgent-t"></span></label>
+    <div class="qt-hp" aria-hidden="true"><label>Website<input id="qt-hp" tabindex="-1" autocomplete="off"></label></div>
+    <div class="dv-btn-row" style="margin-top:20px">
+      <button type="submit" class="dv-btn dv-btn-gold" id="qt-go" data-en="Get my quote">اطلب عرض السعر</button>
+    </div>
+    <div class="dv-callout dv-danger" id="qt-err" hidden><div class="dv-callout-body" id="qt-err-t"></div></div>
+  </form>
+
+  <section id="qt-done" hidden>
+    <div class="dv-callout dv-note">
+      <div class="dv-callout-title" id="qt-done-h"></div>
+      <div class="dv-callout-body" id="qt-done-b"></div>
+    </div>
+    <div id="qt-quote" hidden>
+      <div class="qt-lines" id="qt-lines"></div>
+      <div class="qt-total" id="qt-total"></div>
+      <div class="dv-btn-row" style="margin-top:14px">
+        <button type="button" class="dv-btn dv-btn-gold" id="qt-dl"></button>
+        <button type="button" class="dv-btn dv-btn-line" id="qt-dl2"></button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="dv-foot">
+    <p data-en="The quote is valid for 14 days. Prices are in Egyptian pounds and apply to the listed items only.">عرض السعر صالح ١٤ يومًا. الأسعار بالجنيه المصري وللبنود المذكورة فقط.</p>
+  </footer>
+</main>
+<script src="../deliver/invoice-render.js?v=6"></script>
+<script src="quote.js?v=1"></script>
+</body>
+</html>

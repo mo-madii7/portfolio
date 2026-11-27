@@ -53,8 +53,7 @@
     return c;
   }
   function quoteBtn() {
-    var a = mk("a", "pf-mbtn", "اطلب عرض سعر", "Request a quote"); a.target = "_blank"; a.rel = "noopener noreferrer";
-    a.href = "https://wa.me/201119072800?text=" + encodeURIComponent("أهلًا محمد، حابب أطلب عرض سعر لخدمة.");
+    var a = mk("a", "pf-mbtn", "اطلب عرض سعر", "Request a quote"); a.href = "quote/"; a.removeAttribute("target"); a.removeAttribute("rel");
     var r = mk("div", "pf-mrow"); r.appendChild(a); return r;
   }
   var KEYS = ["id", "bk", "bk", "bk", "so", "pr", "ve", "vs"];
