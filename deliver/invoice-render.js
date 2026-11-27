@@ -97,7 +97,7 @@
     txt(T("محمد مديح · مصمم جرافيك ومونتير", "Mohamad Madih · Graphic designer & video editor"), end, 168, 24, 400, "#cbd5e1", en ? "right" : "left");
     var y = 340, lab = "#64748b", ink = "#0b1b3d";
     function pair(l, v, Y, X, al) { txt(l, X, Y, 24, 400, lab, al); txt(v, X, Y + 42, 32, 600, ink, al); }
-    pair(quote ? T("رقم العرض", "Quote no.") : T("رقم الفاتورة", "Invoice no."), inv.invoice_no, y, start);
+    pair(quote ? T("رقم العرض", "Quote no.") : T("رقم الفاتورة", "Invoice no."), (inv.invoice_code && !quote ? inv.invoice_no + "-" + inv.invoice_code : inv.invoice_no), y, start);
     pair(quote ? T("تاريخ العرض", "Quote date") : T("تاريخ الإصدار", "Issue date"), df(inv.issued_at), y, end, en ? "right" : "left");
     y += 130;
     pair(T("العميل", "Billed to"), inv.client, y, start);
@@ -112,9 +112,7 @@
       pair(T("المشروع", "Project"), pj, y, start);
     })();
     if (quote && inv.delivery_date) { pair(T("تاريخ التسليم", "Delivery date"), df(inv.delivery_date), y, end, en ? "right" : "left"); if (!inv.project) y += 110; }
-    var hasCode = !quote && !!inv.invoice_code;
-    if (hasCode) pair(T("كود الاسترجاع", "Access code"), inv.invoice_code, y, end, en ? "right" : "left");
-    y += (inv.project || hasCode) ? 150 : 40;
+    y += inv.project ? 150 : 40;
     x.fillStyle = "#f1f5f9"; x.fillRect(M, y, W - 2 * M, 70);
     txt(T("الخدمة", "Service"), start, y + 46, 26, 600, ink);
     txt(T("المبلغ (جنيه مصري)", "Amount (EGP)"), end, y + 46, 26, 600, ink, en ? "right" : "left");

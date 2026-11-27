@@ -114,7 +114,7 @@
   </div>
 </main>
 
-<script src="invoice-render.js?v=6"></script>
+<script src="invoice-render.js?v=7"></script>
 <script>
 (function () {
   "use strict";
@@ -317,7 +317,7 @@
     tkLbl.appendChild(tk); tkLbl.appendChild(el("span", "الفاتورة جاهزة (العميل يقدر يحمّلها)"));
     var hint = el("p", d.invoice_no ? "اتصدرت برقم " + d.invoice_no + " والبنود والأسعار اتقفلت." : (d.price ? "زرار الفاتورة هيظهر للعميل بعد ما تفعّل «جاهزة»." : "علّم الخدمات واكتب الأسعار، احفظ، وبعدين فعّل «جاهزة»."));
     hint.className = "dv-hint";
-    var codeLine = d.invoice_code ? el("p", "كود الاسترجاع (مطبوع على الفاتورة): " + d.invoice_code + " · العميل يحمّل الفاتورة من «اطلب فاتورة» بالرقم " + d.invoice_no + " والكود ده.", "margin:0;padding:8px 10px;border-radius:8px;background:rgba(249,115,22,.12);direction:rtl;user-select:all") : null;
+    var codeLine = d.invoice_code ? el("p", "رقم الفاتورة الكامل للعميل (مطبوع عليها): " + d.invoice_no + "-" + d.invoice_code + " · العميل يحمّلها من «اطلب فاتورة» بالرقم ده.", "margin:0;padding:8px 10px;border-radius:8px;background:rgba(249,115,22,.12);direction:rtl;user-select:all") : null;
     function post(payload) {
       return fetch(API + "/api/admin/set-invoice", { method: "POST", headers: headers({ "Content-Type": "application/json" }), body: JSON.stringify(Object.assign({ id: d.id }, payload)) })
         .then(function (r) { return r.json(); }).then(function (res) { if (!res.ok) alert("حصلت مشكلة في الفاتورة: " + (res.error || "غير معروف")); refresh(); });
@@ -365,7 +365,7 @@
         var c = el("div", "", "padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;display:flex;flex-direction:column;gap:8px");
         c.appendChild(el("b", (doc.kind === "quote" ? "عرض سعر" : "فاتورة") + " · " + (doc.doc_no || "مسودة") + " · " + doc.client));
         if (doc.origin) { var mt = {}; try { mt = JSON.parse(doc.meta || "{}"); } catch (e) {} c.appendChild(el("p", (doc.origin === "review" ? "⚠ طلب من الموقع محتاج مراجعتك · " : "طلب تلقائي من الموقع · ") + (mt.service || "") + " / " + (mt.type || "") + " × " + (mt.qty || 1) + (mt.urgent ? " · مستعجل" : "") + " · تواصل: " + (mt.contact || "-") + (mt.notes ? " · ملاحظات: " + mt.notes : ""), "margin:0;padding:8px 10px;border-radius:8px;background:rgba(254,219,12,.1);user-select:all")); }
-        if (doc.invoice_code) c.appendChild(el("p", "كود الاسترجاع (مطبوع على الفاتورة): " + doc.invoice_code, "margin:0;padding:8px 10px;border-radius:8px;background:rgba(249,115,22,.12);user-select:all"));
+        if (doc.invoice_code) c.appendChild(el("p", "رقم الفاتورة الكامل للعميل (مطبوع عليها): " + doc.doc_no + "-" + doc.invoice_code, "margin:0;padding:8px 10px;border-radius:8px;background:rgba(249,115,22,.12);user-select:all"));
         c.appendChild(el("p", "الإجمالي " + doc.price.toLocaleString("en-US") + " جنيه" + (doc.project ? " · " + doc.project : "") + (doc.source_id ? " · محوّلة من عرض سعر" : ""), "margin:0;opacity:.8"));
         var row = el("div", "", "display:flex;gap:8px;flex-wrap:wrap");
         function b(t, f) { var x = el("button", t); x.type = "button"; x.className = "da-toggle"; x.addEventListener("click", f); row.appendChild(x); }
