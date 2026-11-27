@@ -10,7 +10,7 @@
     return new Promise(function (res, rej) {
       if (window.MMInv) return res();
       var sc = document.createElement("script");
-      sc.src = BASE + "deliver/invoice-render.js?v=7"; sc.onload = function () { res(); }; sc.onerror = rej;
+      sc.src = BASE + "deliver/invoice-render.js?v=8"; sc.onload = function () { res(); }; sc.onerror = rej;
       document.head.appendChild(sc);
     });
   }

@@ -145,7 +145,7 @@
       txt(T("الأسعار للبنود المذكورة فقط وصالحة لمدة ١٤ يومًا من تاريخ العرض.", "Prices apply to the listed items only and are valid for 14 days from the quote date."), start + (en ? 30 : -30), y + 98, 22, 400, lab);
       y += 130 + 70;
     } else {
-      var boxH = 100 + PAY.length * 44;
+      var boxH = 100 + PAY.length * 44 + 96;
       x.fillStyle = "#fff7ed"; x.fillRect(M, y, W - 2 * M, boxH);
       txt(T("طرق الدفع", "Payment methods"), start + (en ? 30 : -30), y + 60, 30, 700, "#9a3412");
       PAY.forEach(function (p, i) {
@@ -155,6 +155,9 @@
         txt(p[1], end + (en ? -30 : 30), yy, 26, 500, ink, en ? "right" : "left");
         x.direction = en ? "ltr" : "rtl";
       });
+      var fy = y + 108 + PAY.length * 44 + 10;
+      txt(T("ادفع فقط على الأرقام المكتوبة في هذه الفاتورة.", "Pay only to the numbers on this invoice."), start + (en ? 30 : -30), fy, 24, 700, "#9a3412");
+      txt(T("وأكّد الدفع على واتساب 01119072800 بإرسال إيصال التحويل.", "Then confirm on WhatsApp 01119072800 by sending the transfer receipt."), start + (en ? 30 : -30), fy + 40, 24, 500, "#9a3412");
       y += boxH + 50;
     }
     drawStamp(x, en ? W - M - 140 : M + 140, y + 85, stamp);

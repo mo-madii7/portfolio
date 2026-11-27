@@ -24,6 +24,7 @@
     '.pf-mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}',
     '.pf-mcard{border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:16px;background:rgba(255,255,255,.04)}',
     '.pf-mcard h3{margin:0 0 6px;font-size:17px}',
+    '.pf-mcard p.pf-mx{font-size:12.5px;opacity:.65}',
     '.pf-mcard p{margin:0 0 10px;font-size:13.5px;opacity:.8;line-height:1.6}',
     '.pf-mprice{display:block;font-weight:800;font-size:20px;color:#f6c434}',
     '.pf-mprice small{font-size:12px;font-weight:600;opacity:.85;margin-inline-end:6px}',
@@ -43,10 +44,11 @@
   var panel = mk("div", "pf-mpanel"); panel.hidden = true; panel.id = "pf-mpanel";
   var head2 = anchor.querySelector(".pf-shead"); head2.parentNode.insertBefore(panel, head2.nextSibling);
 
-  function card(ar, en2, dAr, dEn, price, pAr, pEn) {
+  function card(ar, en2, dAr, dEn, price, pAr, pEn, xAr, xEn) {
     var c = mk("div", "pf-mcard");
     c.appendChild(mk("h3", "", ar, en2));
     if (dAr) c.appendChild(mk("p", "", dAr, dEn));
+    if (xAr) c.appendChild(mk("p", "pf-mx", xAr, xEn));
     var p = mk("span", "pf-mprice");
     p.appendChild(mk("small", "", pAr, pEn)); p.appendChild(document.createTextNode(price + " ")); p.appendChild(mk("span", "", "ج.م", "EGP"));
     c.appendChild(p);
@@ -64,13 +66,13 @@
       w.appendChild(mk("p", "pf-mp", "باقات جاهزة بسعر أوضح لو شغلك متكرر. لو عايز حاجة مختلفة اطلب عرض سعر.", "Ready-made packages with clearer pricing for recurring work. Need something different? Request a quote."));
       var g2 = mk("div", "pf-mgrid pf-mg3");
   [
-    ["باقة سوشيال ٨ تصميمات", "Social, 8 designs", "هوية موحدة وقوالب لحسابك كل شهر.", "A consistent look and templates for your account, monthly.", "1,500"],
-    ["باقة سوشيال ١٢ تصميم", "Social, 12 designs", "للحسابات النشيطة.", "For active accounts.", "2,200"],
-    ["باقة سوشيال ٢٠ تصميم + ستوريز", "Social, 20 designs + stories", "تغطية كاملة للشهر.", "Full monthly coverage.", "3,500"],
-    ["شعار + إرشادات مختصرة", "Logo + brief guidelines", "شعار كامل وألوان وخطوط وصفحة استخدام.", "Complete logo, colors, fonts and a usage page.", "3,500"],
-    ["هوية كاملة", "Full visual identity", "شعار وكارت وورق مراسلات وسوشيال.", "Logo, business card, stationery and social.", "6,500"],
-    ["باقة مونتاج ٨ ريلز", "Editing, 8 reels", "ريلز شهرية بنفس الستايل.", "Monthly reels in one consistent style.", "4,500"]
-  ].forEach(function (x) { g2.appendChild(card(x[0], x[1], x[2], x[3], x[4], "ابتداءً من", "from")); });
+    ["باقة سوشيال ٨ تصميمات", "Social, 8 designs", "هوية موحدة وقوالب لحسابك كل شهر.", "A consistent look and templates for your account, monthly.", "1,500", "٨ تصاميم لشهر واحد، شكل موحد وقوالب. ٥ أيام شغل. PNG/JPG. جولتا تعديل، والجولة الواحدة ممكن تشمل كذا تعديل مجمّعين في دفعة واحدة. الملفات المصدرية (المفتوحة للتعديل) غير مشمولة وتُحتسب بشكل منفصل.", "8 designs for one month, shared look and templates. 5 working days. PNG/JPG. Two revision rounds, and one round can include several changes sent together in one batch. Source (editable) files are not included and are priced separately."],
+    ["باقة سوشيال ١٢ تصميم", "Social, 12 designs", "للحسابات النشيطة.", "For active accounts.", "2,200", "١٢ تصميم، نفس الشروط. ٧ أيام شغل. PNG/JPG. جولتا تعديل، والجولة الواحدة ممكن تشمل كذا تعديل مجمّعين في دفعة واحدة. الملفات المصدرية (المفتوحة للتعديل) غير مشمولة وتُحتسب بشكل منفصل.", "12 designs, same terms. 7 working days. PNG/JPG. Two revision rounds, and one round can include several changes sent together in one batch. Source (editable) files are not included and are priced separately."],
+    ["باقة سوشيال ٢٠ تصميم + ستوريز", "Social, 20 designs + stories", "تغطية كاملة للشهر.", "Full monthly coverage.", "3,500", "٢٠ تصميم بالستوريز، نفس الشروط. ١٠ أيام شغل. PNG/JPG. جولتا تعديل، والجولة الواحدة ممكن تشمل كذا تعديل مجمّعين في دفعة واحدة. الملفات المصدرية (المفتوحة للتعديل) غير مشمولة وتُحتسب بشكل منفصل.", "20 designs including stories, same terms. 10 working days. PNG/JPG. Two revision rounds, and one round can include several changes sent together in one batch. Source (editable) files are not included and are priced separately."],
+    ["شعار + إرشادات مختصرة", "Logo + brief guidelines", "شعار كامل وألوان وخطوط وصفحة استخدام.", "Complete logo, colors, fonts and a usage page.", "3,500", "اتجاهين للوجو، ألوان وخطوط ودليل استخدام صفحة. ٧ أيام شغل. PNG وSVG وPDF. جولتا تعديل، والجولة الواحدة ممكن تشمل كذا تعديل مجمّعين في دفعة واحدة. الملفات المصدرية (المفتوحة للتعديل) غير مشمولة وتُحتسب بشكل منفصل.", "Two logo directions, colors, fonts and a one-page usage guide. 7 working days. PNG, SVG and PDF. Two revision rounds, and one round can include several changes sent together in one batch. Source (editable) files are not included and are priced separately."],
+    ["هوية كاملة", "Full visual identity", "شعار وكارت وورق مراسلات وسوشيال.", "Logo, business card, stationery and social.", "6,500", "لوجو وكارت وأوراق مراسلات وسوشيال. ١٤ يوم شغل. PNG وSVG وPDF وملفات طباعة. جولتا تعديل، والجولة الواحدة ممكن تشمل كذا تعديل مجمّعين في دفعة واحدة. الملفات المصدرية (المفتوحة للتعديل) غير مشمولة وتُحتسب بشكل منفصل.", "Logo, business card, stationery and social set. 14 working days. PNG, SVG, PDF and print-ready files. Two revision rounds, and one round can include several changes sent together in one batch. Source (editable) files are not included and are priced separately."],
+    ["باقة مونتاج ٨ ريلز", "Editing, 8 reels", "ريلز شهرية بنفس الستايل.", "Monthly reels in one consistent style.", "4,500", "٨ ريلز بستايل واحد، والعميل بيجيب اللقطات. ٧ أيام شغل. MP4 1080 طولي. جولتا تعديل، والجولة الواحدة ممكن تشمل كذا تعديل مجمّعين في دفعة واحدة. الملفات المصدرية (المفتوحة للتعديل) غير مشمولة وتُحتسب بشكل منفصل.", "8 reels in one style, client supplies the footage. 7 working days. MP4 1080p vertical. Two revision rounds, and one round can include several changes sent together in one batch. Source (editable) files are not included and are priced separately."]
+  ].forEach(function (x) { g2.appendChild(card(x[0], x[1], x[2], x[3], x[4], "ابتداءً من", "from", x[5], x[6])); });
       w.appendChild(g2);
       w.appendChild(mk("p", "pf-mnote", "الأسعار بالجنيه المصري وبتتأكد بعرض سعر قبل البدء.", "Prices are in Egyptian pounds and confirmed with a quote before we start."));
     } else {
