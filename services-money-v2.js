@@ -29,6 +29,12 @@
     '.pf-mprice{display:block;font-weight:800;font-size:20px;color:#f6c434}',
     '.pf-mprice small{font-size:12px;font-weight:600;opacity:.85;margin-inline-end:6px}',
     '.pf-mnote{margin-top:14px;font-size:12.5px;opacity:.7;line-height:1.7}',
+    '.pf-mgh{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;border-top:1px solid rgba(255,255,255,.12);color:inherit;font-family:inherit;font-size:14px;font-weight:800;letter-spacing:.02em;padding:14px 0 0;margin:22px 0 10px;text-align:start;cursor:pointer;opacity:.85}',
+    '.pf-mgh:first-of-type{margin-top:8px;padding-top:0;border-top:0}',
+    '.pf-mgch{flex:0 0 auto;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);opacity:.7;transition:transform .2s}',
+    '.pf-mgh[aria-expanded="true"] .pf-mgch{transform:rotate(-135deg)}',
+    '@media(max-width:640px){.pf-mgrid.pf-mgclosed{display:none}}',
+    '@media(min-width:641px){.pf-mgh{cursor:default}.pf-mgch{display:none}}',
     '.pf-mrow{margin:16px 0 4px}',
     '.pf-mhl{outline:2px solid #f6c434;box-shadow:0 0 0 6px rgba(246,196,52,.18);transition:box-shadow .3s}',
     '.pf-scard[data-mk]{cursor:pointer}',
@@ -50,10 +56,43 @@
     if (dAr) c.appendChild(mk("p", "", dAr, dEn));
     if (xAr) c.appendChild(mk("p", "pf-mx", xAr, xEn));
     var p = mk("span", "pf-mprice");
-    p.appendChild(mk("small", "", pAr, pEn)); p.appendChild(document.createTextNode(price + " ")); p.appendChild(mk("span", "", "ج.م", "EGP"));
+    if (price) { p.appendChild(mk("small", "", pAr, pEn)); p.appendChild(document.createTextNode(price + " ")); p.appendChild(mk("span", "", "ج.م", "EGP")); }
+    else { p.textContent = "—"; p.setAttribute("data-en", "—"); p.setAttribute("data-ar", "—"); }
     c.appendChild(p);
     return c;
   }
+  function group(w, hAr, hEn, items, idx) {
+    var head = document.createElement("button");
+    head.type = "button"; head.className = "pf-mgh";
+    head.setAttribute("aria-expanded", "true");
+    head.appendChild(mk("span", "pf-mgl", hAr, hEn));
+    var ch = mk("span", "pf-mgch"); ch.setAttribute("aria-hidden", "true"); head.appendChild(ch);
+    var g = mk("div", "pf-mgrid pf-mg4"); g.id = "pf-mg-" + idx;
+    head.setAttribute("aria-controls", g.id);
+    items.forEach(function (x) {
+      var cc = card(x[0], x[1], "", "", x[2], "ابتداءً من", "from");
+      if (x[3]) cc.setAttribute("data-k", x[3]);
+      g.appendChild(cc);
+    });
+    head.addEventListener("click", function () {
+      if (!MQ.matches) return;
+      var open = head.getAttribute("aria-expanded") === "true";
+      head.setAttribute("aria-expanded", open ? "false" : "true");
+      g.classList.toggle("pf-mgclosed", open);
+    });
+    w.appendChild(head); w.appendChild(g);
+  }
+  var MQ = window.matchMedia("(max-width: 640px)");
+  function foldDefaults() {
+    var heads = panel.querySelectorAll(".pf-mgh");
+    for (var i = 0; i < heads.length; i++) {
+      var h = heads[i], g = document.getElementById(h.getAttribute("aria-controls"));
+      var open = !MQ.matches || i === 0;
+      h.setAttribute("aria-expanded", open ? "true" : "false");
+      if (g) g.classList.toggle("pf-mgclosed", !open);
+    }
+  }
+  if (MQ.addEventListener) MQ.addEventListener("change", foldDefaults); else if (MQ.addListener) MQ.addListener(foldDefaults);
   function quoteBtn() {
     var a = mk("a", "pf-mbtn", "اطلب عرض سعر", "Request a quote"); a.href = "quote/"; a.removeAttribute("target"); a.removeAttribute("rel");
     var r = mk("div", "pf-mrow"); r.appendChild(a); return r;
@@ -78,18 +117,46 @@
     } else {
       w.appendChild(mk("h2", "pf-mh", "الأسعار والطلبات", "Prices & requests"));
       w.appendChild(mk("p", "pf-mp", "أسعار البداية لكل خدمة. السعر النهائي بيتحدد حسب المطلوب.", "Starting prices for each service. The final price depends on what you need."));
-      var g3 = mk("div", "pf-mgrid pf-mg4");
-  [
-    ["هويات بصرية وشعارات", "Visual identities & logos", "1,500"],
-    ["أغلفة كتب (إلكتروني)", "Book covers (e-book)", "250"],
-    ["أغلفة كتب (طباعة)", "Book covers (print)", "450"],
-    ["غلاف بعمل فني مخصص", "Custom artwork cover", "700"],
-    ["سوشيال ميديا (بوست واحد)", "Social media (single post)", "250"],
-    ["مطبوعات (كارت شخصي)", "Print (business card)", "350"],
-    ["مونتاج فيديو (ريل بسيط)", "Video editing (simple reel)", "450"],
-    ["تصوير فيديو", "Video shooting", "3,500"]
-  ].forEach(function (x) { var cc = card(x[0], x[1], "", "", x[2], "ابتداءً من", "from"); cc.setAttribute("data-k", KEYS[g3.children.length]); g3.appendChild(cc); });
-      w.appendChild(g3);
+      group(w, "الهوية والأغلفة", "Identity & covers", [
+        ["هويات بصرية وشعارات", "Visual identities & logos", "1,500", "id"],
+        ["أغلفة كتب (إلكتروني)", "Book covers (e-book)", "250", "bk"],
+        ["أغلفة كتب (طباعة)", "Book covers (print)", "450", "bk"],
+        ["غلاف بعمل فني مخصص", "Custom artwork cover", "700", "bk"]
+      ], 0);
+      group(w, "مطبوعات", "Print", [
+        ["كارت شخصي", "Business card", "350", "pr"],
+        ["فلاير", "Flyer", "300", "pr"],
+        ["بروشور", "Brochure", "600", "pr"],
+        ["بوستر", "Poster", "350", "pr"],
+        ["بنر", "Banner", "400", "pr"],
+        ["رول أب", "Roll-up banner", "500", "pr"],
+        ["مينيو", "Menu", "700", "pr"],
+        ["ستيكر أو ليبل منتج", "Sticker or product label", "300", "pr"],
+        ["باكدج علبة", "Box packaging", "800", "pr"],
+        ["ورق مراسلات (ترويسة وختم)", "Letterhead & stamp", "600", "pr"],
+        ["تيشيرت أو يونيفورم", "T-shirt or uniform", "350", "pr"],
+        ["مج أو هدية دعائية", "Mug or promo gift", "300", "pr"],
+        ["كارت دعوة", "Invitation card", "250", "pr"],
+        ["شهادة", "Certificate", "250", "pr"]
+      ], 1);
+      group(w, "سوشيال ميديا", "Social media", [
+        ["بوست واحد", "Single post", "250", "so"],
+        ["كاروسيل", "Carousel", "450", "so"],
+        ["غلاف وصورة بروفايل", "Cover & profile picture", "250", "so"],
+        ["بنر إعلاني للويب", "Web banner", "250", "so"],
+        ["قالب سوشيال", "Social template", "400", "so"]
+      ], 2);
+      group(w, "مونتاج فيديو", "Video editing", [
+        ["ريل بسيط", "Simple reel", "450", "ve"],
+        ["مونتاج يوتيوب", "YouTube editing", "600", "ve"]
+      ], 3);
+      group(w, "بريزنتيشن وإنفوجرافيك", "Presentation & infographic", [
+        ["عرض تقديمي", "Presentation", "700", ""],
+        ["إنفوجرافيك", "Infographic", "500", ""]
+      ], 4);
+      group(w, "تصوير فيديو", "Video shooting", [
+        ["تصوير فيديو", "Video shooting", "3,500", "vs"]
+      ], 5);
       w.appendChild(mk("p", "pf-mnote", "تصوير الفيديو بيختلف سعره حسب المعدات المطلوبة.", "Video shooting varies with the equipment required."));
     }
     w.appendChild(quoteBtn());
@@ -99,7 +166,7 @@
   [["الباقات", "Packages"], ["الأسعار والطلبات", "Prices & requests"]].forEach(function (d, i) {
     var b = mk("button", "pf-mtog", d[0], d[1]); b.type = "button"; b.setAttribute("aria-expanded", "false");
     b.addEventListener("click", function () {
-      if (cur === i + 1) { cur = 0; panel.hidden = true; } else { cur = i + 1; panel.innerHTML = ""; panel.appendChild(build(cur)); panel.hidden = false; applyLang(); }
+      if (cur === i + 1) { cur = 0; panel.hidden = true; } else { cur = i + 1; panel.innerHTML = ""; panel.appendChild(build(cur)); panel.hidden = false; applyLang(); foldDefaults(); }
       bs.forEach(function (x, j) { x.setAttribute("aria-expanded", cur === j + 1 ? "true" : "false"); });
     });
     bs.push(b); btns.appendChild(b);
@@ -123,6 +190,12 @@
     var k = keyOf(c); if (!k) return;
     if (cur !== 2) bs[1].click();
     var hits = panel.querySelectorAll('[data-k="' + k + '"]');
+    hits.forEach(function (x) {
+      var g = x.parentNode; if (!g || !g.id) return;
+      var h = panel.querySelector('.pf-mgh[aria-controls="' + g.id + '"]');
+      if (h) h.setAttribute("aria-expanded", "true");
+      g.classList.remove("pf-mgclosed");
+    });
     panel.querySelectorAll(".pf-mhl").forEach(function (x) { x.classList.remove("pf-mhl"); });
     hits.forEach(function (x) { x.classList.add("pf-mhl"); });
     if (hits[0]) setTimeout(function () { window.scrollTo({ top: hits[0].getBoundingClientRect().top + window.scrollY - 90, behavior: "smooth" }); }, 80);
@@ -131,4 +204,5 @@
   applyLang(); setTimeout(applyLang, 400);
   var st = parseInt(new URLSearchParams(location.search).get("mopen") || "0", 10);
   if (st && bs[st - 1]) bs[st - 1].click();
+  foldDefaults();
 })();
