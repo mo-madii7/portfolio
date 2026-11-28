@@ -1661,3 +1661,18 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
   .pf-vid .pf-vid-title{padding-inline:2px}
   .pf-testi .pf-testi-title{margin-inline-start:-12px}
 }
+
+/* v=2026-11-28g: works filter — funnel toggle inside the search bar, chips in a collapsible panel */
+.pf-wf-searchwrap{position:relative}
+#pf-wf-search{padding-inline-end:48px}
+#pf-wf-funnel{position:absolute;top:50%;inset-inline-end:6px;transform:translateY(-50%);width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:8px;color:#8f8676;cursor:pointer;padding:0}
+#pf-wf-funnel:hover{color:#e8c25a}
+#pf-wf-funnel:focus-visible{outline:2px solid #e8c25a;outline-offset:1px}
+#pf-wf-funnel[aria-expanded="true"]{color:#e8c25a}
+#pf-wf-funnel svg{width:18px;height:18px;display:block}
+#pf-wf-funnel .pf-wf-dot{position:absolute;top:5px;inset-inline-end:5px;width:6px;height:6px;border-radius:50%;background:#e8c25a;display:none}
+#pf-wf-funnel.pf-wf-active{color:#e8c25a}
+#pf-wf-funnel.pf-wf-active .pf-wf-dot{display:block}
+.pf-wf-chips{overflow:hidden;max-height:400px;opacity:1;border:1px solid transparent;border-radius:12px;transition:max-height .28s ease,opacity .22s ease,padding .28s ease,background .28s ease,border-color .28s ease,margin .28s ease}
+.pf-wf-chips.pf-wf-collapsed{max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin-top:0;pointer-events:none;border-color:transparent}
+.pf-wf-chips:not(.pf-wf-collapsed){background:#0f0d0b;border-color:rgb(214 178 90/.25);padding:10px;margin-top:2px}

@@ -927,6 +927,9 @@ window.pfSetupTestiClamp();
   var wfChips = Array.prototype.slice.call(document.querySelectorAll(".pf-wf-chip"));
   var wfEmpty = document.getElementById("pf-wf-empty");
   var wfCat = "all";
+  var wfFunnel = document.getElementById("pf-wf-funnel");
+  var wfChipBox = document.querySelector(".pf-wf-chips");
+  if (wfChipBox) wfChipBox.classList.add("pf-wf-collapsed");
   function applyWorksFilter() {
     var q = norm(wfInput ? wfInput.value : "");
     var shown = 0;
@@ -936,6 +939,7 @@ window.pfSetupTestiClamp();
       if (show) shown++;
     });
     if (wfEmpty) wfEmpty.hidden = shown !== 0;
+    if (wfFunnel) wfFunnel.classList.toggle("pf-wf-active", wfCat !== "all");
   }
   function resetWorksFilter() {
     wfCat = "all";
@@ -951,6 +955,12 @@ window.pfSetupTestiClamp();
       applyWorksFilter();
     });
   });
+  if (wfFunnel && wfChipBox) {
+    wfFunnel.addEventListener("click", function () {
+      var open = wfChipBox.classList.toggle("pf-wf-collapsed") === false;
+      wfFunnel.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
 
   /* Global site search: works, novels, services, videos, sections */
   var KINDS = { work: ["عمل", "Work"], novel: ["رواية", "Novel"], service: ["خدمة", "Service"], video: ["فيديو", "Video"], section: ["قسم", "Section"] };
