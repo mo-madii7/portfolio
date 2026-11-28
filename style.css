@@ -1705,3 +1705,8 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
 @media (min-width:760px){
   .pf-brief{margin-inline:18px}
 }
+
+/* v=2026-11-28n: desktop — novels/articles sections share the page gutter so the whole About page sits on one alignment line (approved) */
+@media (min-width:760px){
+  .pf-novels,.pf-articles{padding-inline:max(48px, calc((100% - 1240px)/2))}
+}
