@@ -1676,3 +1676,9 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
 .pf-wf-chips{overflow:hidden;max-height:400px;opacity:1;border:1px solid transparent;border-radius:12px;transition:max-height .28s ease,opacity .22s ease,padding .28s ease,background .28s ease,border-color .28s ease,margin .28s ease}
 .pf-wf-chips.pf-wf-collapsed{max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin-top:0;pointer-events:none;border-color:transparent}
 .pf-wf-chips:not(.pf-wf-collapsed){background:#0f0d0b;border-color:rgb(214 178 90/.25);padding:10px;margin-top:2px}
+
+/* v=2026-11-28h: mobile-only — brief/delivery cards and case-study cards get the same 18px side gutter as headings (desktop untouched) */
+@media (max-width:759px){
+  .pf-brief,
+  .pf-case{margin-inline:18px}
+}
