@@ -1700,14 +1700,3 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
   .pf-worksfilter{max-width:none;padding-inline:max(48px, calc((100% - 1240px)/2))}
   .pf-wtabs{margin-inline:max(48px, calc((100% - 1240px)/2))}
 }
-
-/* v=2026-11-28j: desktop hero — stat chips hug the photo like they do on mobile (positioning box shrinks to the photo ring, centered in its grid cell); mobile untouched */
-@media (min-width: 760px){
-  .pf-hero-visual{width:fit-content;margin-inline:auto}
-}
-
-/* v=2026-11-28k: desktop hero — all four stat chips at one even moderate gap from the photo ring (25px), matching the before-state distance of the case-studies/years chips; mobile untouched */
-@media (min-width: 760px){
-  .pf-chip-1,.pf-chip-3{inset-inline-start:auto;left:calc(100% + 25px)}
-  .pf-chip-2,.pf-chip-4{inset-inline-end:auto;right:calc(100% + 25px)}
-}
