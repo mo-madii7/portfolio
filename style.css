@@ -1705,3 +1705,9 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
 @media (min-width: 760px){
   .pf-hero-visual{width:fit-content;margin-inline:auto}
 }
+
+/* v=2026-11-28k: desktop hero — all four stat chips at one even moderate gap from the photo ring (25px), matching the before-state distance of the case-studies/years chips; mobile untouched */
+@media (min-width: 760px){
+  .pf-chip-1,.pf-chip-3{inset-inline-start:auto;left:calc(100% + 25px)}
+  .pf-chip-2,.pf-chip-4{inset-inline-end:auto;right:calc(100% + 25px)}
+}
