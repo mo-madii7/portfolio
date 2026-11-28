@@ -503,7 +503,7 @@ window.pfSetupTestiClamp();
   function viewFor(h) {
     if (h === "works" || /^pf-case-/.test(h)) return "works";
     if (h === "services" || h === "pf-brief" || h === "pf-receive") return "services";
-    if (h === "videos" || h === "pf-vid") return "videos";
+    if (h === "videos" || h === "pf-vid" || h === "pf-vg-videos" || h === "pf-vg-reels") return "works";
     if (h === "about" || h === "pf-novels" || h === "pf-articles") return "about";
     return "home";
   }
@@ -517,12 +517,32 @@ window.pfSetupTestiClamp();
     var h = location.hash ? location.hash.slice(1) : "";
     var v = viewFor(h);
     root.setAttribute("data-view", v);
+    var wt = (h === "videos" || h === "pf-vid" || h === "pf-vg-videos" || h === "pf-vg-reels") ? "montage" : ((h === "works" || /^pf-case-/.test(h)) ? "design" : "");
+    if (wt) setWtab(wt);
     markNav();
-    var pageHash = h === "" || h === "home" || h === "works" || h === "services" || h === "videos" || h === "about";
+    if (h === "videos") { setTimeout(function () { var p = document.getElementById("pf-vid"); if (p) p.scrollIntoView({ block: "start" }); }, 30); return; }
+    var pageHash = h === "" || h === "home" || h === "works" || h === "services" || h === "about";
     if (pageHash) { if (!initial) window.scrollTo(0, 0); return; }
     var el = document.getElementById(h);
     if (el) setTimeout(function () { el.scrollIntoView({ block: "start" }); }, 30);
   }
+  function setWtab(t) {
+    root.setAttribute("data-wtab", t);
+    document.querySelectorAll(".pf-wtab").forEach(function (b) {
+      var on = b.id === "pf-wtab-" + t;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+  }
+  var wtd = document.getElementById("pf-wtab-design"), wtm = document.getElementById("pf-wtab-montage");
+  if (wtd && wtm) {
+    wtd.addEventListener("click", function () { setWtab("design"); });
+    wtm.addEventListener("click", function () { setWtab("montage"); });
+  }
+  window.pfSetWtab = setWtab;
+  document.querySelectorAll('a[href="#videos"],a[href="#pf-vid"]').forEach(function (a) {
+    a.addEventListener("click", function () { setWtab("montage"); });
+  });
   window.addEventListener("hashchange", function () { route(false); });
   route(true);
 
@@ -994,7 +1014,8 @@ window.pfSetupTestiClamp();
       if (panel && !panel.hidden) { panel.hidden = true; var mb = document.getElementById("pf-menu-btn"); if (mb) mb.setAttribute("aria-expanded", "false"); }
       input.blur();
       if (location.hash === it.hash) {
-        var el = document.getElementById(it.hash.slice(1));
+        if (window.pfSetWtab && (it.hash === "#videos" || it.hash === "#pf-vid" || it.hash === "#pf-vg-videos" || it.hash === "#pf-vg-reels")) window.pfSetWtab("montage");
+        var el = document.getElementById(it.hash.slice(1)) || (it.hash === "#videos" ? document.getElementById("pf-vid") : null);
         if (el) el.scrollIntoView({ block: "start" });
       } else {
         location.hash = it.hash;

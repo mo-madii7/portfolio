@@ -1446,7 +1446,7 @@ h1,h2,h3,.pf-contact-title,.pf-hero-name{line-height:1.5!important;padding-block
 @media(min-width:760px){.pf-nav-links{gap:28px;justify-content:flex-start;margin-inline:0}.pf-nav-links a{font-size:14px}}
 /* page views */
 html:not([data-view="home"]) .pf-hero,html:not([data-view="home"]) .pf-marquee,html:not([data-view="home"]) .pf-featured,html:not([data-view="home"]) #pf-testi,html:not([data-view="home"]) #pf-partners,
-html:not([data-view="works"]) .pf-case,html:not([data-view="services"]) .pf-brief,html:not([data-view="services"]) .pf-svc-cs,html:not([data-view="videos"]) .pf-vid,html:not([data-view="about"]) #pf-about,
+html:not([data-view="works"]) .pf-case,html:not([data-view="services"]) .pf-brief,html:not([data-view="services"]) .pf-svc-cs,html:not([data-view="about"]) #pf-about,
 html:not([data-view="home"]):not([data-view="services"]) .pf-services{height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important}
 /* hero role and buttons */
 .pf-role-l1,.pf-role-l2{display:block}.pf-role-l2{margin-top:4px}
@@ -1643,3 +1643,12 @@ html.pf-search-open .pf-gsearch{display:block}
 /* v=2026-11-26r: brief submit contrast+spacing (gradient restored via inline-rule fix in index.html) */
 .pf-bf-submit{margin-top:12px}
 @media(max-width:600px){.pf-bf-submit{align-self:stretch;justify-content:center}}
+
+/* works tabs: design / montage */
+html:not([data-view="works"]) .pf-wtabs{display:none!important}
+html:not([data-view="works"]) #pf-vid{display:none!important}
+html[data-view="works"]:not([data-wtab="montage"]) #pf-vid{display:none!important}
+html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html[data-wtab="montage"] #pf-worksfilter{display:none!important}
+.pf-wtabs{display:flex;gap:8px;margin:14px 20px 4px}
+.pf-wtab{flex:1;padding:13px;border-radius:14px;border:1px solid rgba(255,194,28,.4);background:#171717;color:#f2f2f2;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer}
+.pf-wtab.on{background:linear-gradient(135deg,#ffc21c,#ff8a00);color:#151515;border-color:transparent}
