@@ -513,9 +513,25 @@ window.pfSetupTestiClamp();
       a.classList.toggle("on", a.getAttribute("data-view") === v);
     });
   }
+  var PAGE_FILE = { home: "index.html", works: "works.html", montage: "montage.html", services: "services.html", about: "about.html" };
+  function pageOf(h) {
+    if (!h) return null;
+    if (h === "home" || h === "pf-testi" || h === "pf-partners") return "home";
+    if (h === "works" || /^pf-case-/.test(h)) return "works";
+    if (h === "videos" || h === "pf-vid" || h === "pf-vg-videos" || h === "pf-vg-reels") return "montage";
+    if (h === "services" || h === "pf-brief" || h === "pf-receive") return "services";
+    if (h === "about" || h === "pf-novels" || h === "pf-articles") return "about";
+    return null;
+  }
   function route(initial) {
     var h = location.hash ? location.hash.slice(1) : "";
     var v = viewFor(h);
+    var dp = root.getAttribute("data-page");
+    if (!h && dp) v = dp === "montage" ? "works" : dp;
+    if (dp && h) {
+      var owner = pageOf(h);
+      if (owner && owner !== dp) { location.replace(PAGE_FILE[owner] + "#" + h); return; }
+    }
     root.setAttribute("data-view", v);
     var wt = (h === "videos" || h === "pf-vid" || h === "pf-vg-videos" || h === "pf-vg-reels") ? "montage" : ((h === "works" || /^pf-case-/.test(h)) ? "design" : "");
     if (wt) setWtab(wt);
@@ -536,8 +552,8 @@ window.pfSetupTestiClamp();
   }
   var wtd = document.getElementById("pf-wtab-design"), wtm = document.getElementById("pf-wtab-montage");
   if (wtd && wtm) {
-    wtd.addEventListener("click", function () { setWtab("design"); });
-    wtm.addEventListener("click", function () { setWtab("montage"); });
+    wtd.addEventListener("click", function () { var go = wtd.getAttribute("data-go"); if (go) { location.href = go; return; } setWtab("design"); });
+    wtm.addEventListener("click", function () { var go = wtm.getAttribute("data-go"); if (go) { location.href = go; return; } setWtab("montage"); });
   }
   window.pfSetWtab = setWtab;
   document.querySelectorAll('a[href="#videos"],a[href="#pf-vid"]').forEach(function (a) {
