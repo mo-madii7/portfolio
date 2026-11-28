@@ -1700,3 +1700,8 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
   .pf-worksfilter{max-width:none;padding-inline:max(48px, calc((100% - 1240px)/2))}
   .pf-wtabs{margin-inline:max(48px, calc((100% - 1240px)/2))}
 }
+
+/* v=2026-11-28m: desktop — brief/delivery cards get the same 18px side margin as mobile so they line up with the full-bleed services strip above (approved) */
+@media (min-width:760px){
+  .pf-brief{margin-inline:18px}
+}
