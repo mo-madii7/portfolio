@@ -1710,3 +1710,15 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
 @media (min-width:760px){
   .pf-novels,.pf-articles{padding-inline:max(48px, calc((100% - 1240px)/2))}
 }
+
+/* v=2026-11-28o: montage videos/reels strips run full-bleed, scrolling in and out of the screen edges instead of clipping at the section padding; headings and group toggles keep the page gutter (approved) */
+@media (min-width:760px){
+  .pf-vid{padding-inline:0}
+  .pf-vid>.pf-contact-kicker,.pf-vid>.pf-vid-title{margin-inline:max(48px, calc((100% - 1240px)/2))}
+  .pf-vid .pf-vidgroup-toggle{box-sizing:border-box;width:100%;padding-inline:max(48px, calc((100% - 1240px)/2))}
+}
+@media (max-width:759px){
+  .pf-vid{padding-inline:0}
+  .pf-vid>.pf-contact-kicker,.pf-vid>.pf-vid-title{margin-inline:18px}
+  .pf-vid .pf-vidgroup-toggle{box-sizing:border-box;width:100%;padding-inline:18px}
+}
