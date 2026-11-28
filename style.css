@@ -887,6 +887,7 @@ body.lb-lock{overflow:hidden}
 .pf-bf-field label{font-size:13.5px;font-weight:700;color:rgb(242 237 228/.85)}
 .pf-bf-field input,.pf-bf-field select,.pf-bf-field textarea{font:inherit;font-size:14px;color:var(--pf-paper);background:rgb(242 237 228/.06);border:1.5px solid rgb(242 237 228/.22);border-radius:12px;padding:11px 14px;outline:none;transition:border-color .25s;min-width:0}
 .pf-bf-field input:focus,.pf-bf-field select:focus,.pf-bf-field textarea:focus{border-color:#ffd25e}
+.pf-bf-field input.pf-bf-bad,.pf-bf-field select.pf-bf-bad,.pf-bf-field textarea.pf-bf-bad{border-color:#e5534b;box-shadow:0 0 0 3px rgb(229 83 75/.22)}
 .pf-bf-field select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#f2ede4 50%),linear-gradient(135deg,#f2ede4 50%,transparent 50%);background-position:calc(18px) 55%,calc(18px + 6px) 55%;background-size:6px 6px;background-repeat:no-repeat;padding-inline-end:36px}
 [dir="ltr"] .pf-bf-field select{background-position:calc(100% - 24px) 55%,calc(100% - 18px) 55%}
 .pf-bf-field option{background:#18181b;color:#f2ede4}

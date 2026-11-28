@@ -52,6 +52,12 @@
 
   fetch(API + "/api/quote-options").then(function (r) { return r.json(); }).then(function (j) { S = j.services; fillServices(); })
     .catch(function () { showErr(T("مش قادر أحمّل الخدمات. جرّب تاني.", "Could not load the services. Try again.")); });
+  ["qt-name", "qt-contact", "qt-need"].forEach(function (k) {
+    $(k).addEventListener("input", function () {
+      this.classList.remove("qt-bad");
+      if (!document.querySelector(".qt-bad")) showErr("");
+    });
+  });
   $("qt-service").addEventListener("change", fillTypes);
   $("qt-type").addEventListener("change", hint);
 
@@ -97,7 +103,24 @@
   $("qt-form").addEventListener("submit", function (e) {
     e.preventDefault(); showErr("");
     var f = { service: $("qt-service").value, type: $("qt-type").value, client: $("qt-name").value.trim(), contact: $("qt-contact").value.trim(), need: $("qt-need").value.trim(), notes: $("qt-notes").value.trim(), qty: Number($("qt-qty").value) || 1, urgent: $("qt-urgent").checked, website: $("qt-hp").value };
-    if (f.client.length < 2 || f.contact.length < 5 || f.need.length < 3) { showErr(T("اكمل الاسم ووسيلة التواصل والمطلوب.", "Please fill in your name, contact and what you need.")); return; }
+    var miss = [];
+    if (f.client.length < 2) miss.push("qt-name");
+    if (f.contact.length < 5) miss.push("qt-contact");
+    if (f.need.length < 3) miss.push("qt-need");
+    if (miss.length) {
+      var oneMsg = {
+        "qt-name": T("اكتب اسمك في خانة (اسمك) عشان نكمل.", "Add your name in the (Your name) field to continue."),
+        "qt-contact": T("اكتب رقم واتساب أو إيميل صحيح في خانة (وسيلة التواصل) عشان نكمل.", "Add a valid WhatsApp number or email in the (Contact) field to continue."),
+        "qt-need": T("اكتب في خانة (محتاج إيه بالظبط؟) تفاصيل المشروع عشان نكمل.", "Write your project details in the (What do you need exactly?) field to continue.")
+      };
+      var names = { "qt-name": T("اسمك", "name"), "qt-contact": T("وسيلة التواصل", "contact"), "qt-need": T("محتاج إيه بالظبط؟", "what you need") };
+      showErr(miss.length === 1 ? oneMsg[miss[0]] : T("اكمل الحقول دي عشان نكمل: ", "Fill in these fields to continue: ") + miss.map(function (k) { return names[k]; }).join(T("، ", ", ")));
+      miss.forEach(function (k) { $(k).classList.add("qt-bad"); });
+      var first = $(miss[0]);
+      first.scrollIntoView({ block: "center", behavior: "smooth" });
+      first.focus({ preventScroll: true });
+      return;
+    }
     var go = $("qt-go"); go.disabled = true;
     fetch(API + "/api/quote-request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) })
       .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })

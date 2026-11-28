@@ -199,8 +199,12 @@ window.pfSetupTestiClamp();
   syncCat();
 
   var MSG = {
-    ar: { sending: "بيبعت...", ok: "وصل! البريف اتبعت لمحمد على إيميله، وهيرد عليك قريب.", err: "حصلت مشكلة في الإرسال. جرّب تاني، أو ابعت تفاصيلك واتساب.", required: "املأ اسمك ووسيلة التواصل ونوع الخدمة الأول." },
-    en: { sending: "Sending...", ok: "Done! Your brief reached Mohamad's email, and he will reply soon.", err: "Something went wrong sending. Try again, or send your details on WhatsApp.", required: "Please fill your name, contact and service type first." }
+    ar: { sending: "بيبعت...", ok: "وصل! البريف اتبعت لمحمد على إيميله، وهيرد عليك قريب.", err: "حصلت مشكلة في الإرسال. جرّب تاني، أو ابعت تفاصيلك واتساب.", required: "املأ الحقول المطلوبة الأول.",
+      one: { "bf-name": "اكتب اسمك في خانة (اسمك) الأول عشان تبعت البريف.", "bf-contact": "اكتب رقم واتساب أو إيميل صحيح في خانة (وسيلة التواصل) الأول عشان تبعت البريف.", "bf-cat": "اختار نوع الخدمة من خانة (نوع التصميم المطلوب) الأول عشان تبعت البريف." },
+      some: "اكمل الحقول دي الأول: ", names: { "bf-name": "اسمك", "bf-contact": "وسيلة التواصل", "bf-cat": "نوع الخدمة" }, and: " و", comma: "، " },
+    en: { sending: "Sending...", ok: "Done! Your brief reached Mohamad's email, and he will reply soon.", err: "Something went wrong sending. Try again, or send your details on WhatsApp.", required: "Please fill the required fields first.",
+      one: { "bf-name": "Add your name in the (Your name) field first to send the brief.", "bf-contact": "Add a valid WhatsApp number or email in the (Contact) field first to send the brief.", "bf-cat": "Choose the service from the (What do you need designed?) field first to send the brief." },
+      some: "Fill in these fields first: ", names: { "bf-name": "your name", "bf-contact": "your contact", "bf-cat": "the service type" }, and: " and ", comma: ", " }
   };
 
   try {
@@ -239,7 +243,21 @@ window.pfSetupTestiClamp();
     var en = document.documentElement.lang === "en";
     var m = en ? MSG.en : MSG.ar;
     if (!form.reportValidity || !form.checkValidity()) {
-      status.textContent = m.required; status.className = "pf-bf-status err";
+      var bad = Array.prototype.slice.call(form.querySelectorAll("[required]")).filter(function (el) { return !el.disabled && !el.checkValidity(); });
+      if (bad.length === 1) {
+        status.textContent = m.one[bad[0].id] || m.required;
+      } else if (bad.length > 1) {
+        var nm = bad.map(function (el) { return m.names[el.id]; }).filter(Boolean);
+        status.textContent = m.some + (nm.length === 2 ? nm.join(m.and) : nm.join(m.comma));
+      } else {
+        status.textContent = m.required;
+      }
+      status.className = "pf-bf-status err";
+      bad.forEach(function (el) {
+        el.classList.add("pf-bf-bad");
+        el.addEventListener("input", function h() { el.classList.remove("pf-bf-bad"); el.removeEventListener("input", h); });
+      });
+      if (bad.length) bad[0].scrollIntoView({ block: "center", behavior: "smooth" });
       if (form.reportValidity) form.reportValidity();
       return;
     }
