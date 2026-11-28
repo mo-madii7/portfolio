@@ -1682,3 +1682,21 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
   .pf-brief,
   .pf-case{margin-inline:18px}
 }
+
+/* v=2026-11-28i: desktop polish (dictated) — cards sit inside the page with the same gutter as the rest, brief form centered, every main section heading the same distance from the screen edge; mobile untouched */
+@media (min-width: 760px){
+  .pf-case{
+    margin-inline:max(48px, calc((100% - 1240px)/2));
+    padding-inline:40px;
+    border-radius:28px;
+  }
+  .pf-brief{
+    margin-inline:max(48px, calc((100% - 1240px)/2));
+  }
+  #pf-brief-form{margin-inline:auto}
+  .pf-testi,.pf-partners,.pf-vid,.pf-about,.pf-contact{
+    padding-inline:max(48px, calc((100% - 1240px)/2));
+  }
+  .pf-worksfilter{max-width:none;padding-inline:max(48px, calc((100% - 1240px)/2))}
+  .pf-wtabs{margin-inline:max(48px, calc((100% - 1240px)/2))}
+}
