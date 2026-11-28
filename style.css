@@ -1700,3 +1700,8 @@ html[data-wtab="montage"] .pf-case,html[data-wtab="montage"] .pf-feat-strip,html
   .pf-worksfilter{max-width:none;padding-inline:max(48px, calc((100% - 1240px)/2))}
   .pf-wtabs{margin-inline:max(48px, calc((100% - 1240px)/2))}
 }
+
+/* v=2026-11-28j: desktop hero — stat chips hug the photo like they do on mobile (positioning box shrinks to the photo ring, centered in its grid cell); mobile untouched */
+@media (min-width: 760px){
+  .pf-hero-visual{width:fit-content;margin-inline:auto}
+}
