@@ -7,12 +7,12 @@
   try { tok = localStorage.getItem("pf-ai-t") || ""; if (!tok) { tok = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); localStorage.setItem("pf-ai-t", tok); } } catch (e) { tok = Math.random().toString(36).slice(2, 12); }
   var css = document.createElement("style");
   css.textContent = [
-    "#pf-ai-b{position:fixed;left:14px;bottom:20px;z-index:60;width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:#f5b321;color:#111;font:700 13px Alexandria,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45)}",
-    "#pf-ai-p{position:fixed;left:14px;bottom:82px;z-index:61;width:min(360px,calc(100vw - 28px));height:min(460px,calc(100vh - 150px));display:none;flex-direction:column;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:#14110e;color:#f2ede4;font:14px/1.6 Alexandria,sans-serif;box-shadow:0 12px 36px rgba(0,0,0,.6);overflow:hidden}",
+    "#pf-ai-b{position:fixed;left:30px;bottom:46px;z-index:60;width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:#f5b321;color:#111;font:700 13px Alexandria,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45)}",
+    "#pf-ai-p{position:fixed;left:30px;bottom:108px;z-index:61;width:min(360px,calc(100vw - 60px));height:min(460px,calc(100vh - 150px));display:none;flex-direction:column;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:#14110e;color:#f2ede4;font:14px/1.6 Alexandria,sans-serif;box-shadow:0 12px 36px rgba(0,0,0,.6);overflow:hidden}",
     "#pf-ai-p.o{display:flex}",
-    "@media(max-width:640px){#pf-ai-b{left:24px;bottom:42px}#pf-ai-p{left:14px;bottom:104px;height:min(460px,calc(100vh - 180px))}html[lang=en] #pf-ai-b{left:auto;right:24px}html[lang=en] #pf-ai-p{left:auto;right:14px}}",
-    "html[lang=en] #pf-ai-b{left:auto;right:14px}",
-    "html[lang=en] #pf-ai-p{left:auto;right:14px}",
+    "@media(max-width:640px){#pf-ai-b{left:30px;bottom:54px}#pf-ai-p{left:14px;bottom:116px;height:min(460px,calc(100vh - 180px))}html[lang=en] #pf-ai-b{left:auto;right:30px}html[lang=en] #pf-ai-p{left:auto;right:14px}}",
+    "html[lang=en] #pf-ai-b{left:auto;right:30px}",
+    "html[lang=en] #pf-ai-p{left:auto;right:30px}",
     "#pf-ai-h{padding:12px 14px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;align-items:center}",
     "#pf-ai-h button{background:none;border:0;color:inherit;font-size:20px;cursor:pointer;line-height:1}",
     "#pf-ai-m{flex:1;overflow:auto;scrollbar-width:thin;scrollbar-color:#555 transparent;padding:12px;display:flex;flex-direction:column;gap:8px}",
