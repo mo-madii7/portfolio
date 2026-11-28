@@ -1443,7 +1443,7 @@ h1,h2,h3,.pf-contact-title,.pf-hero-name{line-height:1.5!important;padding-block
 .pf-nav-links a{color:#cfc8bb;font-size:12.5px;font-weight:600;text-decoration:none;padding:15px 2px 13px;border-bottom:2px solid transparent;white-space:nowrap}
 .pf-nav-links a.on{color:#e8c25a;border-bottom-color:#c47a2a}
 .pf-nav #pf-lang-toggle{position:static;inset:auto;min-width:0;padding:5px 11px;font-size:11px;border-radius:8px;background:#16130f;border:1px solid rgb(214 178 90/.35);color:#efe6d2;backdrop-filter:none;transform:none}
-@media(min-width:760px){.pf-nav-links{gap:28px;justify-content:flex-start;margin-inline:0}.pf-nav-links a{font-size:14px}}
+@media(min-width:760px){.pf-nav-links{gap:16px;justify-content:flex-start;margin-inline:0}.pf-nav-links a{font-size:14px}}
 /* page views */
 html:not([data-view="home"]) .pf-hero,html:not([data-view="home"]) .pf-marquee,html:not([data-view="home"]) .pf-featured,html:not([data-view="home"]) #pf-testi,html:not([data-view="home"]) #pf-partners,
 html:not([data-view="works"]) .pf-case,html:not([data-view="services"]) .pf-brief,html:not([data-view="services"]) .pf-svc-cs,html:not([data-view="about"]) #pf-about,
@@ -1492,8 +1492,8 @@ html:not([data-view="home"]):not([data-view="services"]) .pf-services{height:0!i
 /* nav: full width, EN at the far edge, three-line menu */
 .pf-nav{gap:8px}
 .pf-nav-links{max-width:none!important;flex:1;margin-inline:0!important}
-@media(min-width:760px){.pf-nav{padding:0 20px}.pf-nav-links{justify-content:flex-start;gap:28px}}
-@media(max-width:759px){.pf-nav{padding:0 8px;gap:6px}.pf-nav-links{gap:4px}.pf-nav-links a{font-size:12px}.pf-nav #pf-lang-toggle{padding:5px 8px}}
+@media(min-width:760px){.pf-nav{padding:0 20px}.pf-nav-links{justify-content:flex-start;gap:16px}}
+@media(max-width:759px){.pf-nav{padding:0 8px;gap:6px}.pf-nav-links{gap:4px;padding-inline-end:16px}.pf-nav-links a{font-size:12px}.pf-nav #pf-lang-toggle{padding:5px 8px}}
 #pf-menu-btn{flex:0 0 auto;width:36px;height:34px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:transparent;border:1px solid rgb(214 178 90/.35);border-radius:8px;cursor:pointer;padding:0}
 #pf-menu-btn span{display:block;width:16px;height:2px;border-radius:2px;background:#efe6d2}
 #pf-menu-panel{position:absolute;top:50px;inset-inline-start:0;width:min(300px,100vw);max-height:calc(100vh - 60px);overflow:auto;background:#0f0d0b;border:1px solid rgb(214 178 90/.3);border-top:0;border-radius:0 0 14px 14px;padding:8px 0;display:flex;flex-direction:column;z-index:80}
